@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .forms import SignUpForm
+from .forms import SignUpForm, AddRecordForm
 from .models import Record
 
 def home(request):
@@ -50,3 +50,58 @@ def customer_record(request, pk):
     else:
         messages.error(request, "You must be logged in to view that page.")
         return redirect('home')
+
+def delete_record(request, pk):
+    if request.user.is_authenticated:
+        delete_it = Record.objects.get(id=pk)
+        delete_it.delete()
+        messages.success(request, "Record deleted successfully.")
+        return redirect('home')
+    else:
+        messages.error(request, "You must be logged in to view that page.")
+        return redirect('home')
+
+def add_record(request):
+    form = AddRecordForm(request.POST or None)
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            if form.is_valid():
+                add_record = form.save()
+                messages.success(request, "Record added successfully.")
+                return redirect('home')
+        else:
+            return render(request, 'add_record.html', {'form':form})
+    else:
+        messages.error(request, "You must be logged in to view that page.")
+        return redirect('home')
+
+def update_record(request, pk):
+    if request.user.is_authenticated:
+        current_record = Record.objects.get(id=pk)
+        form = AddRecordForm(request.POST or None, instance = current_record)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Record updated successfully.")
+            return redirect('record', pk=pk)
+        return render(request, 'update_record.html', {'form':form, 'record':current_record})
+    else:
+        messages.error(request, "You must be logged in to view that page.")
+        return redirect('home')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
