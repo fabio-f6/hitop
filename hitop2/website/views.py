@@ -19,7 +19,7 @@ def home(request):
             messages.error(request, "Invalid username or password.")
             return redirect('home')
     else:
-        return render(request, 'home.html', {'records': records})
+        return render(request, 'website/home.html', {'records': records})
 
 def logout_user(request):
     logout(request)
@@ -39,14 +39,14 @@ def register_user(request):
             return redirect('home')
     else:
         form = SignUpForm()
-        return render(request, 'register.html', {'form': form})
+        return render(request, 'website/register.html', {'form': form})
     
-    return render(request, 'register.html', {'form': form})
+    return render(request, 'website/register.html', {'form': form})
 
 def customer_record(request, pk):
     if request.user.is_authenticated:
         customer_record = Record.objects.get(id=pk)
-        return render(request, 'record.html', {'customer_record': customer_record})
+        return render(request, 'website/record.html', {'customer_record': customer_record})
     else:
         messages.error(request, "You must be logged in to view that page.")
         return redirect('home')
@@ -70,7 +70,7 @@ def add_record(request):
                 messages.success(request, "Record added successfully.")
                 return redirect('home')
         else:
-            return render(request, 'add_record.html', {'form':form})
+            return render(request, 'website/add_record.html', {'form':form})
     else:
         messages.error(request, "You must be logged in to view that page.")
         return redirect('home')
@@ -78,30 +78,12 @@ def add_record(request):
 def update_record(request, pk):
     if request.user.is_authenticated:
         current_record = Record.objects.get(id=pk)
-        form = AddRecordForm(request.POST or None, instance = current_record)
+        form = AddRecordForm(request.POST or None, instance=current_record)
         if form.is_valid():
             form.save()
             messages.success(request, "Record updated successfully.")
             return redirect('record', pk=pk)
-        return render(request, 'update_record.html', {'form':form, 'record':current_record})
+        return render(request, 'website/update_record.html', {'form':form, 'record':current_record})
     else:
         messages.error(request, "You must be logged in to view that page.")
         return redirect('home')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
