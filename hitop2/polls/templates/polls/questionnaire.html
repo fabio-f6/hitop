@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+.question-row {
+    padding: 0.75rem 0; /* espaço em cima e embaixo */
+}
+
+.question-row:hover {
+    background-color: #e2f0ff; /* azul claro suave */
+    transition: background-color 0.3s;
+}
+
+.col-md-8.d-flex.justify-content-between .form-check {
+    display: flex;
+    align-items: center;  /* centraliza verticalmente o radio */
+    justify-content: center; /* opcional: centraliza horizontalmente dentro da coluna */
+    margin: 0;  /* remove margens que o bootstrap adiciona por padrão */
+}
+
+</style>
+
+<form method="post">
+    {% csrf_token %}
+
+    <!-- Cabeçalho das opções -->
+    <div class="row align-items-center">
+        <div class="col-md-4">
+            <!-- vazio para alinhar com as perguntas -->
+        </div>
+        <div class="col-md-8">
+            <div class="row text-center">
+                {% for value, label in answer_choices %}
+                    <div class="col">
+                        {{ label }}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Perguntas -->
+    {% for question in questions %}
+        <div class="row align-items-center question-row">
+
+            <!-- Coluna esquerda: pergunta -->
+            <div class="col-md-4">
+                {{ question.question_text }}
+            </div>
+
+            <!-- Coluna direita: respostas -->
+            <div class="col-md-8">
+                <div class="row text-center">
+                    {% for value, label in answer_choices %}
+                        <div class="col">
+                            <input type="radio"
+                                   name="question_{{ question.id }}"
+                                   value="{{ value }}"
+                                   id="q{{ question.id }}_{{ value }}">
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    {% endfor %}
+
+    <br>
+    <button type="submit" class="btn btn-primary">
+        Enviar respostas
+    </button>
+
+</form>
+
+{% endblock %}

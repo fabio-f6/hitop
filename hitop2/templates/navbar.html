@@ -19,6 +19,12 @@
           <a class="nav-link" href="{% url 'add_record' %}">Add record</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link" href="{% url 'polls:index' %}">Question list</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'polls:questionnaire' %}">Questionnaire</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" href="{% url 'logout' %}">Logout</a>
         </li>
         {% else %}
