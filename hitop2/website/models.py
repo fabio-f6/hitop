@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Record(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -13,3 +14,21 @@ class Record(models.Model):
 
     def __str__(self):
         return(f"{self.first_name} {self.last_name}")
+
+class UserProfile(models.Model):
+    USER_TYPES = [
+        ('patient', 'Paciente'),
+        ('professional', 'Profissional'),
+        ('admin', 'Admin'),
+    ]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user_type = models.CharField(max_length=20, choices=USER_TYPES)
+    professional = models.ForeignKey(
+        User, null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name="patients"
+    )
+
+    def __str__(self):
+        return f"{self.user.username} ({self.user_type})"

@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import Question, UserAnswer
 
@@ -30,6 +31,7 @@ def questionnaire(request):
         "answer_choices": answer_choices
     })
 
+@login_required
 def index(request):
     latest_question_list = Question.objects.order_by("-id")
     context = {

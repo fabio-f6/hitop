@@ -1,49 +1,53 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="{% url 'home' %}">HiTOP</a>
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarSupportedContent"
-      aria-controls="navbarSupportedContent"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
+   <div class="container-fluid">
+      <a class="navbar-brand">HiTOP</a>
+      <button
+         class="navbar-toggler"
+         type="button"
+         data-bs-toggle="collapse"
+         data-bs-target="#navbarSupportedContent"
+         aria-controls="navbarSupportedContent"
+         aria-expanded="false"
+         aria-label="Toggle navigation"
+      >
       <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        {% if user.is_authenticated %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'add_record' %}">Add record</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'polls:index' %}">Question list</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'polls:questionnaire' %}">Questionnaire</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-        </li>
-        {% else %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'register' %}">Register</a>
-        </li>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
 
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'home' %}">Login</a>
-          {% endif %}
-        </li>
-      </ul>
-      {% if user.is_superuser %}
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
-        </li>
-      </ul>
-      {% endif %}
-    </div>
-  </div>
+         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            {% if user.is_authenticated %}
+               {% if request.user.userprofile.user_type == 'professional'%}
+               <li class="nav-item">
+                   <a class="nav-link" href="{% url 'website:my_patients' %}">Meus Pacientes</a>
+               </li>
+               <li class="nav-item">
+                  <a class="nav-link" href="{% url 'polls:index' %}">Question list</a>
+               </li>
+               {% endif %}
+               <li class="nav-item">
+                  <a class="nav-link" href="{% url 'polls:questionnaire' %}">Questionnaire</a>
+               </li>
+               <li class="nav-item">
+                  <a class="nav-link" href="{% url 'website:logout' %}">Logout</a>
+               </li>
+            {% else %}
+               <li class="nav-item">
+                  <a class="nav-link" href="{% url 'website:register' %}">Register</a>
+               </li>
+               <li class="nav-item">
+                  <a class="nav-link" href="{% url 'website:home' %}">Login</a>
+               </li>
+            {% endif %}
+         </ul>
+
+         {% if user.is_authenticated and request.user.userprofile.user_type == 'admin' %}
+            <ul class="navbar-nav ms-auto">
+               <li class="nav-item">
+                  <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+               </li>
+            </ul>
+         {% endif %}
+
+      </div>
+   </div>
 </nav>
