@@ -6,6 +6,10 @@
 <table class="table table-striped">
   <thead>
     <tr>
+      <th>Escala</th>
+      <th>Subescala</th>
+      <th>Item #</th>
+      <th>RK</th>
       <th>Pergunta</th>
       <th>Resposta</th>
     </tr>
@@ -13,6 +17,10 @@
   <tbody>
     {% for answer in answers %}
       <tr>
+        <td>{{ answer.question.scale }}</td>
+        <td>{{ answer.question.subscale }}</td>
+        <td>{{ answer.question.item_code }}</td>
+        <td>{{ answer.question.rk }}</td>
         <td>{{ answer.question.question_text }}</td>
         <td>{{ answer.get_answer_display }}</td>
       </tr>

@@ -33,7 +33,7 @@ def questionnaire(request):
 
 @login_required
 def index(request):
-    latest_question_list = Question.objects.order_by("-id")
+    latest_question_list = Question.objects.order_by("id")
     context = {
     	'latest_question_list': latest_question_list
     }

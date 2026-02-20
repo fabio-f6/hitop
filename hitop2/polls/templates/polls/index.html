@@ -2,16 +2,35 @@
 
 {% block content %}
 
-{% if user.is_authenticated %}
+{% if user.is_authenticated and request.user.userprofile.user_type == 'professional' %}
 
 {% if latest_question_list %}
-    <ul>
+    
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Escala</th>
+      <th>Subescala</th>
+      <th>Item #</th>
+      <th>RK</th>
+      <th>Pergunta</th>
+    </tr>
+  </thead>
+  <tbody>
     {% for question in latest_question_list %}
-        <li>{{ question.question_text }}</li>
+      <tr>
+        <td>{{ question.scale }}</td>
+        <td>{{ question.subscale }}</td>
+        <td>{{ question.item_code }}</td>
+        <td>{{ question.rk }}</td>
+        <td class="text-wrap">{{ question.question_text }}</td>
+      </tr>
     {% endfor %}
-    </ul>
+  </tbody>
+</table>
+
 {% else %}
-    <p>No polls are available.</p>
+    <p>No questions are available.</p>
 {% endif %}
 
 {% endif %}

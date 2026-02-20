@@ -16,7 +16,13 @@ def home(request):
         if user is not None:
             login(request, user)
             messages.success(request, "Logged in successfully!")
-            return redirect('polls:questionnaire')
+            if request.user.userprofile.user_type == 'patient':
+                return redirect('polls:questionnaire')
+            elif request.user.userprofile.user_type == 'professional':
+                return redirect('website:my_patients')
+            else:
+                return redirect('website:home')
+
         else:
             messages.error(request, "Invalid username or password.")
             return redirect('website:home')
@@ -49,7 +55,12 @@ def register_user(request):
             login(request, user)
 
             messages.success(request, "Registration successful!")
-            return redirect('website:home')
+            if request.user.userprofile.user_type == 'patient':
+                return redirect('polls:questionnaire')
+            elif request.user.userprofile.user_type == 'professional':
+                return redirect('website:my_patients')
+            else:
+                return redirect('website:home')
     else:
         form = SignUpForm()
 
@@ -124,7 +135,7 @@ def patient_answers(request, patient_id):
         messages.error(request, "Paciente não encontrado ou não associado a você.")
         return redirect('website:my_patients')
 
-    answers = UserAnswer.objects.filter(user=patient_profile.user)
+    answers = UserAnswer.objects.filter(user=patient_profile.user).order_by("question_id")
     return render(request, 'website/patient_answers.html', {
         'patient': patient_profile.user,
         'answers': answers

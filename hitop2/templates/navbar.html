@@ -24,9 +24,11 @@
                   <a class="nav-link" href="{% url 'polls:index' %}">Question list</a>
                </li>
                {% endif %}
+               {% if request.user.userprofile.user_type == 'patient'%}
                <li class="nav-item">
                   <a class="nav-link" href="{% url 'polls:questionnaire' %}">Questionnaire</a>
                </li>
+               {% endif %}
                <li class="nav-item">
                   <a class="nav-link" href="{% url 'website:logout' %}">Logout</a>
                </li>
