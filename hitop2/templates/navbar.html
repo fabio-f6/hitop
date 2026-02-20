@@ -37,6 +37,13 @@
           {% endif %}
         </li>
       </ul>
+      {% if user.is_superuser %}
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+        </li>
+      </ul>
+      {% endif %}
     </div>
   </div>
 </nav>

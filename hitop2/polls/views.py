@@ -7,7 +7,7 @@ answer_choices = Question.ANSWER_CHOICES
 
 @login_required
 def questionnaire(request):
-    questions = Question.objects.all()
+    questions = Question.objects.order_by('?')
 
     if request.method == "POST":
         for question in questions:
