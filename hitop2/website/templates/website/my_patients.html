@@ -3,11 +3,12 @@
 {% block content %}
 <h2>Meus Pacientes</h2>
 
-<ul class="list-group">
+<ul class="list-group rounded-0">
   {% for patient in patients %}
     <li class="list-group-item d-flex justify-content-between align-items-center">
       {{ patient.user.username }} - {{ patient.user.first_name }} {{ patient.user.last_name }}
-      <a href="{% url 'website:patient_answers' patient.user.id %}" class="btn btn-sm btn-primary">Ver respostas</a>
+      <a href="{% url 'website:patient_answers' patient.user.id %}" class="btn btn-sm btn-primary rounded-0" style="background-color: #e2f0ff; color: #000; border: 1px solid #9ec9ff;">
+      Ver respostas</a>
     </li>
   {% empty %}
     <li class="list-group-item">Nenhum paciente associado.</li>
