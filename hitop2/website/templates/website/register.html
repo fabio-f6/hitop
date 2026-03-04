@@ -2,8 +2,7 @@
 {% block content %}
 
 <div class="col-md-6 offset-md-3">
-<h1>Register</h1>
-</br>
+<h2>Pedido de Instrumento</h2>
 
 <form method="POST" action="">
     {% csrf_token %}
@@ -19,13 +18,44 @@
 			</div>
 		{% endif %}
 
+		<p><strong>Condições gerais de utilização do instrumento de avaliação</strong></p>
+		<p>Ao utilizar o presente instrumento de avaliação, o requerente aceita as seguintes condições de utilização:</p>
+		<ol>
+		    <li>
+		        O instrumento de avaliação deverá ser utilizado de acordo com o estabelecido no Código Deontológico da Ordem dos Psicólogos Portugueses 
+		        (<a href="https://www.ordemdospsicologos.pt/ficheiros/document" target="_blank">OPP</a>), exclusivamente para fins de investigação e/ou clínicos.
+		    </li>
+		    <li>
+		        O utilizador deverá administrar e cotar o instrumento de avaliação de acordo com as regras definidas pelos seus autores e descritas nos materiais cedidos.
+		    </li>
+		</ol>
+
+    <p><strong>Dados do requerente do instrumento de avaliação</strong></p>
+
     {{ form.as_p }}
+
+
+    <p><strong>Termo de responsabilidade na utilização do instrumento de avaliação</strong></p>
+    <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" id="termo_responsabilidade" name="termo_responsabilidade" required>
+    <label class="form-check-label" for="termo_responsabilidade">
+        Declaro que as informações acima prestadas são verdadeiras. Declaro que os instrumentos obtidos na sequência deste pedido serão utilizados apenas no âmbito dos objetivos acima descritos. Declaro que utilizarei de forma adequada os instrumentos de avaliação que me foram cedidos, nomeadamente no que se refere à sua administração, cotação e interpretação, de acordo com o Código Deontológico da OPP. Declaro que assegurarei a proteção e segurança dos materiais cedidos, prevenindo a sua divulgação para outras pessoas ou para o domínio público.
+    </label>
+</div>
 
     </br>
 
-      <button type="submit" class="btn btn-secondary">Register</button>
+    <div class="text-end">
+        <button type="submit" class="btn btn-primary rounded-0"
+        style="background-color: #e2f0ff; color: #000; border: 1px solid #9ec9ff;">
+            Registrar
+        </button>
+        </div>
 </form>
 
 </div>
 
+<br>
+
 {% endblock %}
+

@@ -5,60 +5,72 @@ from .models import UserProfile, Record
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(
-        label="",
-        widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'Email Address'})
+        label="", widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'Email'})
     )
     first_name = forms.CharField(
-        label="", max_length=100,
-        widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'First Name'})
+        label="", max_length=100, widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'Nome'})
     )
     last_name = forms.CharField(
-        label="", max_length=100,
-        widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'Last Name'})
+        label="", max_length=100, widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'Apelido'})
     )
 
-    user_type = forms.ChoiceField(
-        label="",
-        choices=[('', 'User Type')] + list(UserProfile.USER_TYPES),
+    # Novos campos do UserProfile
+    area_formacao = forms.ChoiceField(
+        label="Área de formação do requerente",
+        choices=UserProfile._meta.get_field('area_formacao').choices,
         widget=forms.Select(attrs={'class':'form-control'})
     )
 
-    professional = forms.ModelChoiceField(
-        label="",
-        queryset=User.objects.filter(userprofile__user_type='professional'),
-        required=False,
+    objetivo_uso = forms.ChoiceField(
+        label="Objetivo do uso do instrumento",
+        choices=UserProfile._meta.get_field('objetivo_uso').choices,
         widget=forms.Select(attrs={'class':'form-control'})
+    )
+
+    cedula_profissional = forms.CharField(
+        label="Cédula profissional",
+        widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'Número da cédula profissional'})
     )
 
     class Meta:
         model = User
-        fields = ('username', 'first_name', 'last_name', 'email', 'password1', 'password2', 'user_type', 'professional')
+        fields = (
+            'first_name', 
+            'last_name', 
+            'email',
+            'password1', 
+            'password2',
+            'area_formacao', 
+            'objetivo_uso', 
+            'cedula_profissional', 
+            'username',  # escondido
+        )
 
     def __init__(self, *args, **kwargs):
         super(SignUpForm, self).__init__(*args, **kwargs)
 
-        # Estilizando os campos já existentes
-        self.fields['username'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Username'})
-        self.fields['username'].label = ''
-        self.fields['username'].help_text = '<span class="form-text text-muted"><small>Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.</small></span>'
+        # Oculta o username
+        self.fields['username'].widget = forms.HiddenInput()
+        self.fields['username'].required = False
 
-        self.fields['password1'].widget.attrs.update({'class':'form-control', 'placeholder':'Password'})
+        # Password1
+        self.fields['password1'].widget.attrs.update({'class':'form-control', 'placeholder':'Palavra-passe'})
         self.fields['password1'].label = ''
         self.fields['password1'].help_text = (
             '<ul class="form-text text-muted small">'
-            '<li>Your password can\'t be too similar to your other personal information.</li>'
-            '<li>Your password must contain at least 8 characters.</li>'
-            '<li>Your password can\'t be a commonly used password.</li>'
-            '<li>Your password can\'t be entirely numeric.</li>'
+            '<li>A sua palavra-passe não pode ser demasiado semelhante a outras informações pessoais.</li>'
+            '<li>A sua palavra-passe deve conter pelo menos 8 caracteres.</li>'
+            '<li>A sua palavra-passe não pode ser uma palavra-passe comum.</li>'
+            '<li>A sua palavra-passe não pode ser inteiramente numérica.</li>'
             '</ul>'
         )
 
-        self.fields['password2'].widget.attrs.update({'class':'form-control', 'placeholder':'Confirm Password'})
+        # Password2
+        self.fields['password2'].widget.attrs.update({'class':'form-control', 'placeholder':'Confirmar palavra-passe'})
         self.fields['password2'].label = ''
-        self.fields['password2'].help_text = '<span class="form-text text-muted"><small>Enter the same password as before, for verification.</small></span>'
-
-        self.fields['user_type'].widget.attrs.update({'class': 'form-control'})
-        self.fields['professional'].widget.attrs.update({'class': 'form-control'})
+        self.fields['password2'].help_text = (
+            '<span class="form-text text-muted"><small>Insira a mesma palavra-passe novamente para verificação.</small></span>'
+        )
 
 class AddRecordForm(forms.ModelForm):
 	first_name = forms.CharField(required=True, widget=forms.widgets.TextInput(attrs={"placeholder":"First name", "class":"form-control"}), label="")

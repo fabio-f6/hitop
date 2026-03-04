@@ -38,29 +38,29 @@ def register_user(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            user_type = form.cleaned_data['user_type']
-            professional = form.cleaned_data.get('professional')
+            # cria o usuário mas ainda não salva
+            user = form.save(commit=False)
 
-            profile = user.userprofile
-            profile.user_type = user_type
-            profile.professional = professional
-            profile.save()
+            # gera username automaticamente a partir do email
+            user.username = form.cleaned_data['email'].split('@')[0]
+            user.save()
 
+            # cria o perfil do usuário com os campos obrigatórios
+            UserProfile.objects.create(
+                user=user,
+                user_type='professional',  # só profissionais podem se registrar
+                area_formacao=form.cleaned_data['area_formacao'],
+                objetivo_uso=form.cleaned_data['objetivo_uso'],
+                cedula_profissional=form.cleaned_data['cedula_profissional'],
+                termo_responsabilidade=form.cleaned_data['termo_responsabilidade'],
+            )
 
             # autentica e loga o usuário
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password1']
-            user = authenticate(request, username=username, password=password)
+            user = authenticate(request, username=user.username, password=form.cleaned_data['password1'])
             login(request, user)
 
             messages.success(request, "Registration successful!")
-            if request.user.userprofile.user_type == 'patient':
-                return redirect('polls:questionnaire')
-            elif request.user.userprofile.user_type == 'professional':
-                return redirect('website:my_patients')
-            else:
-                return redirect('website:home')
+            return redirect('website:my_patients')  # profissionais vão direto para sua área
     else:
         form = SignUpForm()
 
