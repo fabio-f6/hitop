@@ -7,7 +7,7 @@
 {% else %}
 
 <div class="col-md-6 offset-md-3">
-    <h1>Login</h1>
+    <h2>Login</h2>
   </br>
 
     <form method="POST" action="{% url 'website:home'%}">
@@ -31,10 +31,13 @@
           />
         </div>
       </br>
-        <button type="submit" class="btn btn-secondary">Login</button>
+        <button type="submit" cclass="btn btn-sm rounded-0"
+          style="background-color: #e2f0ff; color: #000; 
+          border: 1px solid #9ec9ff; padding: 0.5rem 1rem;">Login</button>
     </form>
 </div>
 
 {% endif %}
 
 {% endblock %}
+

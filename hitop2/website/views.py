@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import SignUpForm, AddRecordForm
+from .forms import SignUpForm, AddRecordForm, CreatePatientForm
 from .models import Record, UserProfile
 from polls.models import UserAnswer
 
@@ -38,33 +38,63 @@ def register_user(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
-            # cria o usuário mas ainda não salva
+            # cria o usuário mas ainda não salva completamente
             user = form.save(commit=False)
 
             # gera username automaticamente a partir do email
             user.username = form.cleaned_data['email'].split('@')[0]
             user.save()
 
-            # cria o perfil do usuário com os campos obrigatórios
-            UserProfile.objects.create(
-                user=user,
-                user_type='professional',  # só profissionais podem se registrar
-                area_formacao=form.cleaned_data['area_formacao'],
-                objetivo_uso=form.cleaned_data['objetivo_uso'],
-                cedula_profissional=form.cleaned_data['cedula_profissional'],
-                termo_responsabilidade=form.cleaned_data['termo_responsabilidade'],
-            )
+            # atualiza o perfil que já foi criado automaticamente
+            profile = user.userprofile
+            profile.user_type = 'professional'  # apenas profissionais podem registrar
+            profile.area_formacao = form.cleaned_data['area_formacao']
+            profile.objetivo_uso = form.cleaned_data['objetivo_uso']
+            profile.cedula_profissional = form.cleaned_data['cedula_profissional']
+            profile.save()
 
             # autentica e loga o usuário
-            user = authenticate(request, username=user.username, password=form.cleaned_data['password1'])
+            user = authenticate(
+                request,
+                username=user.username,
+                password=form.cleaned_data['password1']
+            )
             login(request, user)
 
-            messages.success(request, "Registration successful!")
-            return redirect('website:my_patients')  # profissionais vão direto para sua área
+            messages.success(request, f"Registo realizado com sucesso! O seu nome de utilizador é: {user.username}")
+            return redirect('website:my_patients')
+
     else:
         form = SignUpForm()
 
     return render(request, 'website/register.html', {'form': form})
+
+@login_required
+def create_patient(request):
+
+    # garante que apenas profissionais podem acessar
+    if request.user.userprofile.user_type != 'professional':
+        messages.error(request, "Apenas profissionais podem criar pacientes.")
+        return redirect('website:home')
+
+    if request.method == "POST":
+        form = CreatePatientForm(request.POST)
+
+        if form.is_valid():
+            user = form.save()
+
+            profile = user.userprofile
+            profile.user_type = 'patient'
+            profile.professional = request.user
+            profile.save()
+
+            messages.success(request, "Paciente criado com sucesso!")
+            return redirect('website:my_patients')
+
+    else:
+        form = CreatePatientForm()
+
+    return render(request, 'website/create_patient.html', {'form': form})
 
 def customer_record(request, pk):
     if request.user.is_authenticated:

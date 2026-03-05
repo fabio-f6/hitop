@@ -72,6 +72,26 @@ class SignUpForm(UserCreationForm):
             '<span class="form-text text-muted"><small>Insira a mesma palavra-passe novamente para verificação.</small></span>'
         )
 
+class CreatePatientForm(UserCreationForm):
+    username = forms.CharField(
+        label="Nome de utilizador",
+        widget=forms.TextInput(attrs={'class':'form-control'})
+        )
+
+    password1 = forms.CharField(
+        label="Palavra-passe",
+        widget=forms.PasswordInput(attrs={'class':'form-control'})
+        )
+
+    password2 = forms.CharField(
+        label="Confirmar palavra-passe",
+        widget=forms.PasswordInput(attrs={'class':'form-control'})
+        )
+
+    class Meta:
+        model = User
+        fields = ('username', 'password1', 'password2')
+
 class AddRecordForm(forms.ModelForm):
 	first_name = forms.CharField(required=True, widget=forms.widgets.TextInput(attrs={"placeholder":"First name", "class":"form-control"}), label="")
 	last_name = forms.CharField(required=True, widget=forms.widgets.TextInput(attrs={"placeholder":"Last name", "class":"form-control"}), label="")

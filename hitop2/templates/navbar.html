@@ -16,6 +16,11 @@
 
          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             {% if user.is_authenticated %}
+               {% if user.is_authenticated and request.user.userprofile.user_type == 'admin' %}
+                     <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+                     </li>
+               {% endif %}
                {% if request.user.userprofile.user_type == 'professional'%}
                <li class="nav-item">
                    <a class="nav-link" href="{% url 'website:my_patients' %}">Meus Pacientes</a>
@@ -26,12 +31,9 @@
                {% endif %}
                {% if request.user.userprofile.user_type == 'patient'%}
                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'polls:questionnaire' %}">Questionnaire</a>
+                  <a class="nav-link" href="{% url 'polls:questionnaire' %}">Questionário</a>
                </li>
                {% endif %}
-               <li class="nav-item">
-                  <a class="nav-link" href="{% url 'website:logout' %}">Logout</a>
-               </li>
             {% else %}
                <li class="nav-item">
                   <a class="nav-link" href="{% url 'website:register' %}">Register</a>
@@ -42,12 +44,12 @@
             {% endif %}
          </ul>
 
-         {% if user.is_authenticated and request.user.userprofile.user_type == 'admin' %}
-            <ul class="navbar-nav ms-auto">
-               <li class="nav-item">
-                  <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
-               </li>
-            </ul>
+         {% if user.is_authenticated %}
+         <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+               <a class="nav-link" href="{% url 'website:logout' %}">Logout</a>
+            </li>
+         </ul>
          {% endif %}
 
       </div>
