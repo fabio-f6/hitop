@@ -74,19 +74,28 @@ class SignUpForm(UserCreationForm):
 
 class CreatePatientForm(UserCreationForm):
     username = forms.CharField(
-        label="Nome de utilizador",
-        widget=forms.TextInput(attrs={'class':'form-control'})
-        )
+        label="",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Nome de utilizador do paciente'
+        })
+    )
 
     password1 = forms.CharField(
-        label="Palavra-passe",
-        widget=forms.PasswordInput(attrs={'class':'form-control'})
-        )
+        label="",
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Palavra-passe'
+        })
+    )
 
     password2 = forms.CharField(
-        label="Confirmar palavra-passe",
-        widget=forms.PasswordInput(attrs={'class':'form-control'})
-        )
+        label="",
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Confirmar palavra-passe'
+        })
+    )
 
     class Meta:
         model = User

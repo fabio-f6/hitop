@@ -1,6 +1,13 @@
-{% extends 'base.html' %} 
+{% extends 'base.html' %}
 
 {% block content %}
+
+<style>
+  .table-striped > tbody > tr:nth-child(odd) > td, 
+  .table-striped > tbody > tr:nth-child(odd) > th {
+    background-color: #e2f0ff; /* azul suave */
+  }
+</style>
 
 {% if user.is_authenticated and request.user.userprofile.user_type == 'professional' %}
 

@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+<style>
+  .table-striped > tbody > tr:nth-child(odd) > td, 
+  .table-striped > tbody > tr:nth-child(odd) > th {
+    background-color: #e2f0ff; /* azul suave */
+  }
+</style>
+
+
 <h2>Respostas de {{ patient.username }}</h2>
 
 <table class="table table-striped">
