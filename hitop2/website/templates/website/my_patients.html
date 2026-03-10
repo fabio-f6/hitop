@@ -5,10 +5,24 @@
 
 <ul class="list-group rounded-0">
   {% for patient in patients %}
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-      {{ patient.user.username }}
-      <a href="{% url 'website:patient_answers' patient.user.id %}" class="btn btn-sm btn-primary rounded-0" style="background-color: #e2f0ff; color: #000; border: 1px solid #9ec9ff;">
-      Ver respostas</a>
+    <li class="list-group-item d-flex align-items-center">
+      <!-- Nome do paciente -->
+      <span>{{ patient.user.username }} - {{ patient.user.first_name }} {{ patient.user.last_name }}</span>
+
+      <!-- Botões alinhados à direita -->
+      <div class="ms-auto d-flex gap-2">
+        <a href="{% url 'website:patient_answers' patient.user.id %}" 
+           class="btn btn-sm btn-primary rounded-0" 
+           style="background-color: #e2f0ff; color: #000; border: 1px solid #9ec9ff;">
+          Ver respostas
+        </a>
+
+        <a href="{% url 'polls:export_patient_pdf' patient.user.id %}" 
+           class="btn btn-sm btn-secondary rounded-0"
+           style="background-color: #e2f0ff; color: #000; border: 1px solid #9ec9ff;">
+          PDF
+        </a>
+      </div>
     </li>
   {% empty %}
     <li class="list-group-item">Nenhum paciente associado.</li>
