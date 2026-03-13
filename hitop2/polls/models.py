@@ -1,26 +1,29 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-class Scale(models.Model):
+class Spectra(models.Model):
     name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
 
-class Subscale(models.Model):
+class Subfactor(models.Model):
     name = models.CharField(max_length=100)
-    scale = models.ForeignKey(Scale, on_delete=models.CASCADE)
+    spectra = models.ForeignKey(Spectra, on_delete=models.CASCADE, related_name='subfactors')
 
     def __str__(self):
-        return f"{self.scale.name} - {self.name}"
+        return f"{self.spectra.name} - {self.name}"
+
+class Scale(models.Model):
+    name = models.CharField(max_length=100)
+    subfactor = models.ForeignKey(Subfactor, on_delete=models.CASCADE, related_name='scales')
+
+    def __str__(self):
+        return f"{self.subfactor.name} - {self.name}"
 
 class Question(models.Model):
-    scale = models.ForeignKey(Scale, on_delete=models.CASCADE)
-    subscale = models.ForeignKey(Subscale, on_delete=models.CASCADE)
-
+    scale = models.ForeignKey(Scale, on_delete=models.CASCADE, related_name='questions')
     item_code = models.CharField(max_length=20, unique=True)
-    rk = models.BooleanField(default=False)
-
     question_text = models.CharField(max_length=255)
 
     ANSWER_CHOICES = [
@@ -33,9 +36,17 @@ class Question(models.Model):
     def __str__(self):
         return f"{self.scale.name} - {self.item_code}"
 
+    @property
+    def subfactor(self):
+        return self.scale.subfactor
+
+    @property
+    def spectra(self):
+        return self.scale.subfactor.spectra
+
 class UserAnswer(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='answers')
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='user_answers')
     answer = models.CharField(max_length=1, choices=Question.ANSWER_CHOICES)
     answered_at = models.DateTimeField(auto_now_add=True)
 
