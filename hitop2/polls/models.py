@@ -24,7 +24,7 @@ class Scale(models.Model):
 class Question(models.Model):
     scale = models.ForeignKey(Scale, on_delete=models.CASCADE, related_name='questions')
     item_code = models.CharField(max_length=20, unique=True)
-    question_text = models.CharField(max_length=255)
+    question_text = models.TextField()
 
     ANSWER_CHOICES = [
         ('1', 'Nunca'),

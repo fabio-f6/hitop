@@ -16,20 +16,19 @@
 <table class="table table-striped">
   <thead>
     <tr>
-      <th>Escala</th>
-      <th>Subescala</th>
-      <th>Item #</th>
-      <th>RK</th>
+      <th>Spectra</th>
+      <th>Subfator</th>
+      <th>Scale</th>
       <th>Pergunta</th>
     </tr>
   </thead>
   <tbody>
     {% for question in latest_question_list %}
       <tr>
+        <td>{{ question.spectra }}</td>
+        <td>{{ question.subfactor }}</td>
         <td>{{ question.scale }}</td>
-        <td>{{ question.subscale }}</td>
         <td>{{ question.item_code }}</td>
-        <td>{{ question.rk }}</td>
         <td class="text-wrap">{{ question.question_text }}</td>
       </tr>
     {% endfor %}
