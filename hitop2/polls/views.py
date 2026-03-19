@@ -18,7 +18,9 @@ answer_choices = Question.ANSWER_CHOICES
 
 @login_required
 def questionnaire(request):
-    questions = Question.objects.order_by('?')
+    questions = Question.objects.filter(
+    scale__subfactor__spectra__in=request.user.userprofile.spectra.all()
+    ).distinct().order_by('?')
 
     if request.method == "POST":
         for question in questions:

@@ -88,6 +88,8 @@ def create_patient(request):
             profile.professional = request.user
             profile.save()
 
+            profile.spectra.set(form.cleaned_data['spectra'])
+
             messages.success(request, "Paciente criado com sucesso!")
             return redirect('website:my_patients')
 

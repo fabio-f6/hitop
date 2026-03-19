@@ -12,14 +12,14 @@ class Subfactor(models.Model):
     spectra = models.ForeignKey(Spectra, on_delete=models.CASCADE, related_name='subfactors')
 
     def __str__(self):
-        return f"{self.spectra.name} - {self.name}"
+        return self.name
 
 class Scale(models.Model):
     name = models.CharField(max_length=100)
     subfactor = models.ForeignKey(Subfactor, on_delete=models.CASCADE, related_name='scales')
 
     def __str__(self):
-        return f"{self.subfactor.name} - {self.name}"
+        return self.name
 
 class Question(models.Model):
     scale = models.ForeignKey(Scale, on_delete=models.CASCADE, related_name='questions')

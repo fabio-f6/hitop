@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from polls.models import Spectra
 
 class Record(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -24,11 +25,14 @@ class UserProfile(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     user_type = models.CharField(max_length=20, choices=USER_TYPES)
+
     professional = models.ForeignKey(
         User, null=True, blank=True,
         on_delete=models.SET_NULL,
         related_name="patients"
     )
+
+    spectra = models.ManyToManyField(Spectra, blank=True, related_name='user_profiles')
 
     area_formacao = models.CharField(max_length=50, choices=[
         ('Psicologia', 'Psicologia'),

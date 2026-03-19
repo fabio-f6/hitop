@@ -2,6 +2,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
 from .models import UserProfile, Record
+from polls.models import Spectra
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(
@@ -95,6 +96,12 @@ class CreatePatientForm(UserCreationForm):
             'class': 'form-control',
             'placeholder': 'Confirmar palavra-passe'
         })
+    )
+
+    spectra = forms.ModelMultipleChoiceField(
+        queryset=Spectra.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=True
     )
 
     class Meta:
