@@ -7,7 +7,7 @@
   {% for patient in patients %}
     <li class="list-group-item d-flex align-items-center">
       <!-- Nome do paciente -->
-      <span>{{ patient.user.username }} - {{ patient.user.first_name }} {{ patient.user.last_name }}</span>
+      <span>{{ patient.user.username }}</span>
 
       <!-- Botões alinhados à direita -->
       <div class="ms-auto d-flex gap-2">
@@ -36,7 +36,7 @@
    class="btn btn-sm rounded-0"
    style="background-color: #e2f0ff; color: #000; 
           border: 1px solid #9ec9ff; padding: 0.5rem 1rem;">
-    Criar registro
+    Criar registro de paciente
 </a>
 
 {% endblock %}
