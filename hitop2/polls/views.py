@@ -26,13 +26,12 @@ answer_choices = [
     ('4', 'Sempre'),
 ]
 
-# opção extra da última página
 last_page_extra_choice = ('5', 'Não sei / Prefiro não responder')
+
 
 def questionnaire(request):
     user_profile = request.user.userprofile
 
-    # Inicializa ordem das questões na sessão
     if 'question_order' not in request.session:
         questions = list(
             Question.objects.filter(
@@ -46,26 +45,49 @@ def questionnaire(request):
     questions = list(Question.objects.filter(id__in=question_ids))
     questions.sort(key=lambda q: question_ids.index(q.id))
 
-    # Paginação
-    per_page = math.ceil(len(questions) / 6)
-    paginator = Paginator(questions, per_page)
-    page_number = request.GET.get('page', 1)
-    page_obj = paginator.get_page(page_number)
-
-    # Carrega respostas parciais já salvas na sessão ou DB
     partial_answers = request.session.get('partial_answers', {})
-    user_answers_qs = UserAnswer.objects.filter(user=request.user)
-    for ua in user_answers_qs:
+    for ua in UserAnswer.objects.filter(user=request.user):
         partial_answers[str(ua.question.id)] = ua.answer
 
+    page_number = int(request.GET.get('page', 1))
+    per_page = math.ceil(len(questions) / 6)
+    paginator = Paginator(questions, per_page)
+
     if request.method == "POST":
-        # Salva respostas da página atual
-        for question in page_obj:
+
+        if page_number > 6:
+            unanswered_questions = [q for q in questions if str(q.id) not in partial_answers]
+
+            for question in unanswered_questions:
+                field_name = f"question_{question.id}"
+                selected_value = request.POST.get(field_name)
+
+                if not selected_value:
+                    messages.error(request, "Por favor responda a todas as perguntas.")
+                    return redirect(f"{reverse('polls:questionnaire')}?page=7")
+
+                partial_answers[str(question.id)] = selected_value
+
+                UserAnswer.objects.update_or_create(
+                    user=request.user,
+                    question=question,
+                    defaults={'answer': selected_value}
+                )
+
+            request.session.pop('partial_answers', None)
+            request.session.pop('question_order', None)
+
+            return redirect("polls:thank_you")
+
+        current_page_obj = paginator.get_page(page_number)
+
+        for question in current_page_obj:
             field_name = f"question_{question.id}"
             selected_value = request.POST.get(field_name)
 
             if selected_value:
                 partial_answers[str(question.id)] = selected_value
+
                 UserAnswer.objects.update_or_create(
                     user=request.user,
                     question=question,
@@ -74,34 +96,39 @@ def questionnaire(request):
 
         request.session['partial_answers'] = partial_answers
 
-        # Última página: verifica se todas as perguntas foram respondidas
-        if not page_obj.has_next():
-            unanswered = [q for q in page_obj if str(q.id) not in partial_answers]
-            if unanswered:
-                messages.error(request, "Por favor, responda todas as perguntas antes de finalizar.")
-                return redirect(f"{reverse('polls:questionnaire')}?page={page_obj.number}")
+        if page_number == 6:
+            unanswered_ids = [q.id for q in questions if str(q.id) not in partial_answers]
 
-        # Próxima página ou finaliza
-        if page_obj.has_next():
-            return redirect(f"{reverse('polls:questionnaire')}?page={page_obj.next_page_number()}")
-        else:
-            # Remove respostas parciais da sessão ao finalizar
-            request.session.pop('partial_answers', None)
-            return redirect("polls:thank_you")
+            if unanswered_ids:
+                return redirect(f"{reverse('polls:questionnaire')}?page=7")
+            else:
+                request.session.pop('partial_answers', None)
+                request.session.pop('question_order', None)
+                return redirect("polls:thank_you")
 
-    # Calcula progress bar
-    progress = (page_obj.number / page_obj.paginator.num_pages) * 100
+        return redirect(f"{reverse('polls:questionnaire')}?page={page_number + 1}")
 
-    # Define choices da página atual (última página inclui opção extra)
-    current_answer_choices = answer_choices.copy()
-    if not page_obj.has_next():
-        current_answer_choices.append(last_page_extra_choice)
+    if page_number <= 6:
+        page_obj = paginator.get_page(page_number)
+        current_answer_choices = answer_choices.copy()
+    else:
+        unanswered_questions = [q for q in questions if str(q.id) not in partial_answers]
+        page_obj = unanswered_questions
+        current_answer_choices = answer_choices.copy() + [last_page_extra_choice]
+
+    # Progress bar
+    if page_number <= 6:
+        progress = (page_number / 6) * 100
+    else:
+        progress = 100
 
     return render(request, "polls/questionnaire.html", {
         "page_obj": page_obj,
         "answer_choices": current_answer_choices,
         "progress": progress,
-        "partial_answers": partial_answers
+        "partial_answers": partial_answers,
+        "page_number": page_number,
+        "num_pages": 6,
     })
 
 @login_required
