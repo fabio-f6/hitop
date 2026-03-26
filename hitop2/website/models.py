@@ -33,6 +33,7 @@ class UserProfile(models.Model):
     )
 
     spectra = models.ManyToManyField(Spectra, blank=True, related_name='user_profiles')
+    questionnaire_completed = models.BooleanField(default=False)
 
     area_formacao = models.CharField(max_length=50, choices=[
         ('Psicologia', 'Psicologia'),

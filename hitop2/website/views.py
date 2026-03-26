@@ -119,6 +119,20 @@ def edit_patient(request, patient_id):
             'patient': patient_profile
             })
 
+def reopen_questionnaire(request, patient_id):
+    patient_profile = get_object_or_404(UserProfile, id=patient_id, user_type='patient')
+
+    if patient_profile.professional != request.user:
+        messages.error(request, "Sem permissão.")
+        return redirect('website:my_patients')
+
+    patient_profile.questionnaire_completed = False
+    patient_profile.save()
+
+    UserAnswer.objects.filter(user=patient_profile.user).delete()
+
+    messages.success(request, "Questionário reaberto com sucesso.")
+    return redirect('website:my_patients')
 
 def customer_record(request, pk):
     if request.user.is_authenticated:

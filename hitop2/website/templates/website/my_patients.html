@@ -30,6 +30,14 @@
             Editar
         </a>
 
+        {% if patient.questionnaire_completed %}
+        <a href="{% url 'website:reopen_questionnaire' patient.id %}"
+            class="btn btn-sm btn-warning rounded-0"
+            style="background-color: #ffe2e2; color: #000; border: 1px solid #ff9e9e;">
+            Reabrir Questionário
+        </a>
+        {% endif %}
+
       </div>
     </li>
   {% empty %}

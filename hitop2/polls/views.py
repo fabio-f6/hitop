@@ -32,6 +32,9 @@ last_page_extra_choice = ('5', 'Não sei / Prefiro não responder')
 def questionnaire(request):
     user_profile = request.user.userprofile
 
+    if user_profile.questionnaire_completed:
+        return redirect("polls:thank_you")
+
     if 'question_order' not in request.session:
         questions = list(
             Question.objects.filter(
@@ -77,6 +80,8 @@ def questionnaire(request):
             request.session.pop('partial_answers', None)
             request.session.pop('question_order', None)
 
+            user_profile.questionnaire_completed = True
+            user_profile.save()
             return redirect("polls:thank_you")
 
         current_page_obj = paginator.get_page(page_number)
@@ -104,6 +109,9 @@ def questionnaire(request):
             else:
                 request.session.pop('partial_answers', None)
                 request.session.pop('question_order', None)
+
+                user_profile.questionnaire_completed = True
+                user_profile.save()
                 return redirect("polls:thank_you")
 
         return redirect(f"{reverse('polls:questionnaire')}?page={page_number + 1}")
