@@ -12,6 +12,7 @@ urlpatterns = [
     path('update_record/<int:pk>', views.update_record, name='update_record'),
     path('add_record/', views.add_record, name='add_record'),
     path("my_patients/", views.my_patients, name="my_patients"),
-    path("patient/<int:patient_id>", views.patient_answers, name="patient_answers"),
+    path("patient/<int:patient_id>/", views.patient_answers, name="patient_answers"),
     path('create_patient/', views.create_patient, name='create_patient'),
+    path('edit_patient/<int:patient_id>/', views.edit_patient, name='edit_patient')
 ]

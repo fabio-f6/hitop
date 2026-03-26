@@ -108,6 +108,18 @@ class CreatePatientForm(UserCreationForm):
         model = User
         fields = ('username', 'password1', 'password2')
 
+class EditPatientForm(forms.ModelForm):
+    spectra = forms.ModelMultipleChoiceField(
+        queryset=Spectra.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=True,
+        label="Módulos (HiTOP)"
+        )
+
+    class Meta:
+        model = UserProfile
+        fields = ['spectra']
+
 class AddRecordForm(forms.ModelForm):
 	first_name = forms.CharField(required=True, widget=forms.widgets.TextInput(attrs={"placeholder":"First name", "class":"form-control"}), label="")
 	last_name = forms.CharField(required=True, widget=forms.widgets.TextInput(attrs={"placeholder":"Last name", "class":"form-control"}), label="")

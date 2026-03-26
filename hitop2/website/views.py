@@ -1,8 +1,8 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import SignUpForm, AddRecordForm, CreatePatientForm
+from .forms import SignUpForm, AddRecordForm, CreatePatientForm, EditPatientForm
 from .models import Record, UserProfile
 from polls.models import UserAnswer
 
@@ -97,6 +97,28 @@ def create_patient(request):
         form = CreatePatientForm()
 
     return render(request, 'website/create_patient.html', {'form': form})
+
+def edit_patient(request, patient_id):
+    patient_profile = get_object_or_404(UserProfile, id=patient_id, user_type='patient')
+
+    if patient_profile.professional != request.user:
+        messages.error(request, "Sem permissão.")
+        return redirect('website:my_patients')
+
+    if request.method == "POST":
+        form = EditPatientForm(request.POST, instance=patient_profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Paciente atualizado com sucesso.")
+            return redirect('website:my_patients')
+    else:
+        form = EditPatientForm(instance=patient_profile)
+
+    return render(request, 'website/edit_patient.html', {
+            'form': form,
+            'patient': patient_profile
+            })
+
 
 def customer_record(request, pk):
     if request.user.is_authenticated:

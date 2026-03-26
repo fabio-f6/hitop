@@ -11,6 +11,7 @@
 
       <!-- Botões alinhados à direita -->
       <div class="ms-auto d-flex gap-2">
+
         <a href="{% url 'website:patient_answers' patient.user.id %}" 
            class="btn btn-sm btn-primary rounded-0" 
            style="background-color: #e2f0ff; color: #000; border: 1px solid #9ec9ff;">
@@ -22,6 +23,13 @@
            style="background-color: #e2f0ff; color: #000; border: 1px solid #9ec9ff;">
           PDF
         </a>
+
+        <a href="{% url 'website:edit_patient' patient.id %}"
+            class="btn btn-sm btn-secondary rounded-0"
+            style="background-color: #e2f0ff; color: #000; border: 1px solid #9ec9ff;">
+            Editar
+        </a>
+
       </div>
     </li>
   {% empty %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Editar paciente: {{ patient.user.username }}</h2>
+
+<form method="post">
+	{% csrf_token %}
+
+	{{ form.as_p }}
+
+	<button type="submit"
+		class="btn btn-sm btn-secondary rounded-0"
+		style="background-color: #e2f0ff; color: #000; border: 1px solid #9ec9ff;">
+		Guardar
+	</button>
+</form>
+
+{% endblock %}
