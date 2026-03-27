@@ -1,0 +1,44 @@
+{% if messages %}
+    <div style="position: fixed; top: 80px; right: 20px; z-index: 9999; width: 300px;">
+        {% for message in messages %}
+
+            <div class="alert alert-dismissible fade show rounded-0"
+                 style="
+                    position: relative;
+                    padding: 12px;
+                    margin-bottom: 10px;
+                    border: 1px solid;
+
+                    {% if message.tags == 'success' %}
+                        background-color: #e2f0ff;
+                        border-color: #9ec9ff;
+                    {% elif message.tags == 'error' %}
+                        background-color: #ffe2e2;
+                        border-color: #ff9e9e;
+                    {% else %}
+                        background-color: #f5f5f5;
+                        border-color: #ccc;
+                    {% endif %}
+                 ">
+                 
+                <div style="padding-right: 25px;">
+                    {{ message }}
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        style="
+                            position: absolute;
+                            top: 50%;
+                            right: 10px;
+                            transform: translateY(-50%);
+                            padding: 0;
+                            margin: 0;
+                        ">
+                </button>
+            </div>
+
+        {% endfor %}
+    </div>
+{% endif %}
