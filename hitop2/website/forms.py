@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django import forms
 from .models import UserProfile, Record
 from polls.models import Spectra
+import random, string
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(
@@ -76,9 +77,11 @@ class SignUpForm(UserCreationForm):
 class CreatePatientForm(UserCreationForm):
     username = forms.CharField(
         label="",
+        required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Nome de utilizador do paciente'
+            'readonly': True,
+            'style': 'background-color: #f5f5f5;'
         })
     )
 
@@ -107,6 +110,29 @@ class CreatePatientForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('username', 'password1', 'password2')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        def generate_username():
+            return 'P_' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+
+        username = generate_username()
+        while User.objects.filter(username=username).exists():
+            username = generate_username()
+
+        self.generated_username = username
+        self.fields['username'].initial = username
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+
+        user.username = self.generated_username
+
+        if commit:
+            user.save()
+
+        return user
 
 class EditPatientForm(forms.ModelForm):
     spectra = forms.ModelMultipleChoiceField(
