@@ -75,8 +75,9 @@ class SignUpForm(UserCreationForm):
         )
 
 class CreatePatientForm(UserCreationForm):
+
     username = forms.CharField(
-        label="",
+        label="ID de Utilizador",
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
@@ -86,20 +87,16 @@ class CreatePatientForm(UserCreationForm):
     )
 
     password1 = forms.CharField(
-        label="",
-        widget=forms.PasswordInput(attrs={
+        label="Palavra-passe",
+        required=False,
+        widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Palavra-passe'
+            'readonly': True,
+            'style': 'background-color: #f5f5f5;',
         })
     )
 
-    password2 = forms.CharField(
-        label="",
-        widget=forms.PasswordInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Confirmar palavra-passe'
-        })
-    )
+    password2 = forms.CharField(required=False, widget=forms.HiddenInput())
 
     spectra = forms.ModelMultipleChoiceField(
         queryset=Spectra.objects.all(),
@@ -117,6 +114,9 @@ class CreatePatientForm(UserCreationForm):
         def generate_username():
             return 'P_' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
 
+        def generate_password():
+            return 'PW_' + ''.join(random.choices(string.ascii_letters + string.digits, k=6))
+
         username = generate_username()
         while User.objects.filter(username=username).exists():
             username = generate_username()
@@ -124,10 +124,25 @@ class CreatePatientForm(UserCreationForm):
         self.generated_username = username
         self.fields['username'].initial = username
 
+        password = generate_password()
+        self.generated_password = password
+
+        self.fields['password1'].initial = password
+        self.fields['password2'].initial = password
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        cleaned_data['password1'] = self.generated_password
+        cleaned_data['password2'] = self.generated_password
+
+        return cleaned_data
+
     def save(self, commit=True):
         user = super().save(commit=False)
 
         user.username = self.generated_username
+        user.set_password(self.generated_password)
 
         if commit:
             user.save()

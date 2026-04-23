@@ -78,7 +78,14 @@ def create_patient(request):
         return redirect('website:home')
 
     if request.method == "POST":
+
+        temp_credentials = request.session.get('temp_credentials')
+
         form = CreatePatientForm(request.POST)
+
+        if temp_credentials:
+            form.generated_username = temp_credentials['username']
+            form.generated_password = temp_credentials['password']
 
         if form.is_valid():
             user = form.save()
@@ -90,13 +97,36 @@ def create_patient(request):
 
             profile.spectra.set(form.cleaned_data['spectra'])
 
-            messages.success(request, "Paciente criado com sucesso!")
-            return redirect('website:my_patients')
+            request.session['new_patient_credentials'] = {
+                'username': form.generated_username,
+                'password': form.generated_password
+            }
+
+            request.session.pop('temp_credentials', None)
+
+            return redirect('website:patient_credentials')
 
     else:
         form = CreatePatientForm()
 
+        request.session['temp_credentials'] = {
+            'username': form.generated_username,
+            'password': form.generated_password
+        }
+
     return render(request, 'website/create_patient.html', {'form': form})
+
+def patient_credentials(request):
+    credentials = request.session.get('new_patient_credentials')
+
+    if not credentials:
+        return redirect('website:my_patients')
+
+    del request.session['new_patient_credentials']
+
+    return render(request, 'website/patient_credentials.html', {
+        'credentials': credentials
+        })
 
 def edit_patient(request, patient_id):
     patient_profile = get_object_or_404(UserProfile, id=patient_id, user_type='patient')
