@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load custom_tags %}
+
+{% block content %}
+
+<div class="container mt-4" style="max-width: 700px;">
+
+    <div style="background-color: #e2f0ff; padding: 15px; border: 1px solid #9ec9ff;">
+        <b>Dados Sociodemográficos</b><br>
+        Responda às seguintes questões.
+    </div>
+
+    <br>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% for q in questions %}
+            <div class="mb-4">
+                <label><b>{{ q.label }}</b></label>
+
+                <!-- RADIO -->
+                {% if q.type == "radio" %}
+                    {% for value, label in q.choices %}
+                        <div>
+                            <input type="radio"
+                                   name="{{ q.id }}"
+                                   value="{{ value }}"
+                                   {% if answers|get_item:q.id == value %}checked{% endif %}>
+                            {{ label }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- TEXT -->
+                {% if q.type == "text" %}
+                    <input type="text"
+                           name="{{ q.id }}"
+                           class="form-control"
+                           value="{{ answers|get_item:q.id }}">
+                {% endif %}
+
+                <!-- NUMBER -->
+                {% if q.type == "number" %}
+                    <input type="number"
+                           name="{{ q.id }}"
+                           class="form-control"
+                           value="{{ answers|get_item:q.id }}">
+                {% endif %}
+
+            </div>
+        {% endfor %}
+
+        <button type="submit"
+                class="btn btn-primary rounded-0"
+                style="background-color: #e2f0ff; color: #000; border: 1px solid #9ec9ff;">
+            Continuar
+        </button>
+    </form>
+
+</div>
+
+{% endblock %}

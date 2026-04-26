@@ -8,4 +8,5 @@ urlpatterns = [
     path("questionnaire/", views.questionnaire, name="questionnaire"),
 	path("thank-you/", views.thank_you, name="thank_you"),
     path('export_pdf/<int:user_id>/', views.export_patient_pdf, name='export_patient_pdf'),
+    path('sociodemographic/', views.sociodemographic_form, name='sociodemographic'),
 ]

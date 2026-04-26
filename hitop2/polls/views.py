@@ -9,7 +9,8 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.paginator import Paginator
 
-from .models import Question, UserAnswer
+from .models import Question, UserAnswer, SociodemographicAnswer
+from .socio_config import SOCIO_QUESTIONS
 
 from datetime import datetime
 
@@ -31,6 +32,9 @@ last_page_extra_choice = ('5', 'Não sei / Prefiro não responder')
 
 def questionnaire(request):
     user_profile = request.user.userprofile
+
+    if not SociodemographicAnswer.objects.filter(user=request.user).exists():
+        return redirect('polls:sociodemographic')
 
     if user_profile.questionnaire_completed:
         return redirect("polls:thank_you")
@@ -204,3 +208,39 @@ def export_patient_pdf(request, user_id):
     doc.build(elements)
 
     return response
+
+@login_required
+def sociodemographic_form(request):
+
+    if request.method == "POST":
+
+        for q in SOCIO_QUESTIONS:
+            value = request.POST.get(q["id"])
+
+            if value:
+
+                if "choices" in q:
+                    label = dict(q["choices"]).get(value)
+                else:
+                    label = value
+
+                SociodemographicAnswer.objects.update_or_create(
+                    user=request.user,
+                    question_id=q["id"],
+                    defaults={
+                        "answer_value": value,
+                        "answer_label": label
+                    }
+                )
+
+        return redirect('polls:questionnaire')
+
+    existing_answers = {
+        a.question_id: a.answer_value
+        for a in SociodemographicAnswer.objects.filter(user=request.user)
+    }
+
+    return render(request, "polls/sociodemographic.html", {
+        "questions": SOCIO_QUESTIONS,
+        "answers": existing_answers
+        })

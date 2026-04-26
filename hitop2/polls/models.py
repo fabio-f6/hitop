@@ -52,3 +52,15 @@ class UserAnswer(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.question.question_text}: {self.get_answer_display()}"
+
+class SociodemographicAnswer(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    question_id = models.CharField(max_length=50)
+    answer_value = models.CharField(max_length=10)
+    answer_label = models.CharField(max_length=100)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.question_id}"
