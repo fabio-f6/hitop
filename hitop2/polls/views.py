@@ -3,13 +3,14 @@ import random
 
 from django.http import HttpResponse
 from django.urls import reverse
-from django.shortcuts import render, redirect
+from django.utils import timezone
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.paginator import Paginator
 
-from .models import Question, UserAnswer, SociodemographicAnswer
+from .models import Question, UserAnswer, SociodemographicAnswer, QuestionnaireSubmission
 from .socio_config import SOCIO_QUESTIONS
 
 from datetime import datetime
@@ -29,16 +30,60 @@ answer_choices = [
 
 last_page_extra_choice = ('5', 'Não sei / Prefiro não responder')
 
-
 def questionnaire(request):
     user_profile = request.user.userprofile
 
+    # ----------------------------
+    # SOCIODEMOGRÁFICO
+    # ----------------------------
     if not SociodemographicAnswer.objects.filter(user=request.user).exists():
         return redirect('polls:sociodemographic')
 
-    if user_profile.questionnaire_completed:
+    # ----------------------------
+    # EXISTE HISTÓRICO?
+    # ----------------------------
+    has_any_submission = QuestionnaireSubmission.objects.filter(
+        user=request.user,
+        questionnaire_type="hitop"
+    ).exists()
+
+    # ----------------------------
+    # TENTAR SUBMISSION ATIVA
+    # ----------------------------
+    submission = QuestionnaireSubmission.objects.filter(
+        user=request.user,
+        questionnaire_type="hitop",
+        completed=False
+    ).order_by("-started_at").first()
+
+    # ----------------------------
+    # CASO 1: PRIMEIRA VEZ → CRIA
+    # ----------------------------
+    if not submission and not has_any_submission:
+        submission = QuestionnaireSubmission.objects.create(
+            user=request.user,
+            questionnaire_type="hitop",
+            completed=False,
+            is_open=True
+        )
+
+    # ----------------------------
+    # CASO 2: NÃO HÁ SUBMISSION ATIVA
+    # ----------------------------
+    if not submission:
         return redirect("polls:thank_you")
 
+    # ----------------------------
+    # BLOQUEIO POR PROFISSIONAL
+    # ----------------------------
+    if not submission.is_open:
+        return redirect("polls:thank_you")
+
+    request.session["submission_id"] = submission.id
+
+    # ----------------------------
+    # ORDEM DAS QUESTÕES
+    # ----------------------------
     if 'question_order' not in request.session:
         questions = list(
             Question.objects.filter(
@@ -52,41 +97,25 @@ def questionnaire(request):
     questions = list(Question.objects.filter(id__in=question_ids))
     questions.sort(key=lambda q: question_ids.index(q.id))
 
+    # ----------------------------
+    # RESPOSTAS PARCIAIS
+    # ----------------------------
     partial_answers = request.session.get('partial_answers', {})
-    for ua in UserAnswer.objects.filter(user=request.user):
+
+    for ua in UserAnswer.objects.filter(submission=submission):
         partial_answers[str(ua.question.id)] = ua.answer
 
+    # ----------------------------
+    # PAGINAÇÃO
+    # ----------------------------
     page_number = int(request.GET.get('page', 1))
     per_page = math.ceil(len(questions) / 6)
     paginator = Paginator(questions, per_page)
 
+    # ----------------------------
+    # POST
+    # ----------------------------
     if request.method == "POST":
-
-        if page_number > 6:
-            unanswered_questions = [q for q in questions if str(q.id) not in partial_answers]
-
-            for question in unanswered_questions:
-                field_name = f"question_{question.id}"
-                selected_value = request.POST.get(field_name)
-
-                if not selected_value:
-                    messages.error(request, "Por favor responda a todas as perguntas.")
-                    return redirect(f"{reverse('polls:questionnaire')}?page=7")
-
-                partial_answers[str(question.id)] = selected_value
-
-                UserAnswer.objects.update_or_create(
-                    user=request.user,
-                    question=question,
-                    defaults={'answer': selected_value}
-                )
-
-            request.session.pop('partial_answers', None)
-            request.session.pop('question_order', None)
-
-            user_profile.questionnaire_completed = True
-            user_profile.save()
-            return redirect("polls:thank_you")
 
         current_page_obj = paginator.get_page(page_number)
 
@@ -99,40 +128,54 @@ def questionnaire(request):
 
                 UserAnswer.objects.update_or_create(
                     user=request.user,
+                    submission=submission,
                     question=question,
                     defaults={'answer': selected_value}
                 )
 
         request.session['partial_answers'] = partial_answers
 
+        # ----------------------------
+        # FINALIZAÇÃO
+        # ----------------------------
         if page_number == 6:
-            unanswered_ids = [q.id for q in questions if str(q.id) not in partial_answers]
+            unanswered_ids = [
+                q.id for q in questions if str(q.id) not in partial_answers
+            ]
 
             if unanswered_ids:
                 return redirect(f"{reverse('polls:questionnaire')}?page=7")
-            else:
-                request.session.pop('partial_answers', None)
-                request.session.pop('question_order', None)
 
-                user_profile.questionnaire_completed = True
-                user_profile.save()
-                return redirect("polls:thank_you")
+            request.session.pop('partial_answers', None)
+            request.session.pop('question_order', None)
+            request.session.pop('submission_id', None)
+
+            submission.completed = True
+            submission.completed_at = timezone.now()
+            submission.is_open = False
+            submission.save()
+
+            user_profile.questionnaire_completed = True
+            user_profile.save()
+
+            return redirect("polls:thank_you")
 
         return redirect(f"{reverse('polls:questionnaire')}?page={page_number + 1}")
 
+    # ----------------------------
+    # GET
+    # ----------------------------
     if page_number <= 6:
         page_obj = paginator.get_page(page_number)
         current_answer_choices = answer_choices.copy()
     else:
-        unanswered_questions = [q for q in questions if str(q.id) not in partial_answers]
+        unanswered_questions = [
+            q for q in questions if str(q.id) not in partial_answers
+        ]
         page_obj = unanswered_questions
         current_answer_choices = answer_choices.copy() + [last_page_extra_choice]
 
-    # Progress bar
-    if page_number <= 6:
-        progress = (page_number / 6) * 100
-    else:
-        progress = 100
+    progress = (page_number / 6) * 100 if page_number <= 6 else 100
 
     return render(request, "polls/questionnaire.html", {
         "page_obj": page_obj,

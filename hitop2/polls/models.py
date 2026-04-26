@@ -44,11 +44,29 @@ class Question(models.Model):
     def spectra(self):
         return self.scale.subfactor.spectra
 
+class QuestionnaireSubmission(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    questionnaire_type = models.CharField(max_length=50, default="hitop")
+    completed = models.BooleanField(default=False)
+    started_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    is_open = models.BooleanField(default=True)
+
 class UserAnswer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='answers')
+    
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='user_answers')
     answer = models.CharField(max_length=1, choices=Question.ANSWER_CHOICES)
     answered_at = models.DateTimeField(auto_now_add=True)
+
+    submission = models.ForeignKey(
+
+        QuestionnaireSubmission,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
 
     def __str__(self):
         return f"{self.user.username} - {self.question.question_text}: {self.get_answer_display()}"

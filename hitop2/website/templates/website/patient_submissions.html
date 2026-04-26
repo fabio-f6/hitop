@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3>Submissões de {{ patient.username }}</h3>
+
+{% for s in submissions %}
+    <div style="
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 10px;
+    ">
+
+        <strong>HiTOP</strong><br>
+
+        Data: {{ s.started_at|date:"d/m/Y H:i" }}<br>
+
+        Estado:
+        {% if s.completed %}
+            <span style="color: green;">Finalizado</span>
+        {% else %}
+            <span style="color: orange;">Em progresso</span>
+        {% endif %}
+
+        <br><br>
+
+        <a href="{% url 'website:patient_answers' s.id %}"
+            class="btn btn-sm btn-secondary rounded-0"
+            style="background-color: #e2f0ff; color: #000; border: 1px solid #9ec9ff;">
+            Ver respostas completas
+        </a>
+
+    </div>
+{% empty %}
+    <p>Este paciente ainda não tem submissões.</p>
+{% endfor %}
+
+{% endblock %}

@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.contrib import messages
 from .forms import SignUpForm, AddRecordForm, CreatePatientForm, EditPatientForm
 from .models import Record, UserProfile
-from polls.models import UserAnswer
+from polls.models import UserAnswer, QuestionnaireSubmission
 
 def home(request):
     records = Record.objects.all()
@@ -150,16 +151,39 @@ def edit_patient(request, patient_id):
             })
 
 def reopen_questionnaire(request, patient_id):
-    patient_profile = get_object_or_404(UserProfile, id=patient_id, user_type='patient')
+    patient_profile = get_object_or_404(
+        UserProfile,
+        id=patient_id,
+        user_type='patient'
+    )
 
     if patient_profile.professional != request.user:
         messages.error(request, "Sem permissão.")
         return redirect('website:my_patients')
 
+    # ----------------------------
+    # RESET DO PROFILE
+    # ----------------------------
     patient_profile.questionnaire_completed = False
     patient_profile.save()
 
-    UserAnswer.objects.filter(user=patient_profile.user).delete()
+    # ----------------------------
+    # FECHAR SUBMISSÕES ANTIGAS (NÃO APAGAR)
+    # ----------------------------
+    QuestionnaireSubmission.objects.filter(
+        user=patient_profile.user,
+        questionnaire_type="hitop"
+    ).update(is_open=False)
+
+    # ----------------------------
+    # CRIAR NOVA SUBMISSÃO ABERTA
+    # ----------------------------
+    submission = QuestionnaireSubmission.objects.create(
+        user=patient_profile.user,
+        questionnaire_type="hitop",
+        completed=False,
+        is_open=True
+    )
 
     messages.success(request, "Questionário reaberto com sucesso.")
     return redirect('website:my_patients')
@@ -221,20 +245,65 @@ def my_patients(request):
     return render(request, 'website/my_patients.html', {'patients': patients})
 
 @login_required
-def patient_answers(request, patient_id):
-    if request.user.userprofile.user_type != 'professional':
+def patient_answers(request, submission_id):
+
+    submission = get_object_or_404(
+        QuestionnaireSubmission,
+        id=submission_id
+    )
+
+    # segurança
+    if submission.user.userprofile.professional != request.user:
         messages.error(request, "Acesso negado.")
-        return redirect('website:home')
+        return redirect("website:my_patients")
 
-    try:
-        # já filtra pelo paciente associado ao profissional logado
-        patient_profile = UserProfile.objects.get(user__id=patient_id, professional=request.user)
-    except UserProfile.DoesNotExist:
-        messages.error(request, "Paciente não encontrado ou não associado a você.")
-        return redirect('website:my_patients')
+    answers = UserAnswer.objects.filter(
+        submission=submission
+    ).select_related('question')
 
-    answers = UserAnswer.objects.filter(user=patient_profile.user).order_by("question_id")
-    return render(request, 'website/patient_answers.html', {
-        'patient': patient_profile.user,
-        'answers': answers
+    return render(request, "website/patient_answers.html", {
+        "submission": submission,
+        "answers": answers
+    })
+
+@login_required
+def patient_submissions(request, patient_id):
+
+    patient = get_object_or_404(User, id=patient_id)
+
+    # segurança: só profissional dono pode ver
+    if patient.userprofile.professional != request.user:
+        messages.error(request, "Acesso negado.")
+        return redirect("website:my_patients")
+
+    submissions = QuestionnaireSubmission.objects.filter(
+        user=patient,
+        questionnaire_type="hitop"
+    ).order_by("-started_at")
+
+    return render(request, "website/patient_submissions.html", {
+        "patient": patient,
+        "submissions": submissions
+    })
+
+@login_required
+def submission_detail(request, submission_id):
+
+    submission = get_object_or_404(
+        QuestionnaireSubmission,
+        id=submission_id
+    )
+
+    # segurança: só o profissional dono pode ver
+    if submission.user.userprofile.professional != request.user:
+        messages.error(request, "Acesso negado.")
+        return redirect("website:my_patients")
+
+    answers = UserAnswer.objects.filter(
+        submission=submission
+    ).select_related('question')
+
+    return render(request, "website/submission_detail.html", {
+        "submission": submission,
+        "answers": answers
     })
