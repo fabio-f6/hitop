@@ -82,3 +82,94 @@ class SociodemographicAnswer(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.question_id}"
+
+#Novo sistema de questões sociodemográficas:
+
+class QuestionCategory(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+class DynamicQuestion(models.Model):
+
+    QUESTION_TYPES = [
+        ("radio", "Radio"),
+        ("checkbox", "Checkbox"),
+        ("text", "Text"),
+        ("number", "Number"),
+        ("matrix", "Matrix"),
+    ]
+
+    category = models.ForeignKey(
+        QuestionCategory,
+        on_delete=models.CASCADE,
+        related_name="questions"
+    )
+
+    question_id = models.CharField(
+        max_length=100,
+        unique=True
+    )
+
+    label = models.TextField()
+
+    question_type = models.CharField(
+        max_length=20,
+        choices=QUESTION_TYPES
+    )
+
+    required = models.BooleanField(default=True)
+
+    order = models.PositiveIntegerField(default=0)
+
+    description = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    def __str__(self):
+        return self.question_id
+
+class DynamicChoice(models.Model):
+
+    question = models.ForeignKey(
+        DynamicQuestion,
+        on_delete=models.CASCADE,
+        related_name="choices"
+    )
+
+    value = models.CharField(max_length=20)
+
+    label = models.CharField(max_length=255)
+
+    order = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.question.question_id} - {self.label}"
+
+class DynamicAnswer(models.Model):
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    submission = models.ForeignKey(
+        QuestionnaireSubmission,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+
+    question = models.ForeignKey(
+        DynamicQuestion,
+        on_delete=models.CASCADE
+    )
+
+    answer_value = models.TextField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.question.question_id}"

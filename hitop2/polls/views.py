@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.paginator import Paginator
 
-from .models import Question, UserAnswer, SociodemographicAnswer, QuestionnaireSubmission
+from .models import Question, QuestionCategory, DynamicAnswer, UserAnswer, SociodemographicAnswer, QuestionnaireSubmission
 from .socio_config import SOCIO_QUESTIONS
 
 from datetime import datetime
@@ -287,3 +287,54 @@ def sociodemographic_form(request):
         "questions": SOCIO_QUESTIONS,
         "answers": existing_answers
         })
+
+@login_required
+def dynamic_questionnaire(request, category_id):
+
+    category = get_object_or_404(
+        QuestionCategory,
+        id=category_id
+    )
+
+    questions = category.questions.all().order_by("order")
+
+    if request.method == "POST":
+
+        for question in questions:
+
+            field_name = f"question_{question.id}"
+
+            # checkbox
+            if question.question_type == "checkbox":
+
+                values = request.POST.getlist(field_name)
+
+                for value in values:
+
+                    DynamicAnswer.objects.create(
+                        user=request.user,
+                        question=question,
+                        answer_value=value
+                    )
+
+            # restantes
+            else:
+
+                value = request.POST.get(field_name)
+
+                if value:
+
+                    DynamicAnswer.objects.create(
+                        user=request.user,
+                        question=question,
+                        answer_value=value
+                    )
+
+        messages.success(request, "Respostas guardadas.")
+
+        return redirect("polls:index")
+
+    return render(request, "polls/dynamic_questionnaire.html", {
+        "category": category,
+        "questions": questions
+    })

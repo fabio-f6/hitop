@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>{{ category.name }}</h2>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        {% for question in questions %}
+
+            <div class="mb-4">
+
+                <label>
+                    <strong>{{ question.label }}</strong>
+                </label>
+
+                <!-- TEXT -->
+                {% if question.question_type == "text" %}
+
+                    <input
+                        type="text"
+                        name="question_{{ question.id }}"
+                        class="form-control"
+                    >
+
+                <!-- NUMBER -->
+                {% elif question.question_type == "number" %}
+
+                    <input
+                        type="number"
+                        name="question_{{ question.id }}"
+                        class="form-control"
+                    >
+
+                <!-- RADIO -->
+                {% elif question.question_type == "radio" %}
+
+                    {% for choice in question.choices.all %}
+
+                        <div class="form-check">
+
+                            <input
+                                type="radio"
+                                name="question_{{ question.id }}"
+                                value="{{ choice.value }}"
+                                class="form-check-input"
+                            >
+
+                            <label class="form-check-label">
+                                {{ choice.label }}
+                            </label>
+
+                        </div>
+
+                    {% endfor %}
+
+                <!-- CHECKBOX -->
+                {% elif question.question_type == "checkbox" %}
+
+                    {% for choice in question.choices.all %}
+
+                        <div class="form-check">
+
+                            <input
+                                type="checkbox"
+                                name="question_{{ question.id }}"
+                                value="{{ choice.value }}"
+                                class="form-check-input"
+                            >
+
+                            <label class="form-check-label">
+                                {{ choice.label }}
+                            </label>
+
+                        </div>
+
+                    {% endfor %}
+
+                {% endif %}
+
+            </div>
+
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary">
+            Enviar
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}
