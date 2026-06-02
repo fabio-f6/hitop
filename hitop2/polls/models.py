@@ -47,11 +47,21 @@ class Question(models.Model):
 class QuestionnaireSubmission(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    title = models.CharField(
+        max_length=255,
+        blank=True
+    )
+
     questionnaire_type = models.CharField(max_length=50, default="hitop")
     completed = models.BooleanField(default=False)
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     is_open = models.BooleanField(default=True)
+
+    spectra = models.ManyToManyField(
+        Spectra,
+        blank=True
+    )
 
 class UserAnswer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='answers')

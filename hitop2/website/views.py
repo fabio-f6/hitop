@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from .forms import SignUpForm, CreatePatientForm, EditPatientForm
 from .models import UserProfile
-from polls.models import UserAnswer, QuestionnaireSubmission
+from polls.models import UserAnswer, QuestionnaireSubmission, Spectra
 
 def home(request):
     if request.method == 'POST':
@@ -185,6 +185,77 @@ def reopen_questionnaire(request, patient_id):
 
     messages.success(request, "Questionário reaberto com sucesso.")
     return redirect('website:my_patients')
+
+@login_required
+def new_questionnaire(request, patient_id):
+
+    patient_profile = get_object_or_404(
+        UserProfile,
+        id=patient_id,
+        user_type="patient"
+    )
+
+    if patient_profile.professional != request.user:
+        messages.error(request, "Sem permissão.")
+        return redirect("website:my_patients")
+
+    spectra = Spectra.objects.all()
+
+    if request.method == "POST":
+
+        title = request.POST.get("title")
+        selected_spectra_ids = request.POST.getlist("spectra")
+
+        title = title.strip()
+
+        if not title:
+            messages.error(
+                request,
+                "O nome da submissão é obrigatório."
+            )
+            return redirect(
+                "website:new_questionnaire",
+                patient_id=patient_id
+            )
+
+        if not selected_spectra_ids:
+            messages.error(
+                request,
+                "Selecione pelo menos um spectra."
+            )
+            return redirect(
+                "website:new_questionnaire",
+                patient_id=patient_id
+            )
+
+        submission = QuestionnaireSubmission.objects.create(
+            user=patient_profile.user,
+            questionnaire_type="hitop",
+            title=title,
+            completed=False,
+            is_open=True
+        )
+
+        submission.spectra.set(selected_spectra_ids)
+
+        patient_profile.questionnaire_completed = False
+        patient_profile.save()
+
+        messages.success(
+            request,
+            "Novo questionário criado com sucesso."
+        )
+
+        return redirect("website:my_patients")
+
+    return render(
+        request,
+        "website/new_questionnaire.html",
+        {
+            "patient": patient_profile,
+            "spectra": spectra,
+        }
+    )
 
 @login_required
 def my_patients(request):

@@ -11,7 +11,7 @@
         margin-bottom: 10px;
     ">
 
-        <strong>HiTOP</strong><br>
+        <strong>{{s.title}}</strong><br>
 
         Data: {{ s.started_at|date:"d/m/Y H:i" }}<br>
 
@@ -34,5 +34,13 @@
 {% empty %}
     <p>Este paciente ainda não tem submissões.</p>
 {% endfor %}
+
+{% if patient.userprofile.questionnaire_completed %}
+<a href="{% url 'website:new_questionnaire' patient.userprofile.id %}"
+    class="btn btn-sm btn-warning rounded-0"
+    style="background-color: #ffe2e2; color: #000; border: 1px solid #ff9e9e;">
+    Criar nova submissão
+</a>
+{% endif %}
 
 {% endblock %}

@@ -87,7 +87,7 @@ def questionnaire(request):
     if 'question_order' not in request.session:
         questions = list(
             Question.objects.filter(
-                scale__subfactor__spectra__in=user_profile.spectra.all()
+                scale__subfactor__spectra__in=submission.spectra.all()
             ).distinct()
         )
         random.shuffle(questions)

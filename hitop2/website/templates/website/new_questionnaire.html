@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>Nova Aplicação HITOP</h2>
+
+    <p>
+        Paciente:
+        <strong>{{ patient.user.username }}</strong>
+    </p>
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Nome da aplicação
+            </label>
+
+            <input
+                type="text"
+                name="title"
+                class="form-control"
+                placeholder="Ex: Avaliação após 3 meses de terapia"
+            >
+
+        </div>
+
+        <div class="mb-4">
+
+            <label class="form-label">
+                Spectras incluídos
+            </label>
+
+            {% for spectrum in spectra %}
+
+                <div class="form-check">
+
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        name="spectra"
+                        value="{{ spectrum.id }}"
+                    >
+
+                    <label class="form-check-label">
+                        {{ spectrum.name }}
+                    </label>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+        <button
+            type="submit"
+            class="btn btn-primary"
+        >
+            Criar e abrir questionário
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}
