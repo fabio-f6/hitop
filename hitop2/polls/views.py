@@ -31,30 +31,48 @@ answer_choices = [
 last_page_extra_choice = ('5', 'Não sei / Prefiro não responder')
 
 def questionnaire(request):
-    user_profile = request.user.userprofile
+
+    user_profile = None
+
+    # ----------------------------
+    # TENTAR SUBMISSION DA SESSION
+    # ----------------------------
+    submission = None
+
+    submission_id = request.session.get("submission_id")
+
+    if submission_id:
+
+        submission = QuestionnaireSubmission.objects.filter(
+            id=submission_id,
+            questionnaire_type="hitop"
+        ).first()
+
+    if submission:
+        user_profile = submission.user.userprofile
+
+    # ----------------------------
+    # FALLBACK PARA SISTEMA ANTIGO
+    # ----------------------------
+    if not submission:
+
+        submission = QuestionnaireSubmission.objects.filter(
+            user=request.user,
+            questionnaire_type="hitop",
+            completed=False
+        ).order_by("-started_at").first()
+
+        if submission:
+            user_profile = submission.user.userprofile
 
     # ----------------------------
     # SOCIODEMOGRÁFICO
     # ----------------------------
-    if not SociodemographicAnswer.objects.filter(user=request.user).exists():
+    if not SociodemographicAnswer.objects.filter(
+        user=submission.user
+    ).exists():
+
         return redirect('polls:sociodemographic')
-
-    # ----------------------------
-    # EXISTE HISTÓRICO?
-    # ----------------------------
-    has_any_submission = QuestionnaireSubmission.objects.filter(
-        user=request.user,
-        questionnaire_type="hitop"
-    ).exists()
-
-    # ----------------------------
-    # TENTAR SUBMISSION ATIVA
-    # ----------------------------
-    submission = QuestionnaireSubmission.objects.filter(
-        user=request.user,
-        questionnaire_type="hitop",
-        completed=False
-    ).order_by("-started_at").first()
 
     # ----------------------------
     # CASO 1: PRIMEIRA VEZ → CRIA
@@ -90,6 +108,13 @@ def questionnaire(request):
     questions = list(Question.objects.filter(id__in=question_ids))
     questions.sort(key=lambda q: question_ids.index(q.id))
 
+    if not questions:
+        messages.error(
+            request,
+            "Esta submissão não possui spectras configurados."
+        )
+        return redirect("polls:thank_you")
+
     # ----------------------------
     # RESPOSTAS PARCIAIS
     # ----------------------------
@@ -120,7 +145,7 @@ def questionnaire(request):
                 partial_answers[str(question.id)] = selected_value
 
                 UserAnswer.objects.update_or_create(
-                    user=request.user,
+                    user=submission.user,
                     submission=submission,
                     question=question,
                     defaults={'answer': selected_value}
@@ -187,7 +212,6 @@ def index(request):
     }
     return render(request, 'polls/index.html', context)
 
-@login_required
 def thank_you(request):
     return render(request, "polls/thank_you.html")
 
@@ -245,8 +269,19 @@ def export_patient_pdf(request, user_id):
 
     return response
 
-@login_required
 def sociodemographic_form(request):
+
+    submission_id = request.session.get("submission_id")
+
+    if not submission_id:
+        return redirect("polls:thank_you")
+
+    submission = get_object_or_404(
+        QuestionnaireSubmission,
+        id=submission_id
+    )
+
+    user = submission.user
 
     if request.method == "POST":
 
@@ -261,7 +296,7 @@ def sociodemographic_form(request):
                     label = value
 
                 SociodemographicAnswer.objects.update_or_create(
-                    user=request.user,
+                    user=user,
                     question_id=q["id"],
                     defaults={
                         "answer_value": value,
@@ -273,7 +308,7 @@ def sociodemographic_form(request):
 
     existing_answers = {
         a.question_id: a.answer_value
-        for a in SociodemographicAnswer.objects.filter(user=request.user)
+        for a in SociodemographicAnswer.objects.filter(user=user)
     }
 
     return render(request, "polls/sociodemographic.html", {
@@ -340,6 +375,6 @@ def questionnaire_by_token(request, token):
         is_open=True
     )
 
-    return HttpResponse(
-        f"Submissão encontrada: {submission.title}"
-    )
+    request.session["submission_id"] = submission.id
+
+    return redirect("polls:questionnaire")
