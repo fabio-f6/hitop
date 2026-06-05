@@ -59,14 +59,7 @@ def questionnaire(request):
     # ----------------------------
     # CASO 1: PRIMEIRA VEZ → CRIA
     # ----------------------------
-    if not submission and not has_any_submission:
-        submission = QuestionnaireSubmission.objects.create(
-            user=request.user,
-            questionnaire_type="hitop",
-            completed=False,
-            is_open=True
-        )
-
+   
     # ----------------------------
     # CASO 2: NÃO HÁ SUBMISSION ATIVA
     # ----------------------------
@@ -338,3 +331,15 @@ def dynamic_questionnaire(request, category_id):
         "category": category,
         "questions": questions
     })
+
+def questionnaire_by_token(request, token):
+
+    submission = get_object_or_404(
+        QuestionnaireSubmission,
+        access_token=token,
+        is_open=True
+    )
+
+    return HttpResponse(
+        f"Submissão encontrada: {submission.title}"
+    )

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+import uuid
 
 class Spectra(models.Model):
     name = models.CharField(max_length=100)
@@ -46,6 +47,12 @@ class Question(models.Model):
 
 class QuestionnaireSubmission(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    access_token = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False
+    )
 
     title = models.CharField(
         max_length=255,
