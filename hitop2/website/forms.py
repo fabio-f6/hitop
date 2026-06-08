@@ -1,9 +1,10 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
-from .models import UserProfile, Record
+from .models import UserProfile
 from polls.models import Spectra
-import random, string
+import random
+import string
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(

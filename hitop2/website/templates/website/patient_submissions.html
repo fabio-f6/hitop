@@ -11,8 +11,15 @@
         margin-bottom: 10px;
     ">
 
-        <strong>{{s.title}}</strong><br>
-        Token: {{ s.access_token }}<br>
+        Título:
+        <strong>{{s.title}}</strong>
+        <br>
+
+        <input
+            type="hidden"
+            id="link-{{ s.id }}"
+            value="{{ s.access_link }}"
+        >
 
         Data: {{ s.started_at|date:"d/m/Y H:i" }}<br>
 
@@ -23,25 +30,47 @@
             <span style="color: orange;">Em progresso</span>
         {% endif %}
 
-        <br><br>
+        <br>
 
-        <a href="{% url 'website:patient_answers' s.id %}"
-            class="btn btn-sm btn-secondary rounded-0"
-            style="background-color: #e2f0ff; color: #000; border: 1px solid #9ec9ff;">
-            Ver respostas completas
-        </a>
+        <div class="mt-2">
+
+            <button
+                type="button"
+                onclick="copyLink('link-{{ s.id }}')"
+                class="btn btn-sm btn-secondary rounded-0"
+                style="background-color: #e2f0ff; color: #000; border: 1px solid #9ec9ff;"
+            >
+                Copiar link
+            </button>
+
+            <a href="{% url 'website:patient_answers' s.id %}"
+                class="btn btn-sm btn-secondary rounded-0"
+                style="background-color: #e2f0ff; color: #000; border: 1px solid #9ec9ff;">
+                Ver respostas completas
+            </a>
+
+        </div>
 
     </div>
 {% empty %}
     <p>Este paciente ainda não tem submissões.</p>
 {% endfor %}
 
-{% if patient.userprofile.questionnaire_completed %}
+{% if not has_open_submissions %}
 <a href="{% url 'website:new_questionnaire' patient.userprofile.id %}"
     class="btn btn-sm btn-warning rounded-0"
     style="background-color: #ffe2e2; color: #000; border: 1px solid #ff9e9e;">
     Criar nova submissão
 </a>
 {% endif %}
+
+<script>
+
+function copyLink(inputId) {
+    const input = document.getElementById(inputId);
+    navigator.clipboard.writeText(input.value);
+    alert("Link copiado para a área de transferência.");
+}
+</script>
 
 {% endblock %}

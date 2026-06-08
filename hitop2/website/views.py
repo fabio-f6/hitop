@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.urls import reverse
 from .forms import SignUpForm, CreatePatientForm, EditPatientForm
 from .models import UserProfile
 from polls.models import UserAnswer, QuestionnaireSubmission, Spectra
@@ -96,14 +97,12 @@ def create_patient(request):
 
             profile.spectra.set(form.cleaned_data['spectra'])
 
-            request.session['new_patient_credentials'] = {
-                'username': form.generated_username,
-                'password': form.generated_password
-            }
-
             request.session.pop('temp_credentials', None)
 
-            return redirect('website:patient_credentials')
+            return redirect(
+                'website:patient_submissions',
+                patient_id=user.id
+                )
 
     else:
         form = CreatePatientForm()
@@ -304,9 +303,25 @@ def patient_submissions(request, patient_id):
         questionnaire_type="hitop"
     ).order_by("-started_at")
 
+    has_open_submission = QuestionnaireSubmission.objects.filter(
+        user=patient,
+        questionnaire_type="hitop",
+        is_open=True
+    ).exists()
+
+    for submission in submissions:
+
+        submission.access_link = request.build_absolute_uri(
+            reverse(
+                "polls:questionnaire_by_token",
+                args=[submission.access_token]
+            )
+        )
+
     return render(request, "website/patient_submissions.html", {
         "patient": patient,
-        "submissions": submissions
+        "submissions": submissions,
+        "has_open_submission": has_open_submission,
     })
 
 @login_required

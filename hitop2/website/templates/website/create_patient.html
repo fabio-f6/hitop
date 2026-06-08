@@ -9,7 +9,12 @@
 <form method="POST">
     {% csrf_token %}
 
-    {{ form.as_p }}
+    <div class="mb-3">
+        <label>
+            <strong>Spectras a incluir:</strong>
+        </label>
+        {{ form.spectra }}
+    </div>
 
     <br>
 
