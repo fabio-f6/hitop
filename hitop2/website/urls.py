@@ -35,16 +35,6 @@ urlpatterns = [
         name='edit_patient'
     ),
     path(
-        'reopen_questionnaire/<int:patient_id>/',
-        views.reopen_questionnaire,
-        name='reopen_questionnaire'
-    ),
-    path(
-        'patient_credentials/',
-        views.patient_credentials,
-        name='patient_credentials'
-    ),
-    path(
         'patient/<int:patient_id>/submissions/',
         views.patient_submissions,
         name='patient_submissions'

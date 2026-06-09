@@ -185,9 +185,6 @@ def questionnaire(request):
             submission.is_open = False
             submission.save()
 
-            user_profile.questionnaire_completed = True
-            user_profile.save()
-
             return redirect("polls:thank_you")
 
         return redirect(f"{reverse('polls:questionnaire')}?page={page_number + 1}")
@@ -227,7 +224,16 @@ def index(request):
     return render(request, 'polls/index.html', context)
 
 def thank_you(request):
-    return render(request, "polls/thank_you.html")
+
+    request.session.pop(
+        "anonymous_questionnaire",
+        None
+    )
+
+    return render(
+        request,
+        "polls/thank_you.html"
+    )
 
 def export_patient_pdf(request, user_id):
     user = User.objects.get(id=user_id)
@@ -383,12 +389,21 @@ def dynamic_questionnaire(request, category_id):
 
 def questionnaire_by_token(request, token):
 
-    submission = get_object_or_404(
-        QuestionnaireSubmission,
+    submission = QuestionnaireSubmission.objects.filter(
         access_token=token,
         is_open=True
-    )
+    ).first()
+
+    if not submission:
+        request.session.pop("submission_id", None)
+        request.session.pop("anonymous_questionnaire", None)
+
+        return render(
+            request,
+            "polls/invalid_link.html"
+        )
 
     request.session["submission_id"] = submission.id
+    request.session["anonymous_questionnaire"] = True
 
     return redirect("polls:questionnaire")

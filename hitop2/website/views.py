@@ -124,18 +124,6 @@ def create_patient(request):
 
     return render(request, 'website/create_patient.html', {'form': form})
 
-def patient_credentials(request):
-    credentials = request.session.get('new_patient_credentials')
-
-    if not credentials:
-        return redirect('website:my_patients')
-
-    del request.session['new_patient_credentials']
-
-    return render(request, 'website/patient_credentials.html', {
-        'credentials': credentials
-        })
-
 def edit_patient(request, patient_id):
     patient_profile = get_object_or_404(UserProfile, id=patient_id, user_type='patient')
 
@@ -156,44 +144,6 @@ def edit_patient(request, patient_id):
             'form': form,
             'patient': patient_profile
             })
-
-def reopen_questionnaire(request, patient_id):
-    patient_profile = get_object_or_404(
-        UserProfile,
-        id=patient_id,
-        user_type='patient'
-    )
-
-    if patient_profile.professional != request.user:
-        messages.error(request, "Sem permissão.")
-        return redirect('website:my_patients')
-
-    # ----------------------------
-    # RESET DO PROFILE
-    # ----------------------------
-    patient_profile.questionnaire_completed = False
-    patient_profile.save()
-
-    # ----------------------------
-    # FECHAR SUBMISSÕES ANTIGAS (NÃO APAGAR)
-    # ----------------------------
-    QuestionnaireSubmission.objects.filter(
-        user=patient_profile.user,
-        questionnaire_type="hitop"
-    ).update(is_open=False)
-
-    # ----------------------------
-    # CRIAR NOVA SUBMISSÃO ABERTA
-    # ----------------------------
-    submission = QuestionnaireSubmission.objects.create(
-        user=patient_profile.user,
-        questionnaire_type="hitop",
-        completed=False,
-        is_open=True
-    )
-
-    messages.success(request, "Questionário reaberto com sucesso.")
-    return redirect('website:my_patients')
 
 @login_required
 def new_questionnaire(request, patient_id):
@@ -246,9 +196,6 @@ def new_questionnaire(request, patient_id):
         )
 
         submission.spectra.set(selected_spectra_ids)
-
-        patient_profile.questionnaire_completed = False
-        patient_profile.save()
 
         messages.success(
             request,
