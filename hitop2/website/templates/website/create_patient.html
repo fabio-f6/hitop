@@ -3,15 +3,25 @@
 
 <div class="col-md-6 offset-md-3">
 
-<h2>Criar novo registro</h2>
+<h2>Novo paciente e aplicação HiTOP</h2>
 <br>
 
 <form method="POST">
     {% csrf_token %}
 
     <div class="mb-3">
+        {{ form.username.label_tag }}
+        {{ form.username }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.title.label_tag }}
+        {{ form.title }}
+    </div>
+
+    <div class="mb-3">
         <label>
-            <strong>Spectras a incluir:</strong>
+            Spectras incluídos
         </label>
         {{ form.spectra }}
     </div>

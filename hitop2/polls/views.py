@@ -129,13 +129,23 @@ def questionnaire(request):
     page_number = int(request.GET.get('page', 1))
     per_page = math.ceil(len(questions) / 6)
     paginator = Paginator(questions, per_page)
+    num_pages = paginator.num_pages
 
     # ----------------------------
     # POST
     # ----------------------------
     if request.method == "POST":
 
-        current_page_obj = paginator.get_page(page_number)
+        if page_number <= num_pages:
+
+            current_page_obj = paginator.get_page(page_number)
+
+        else:
+
+            current_page_obj = [
+                q for q in questions
+                if str(q.id) not in partial_answers
+            ]
 
         for question in current_page_obj:
             field_name = f"question_{question.id}"
@@ -156,13 +166,15 @@ def questionnaire(request):
         # ----------------------------
         # FINALIZAÇÃO
         # ----------------------------
-        if page_number == 6:
+        if page_number >= num_pages:
             unanswered_ids = [
                 q.id for q in questions if str(q.id) not in partial_answers
             ]
 
             if unanswered_ids:
-                return redirect(f"{reverse('polls:questionnaire')}?page=7")
+                return redirect(
+                    f"{reverse('polls:questionnaire')}?page={num_pages + 1}"
+                )
 
             request.session.pop('partial_answers', None)
             request.session.pop('question_order', None)
@@ -183,7 +195,7 @@ def questionnaire(request):
     # ----------------------------
     # GET
     # ----------------------------
-    if page_number <= 6:
+    if page_number <= num_pages:
         page_obj = paginator.get_page(page_number)
         current_answer_choices = answer_choices.copy()
     else:
@@ -193,7 +205,9 @@ def questionnaire(request):
         page_obj = unanswered_questions
         current_answer_choices = answer_choices.copy() + [last_page_extra_choice]
 
-    progress = (page_number / 6) * 100 if page_number <= 6 else 100
+    progress = (
+        page_number / num_pages
+    ) * 100 if page_number <= num_pages else 100
 
     return render(request, "polls/questionnaire.html", {
         "page_obj": page_obj,
@@ -201,7 +215,7 @@ def questionnaire(request):
         "progress": progress,
         "partial_answers": partial_answers,
         "page_number": page_number,
-        "num_pages": 6,
+        "num_pages": num_pages,
     })
 
 @login_required

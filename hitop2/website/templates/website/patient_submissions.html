@@ -56,11 +56,11 @@
     <p>Este paciente ainda não tem submissões.</p>
 {% endfor %}
 
-{% if not has_open_submissions %}
+{% if not has_open_submission %}
 <a href="{% url 'website:new_questionnaire' patient.userprofile.id %}"
     class="btn btn-sm btn-warning rounded-0"
     style="background-color: #ffe2e2; color: #000; border: 1px solid #ff9e9e;">
-    Criar nova submissão
+    Nova aplicação HiTOP
 </a>
 {% endif %}
 

@@ -95,7 +95,17 @@ def create_patient(request):
             profile.professional = request.user
             profile.save()
 
-            profile.spectra.set(form.cleaned_data['spectra'])
+            submission = QuestionnaireSubmission.objects.create(
+                user=user,
+                questionnaire_type="hitop",
+                title=form.cleaned_data["title"],
+                completed=False,
+                is_open=True
+            )
+
+            submission.spectra.set(
+                form.cleaned_data["spectra"]
+            )
 
             request.session.pop('temp_credentials', None)
 

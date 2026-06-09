@@ -90,10 +90,8 @@
         <button type="submit" class="btn btn-primary rounded-0"
             style="background-color: #e2f0ff; color: #000; border: 1px solid #9ec9ff;">
             
-            {% if page_number < 6 %}
+            {% if page_number < num_pages %}
                 Próximo
-            {% elif page_number == 6 %}
-                Finalizar
             {% else %}
                 Finalizar
             {% endif %}
@@ -113,8 +111,8 @@
     </div>
 
     <p style="text-align: center;">
-        {% if page_number <= 6 %}
-            Página {{ page_number }} de 6
+        {% if page_number <= num_pages %}
+            Página {{ page_number }} de {{ num_pages }}
         {% else %}
             Página final
         {% endif %}

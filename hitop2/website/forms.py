@@ -97,7 +97,19 @@ class CreatePatientForm(UserCreationForm):
         })
     )
 
-    password2 = forms.CharField(required=False, widget=forms.HiddenInput())
+    password2 = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput())
+
+    title = forms.CharField(
+        label="Nome da aplicação",
+        max_length=255,
+        required=True,
+        initial="Avaliação Inicial",
+        widget=forms.TextInput(attrs={
+            "class": "form-control"
+            })
+        )
 
     spectra = forms.ModelMultipleChoiceField(
         queryset=Spectra.objects.all(),
