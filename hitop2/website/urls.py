@@ -49,4 +49,9 @@ urlpatterns = [
         views.new_questionnaire,
         name='new_questionnaire'
     ),
+    path(
+        "report-preview/<int:submission_id>/",
+        views.report_preview,
+        name="report_preview"
+    ),
 ]

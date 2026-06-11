@@ -1,0 +1,1259 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div
+        style="
+            max-width: 1200px;
+            margin: auto;
+            background-color: white;
+            padding: 35px;
+        "
+    >
+
+        <!-- LOGO -->
+
+        <div class="text-center mb-4">
+
+            <img
+                src="{% static 'images/hitop_logo.png' %}"
+                alt="HiTOP"
+                style="
+                    max-width: 850px;
+                    width: 100%;
+                "
+            >
+
+        </div>
+
+        <!-- TÍTULO -->
+
+        <div
+            style="
+                background-color: #efefef;
+                padding: 6px 8px;
+                margin-top: 15px;
+                margin-bottom: 15px;
+            "
+        >
+
+            <h2
+                style="
+                    margin: 0;
+                    font-size: 1.8rem;
+                    font-weight: bold;
+                "
+            >
+                Relatório Clínico
+            </h2>
+
+        </div>
+
+        <!-- PROFISSIONAL -->
+
+        <p
+            style="
+                font-size: 1.1rem;
+                font-style: italic;
+                margin-bottom: 40px;
+            "
+        >
+
+            {{ report.professional_name }},
+            {{ report.professional_area }},
+            Nº {{ report.professional_license }},
+            Referência Certificação HiTOP
+
+        </p>
+
+        <!-- DADOS PARTICIPANTE -->
+
+        <div
+            style="
+                font-size: 1rem;
+                line-height: 1.8;
+                margin-bottom: 50px;
+            "
+        >
+
+            <p>
+                <strong>Nome:</strong>
+                {{ report.patient_name }}
+            </p>
+
+            <p>
+                <strong>Idade:</strong>
+                {{ report.age }}
+            </p>
+
+            <p>
+                <strong>Sexo biológico:</strong>
+                {{ report.sex }}
+            </p>
+
+            <p>
+                <strong>Género com que se identifica:</strong>
+                {{ report.gender }}
+            </p>
+
+            <p>
+                <strong>Escolaridade:</strong>
+                {{ report.education }}
+            </p>
+
+            <p>
+                <strong>Data de Preenchimento:</strong>
+                {{ report.submission_date|date:"d/m/Y" }}
+            </p>
+
+        </div>
+
+        <!-- CAIXA AZUL -->
+
+        <div
+            style="
+                background-color: #dbe7f5;
+                padding: 25px;
+                margin-top: 30px;
+                font-size: 0.95rem;
+                line-height: 1.7;
+            "
+        >
+
+            <p>
+                O HiTOP:SR (Hierarchical Taxonomy of Psychopathology – Self-Report) é um questionário que permite medir padrões de sintomas psicológicos segundo uma abordagem baseada na evidência científica. Para mais informação sobre o racional conceptual e interpretativo do instrumento, recomenda-se a consulta dos documentos oficiais em [website projeto].
+            </p>
+
+            <p>
+                O objetivo principal deste relatório é fornecer uma caracterização inicial das principais dimensões de funcionamento psicológico. A interpretação dos resultados obtidos deriva de um conjunto de valores de referência relativos a dados de pessoas com características semelhantes (por exemplo, a mesma idade). Os resultados apresentados são informativos e não têm valor de diagnóstico, devendo ser considerados em conjunto com outras fontes de informação ou acompanhamento profissional.
+            </p>
+
+        </div>
+
+        <hr class="my-5">
+
+        <h1
+            style="
+                font-weight: bold;
+                font-size: 2rem;
+            "
+        >
+            Resultados
+        </h1>
+
+        <div
+            style="
+                background-color: #dbe7f5;
+                padding: 8px 10px;
+                margin-bottom: 20px;
+            "
+        >
+            <h2
+                style="
+                    margin:0;
+                    font-size: 1.6rem;
+                    font-weight: bold;
+                "
+            >
+                Perfil Global
+            </h2>
+        </div>
+
+        <p
+            style="
+                font-size: 0.95rem;
+                line-height: 1.7;
+            "
+        >
+            O gráfico apresenta a pontuação bruta e percentil para cada um dos fatores implicados na expressão de comorbilidade (ou seja, covariação entre sintomas). A pontuação bruta representa a soma direta das pontuações dos itens respondidos. Já o valor do percentil compara os valores individuais com os valores de referência obtidos através de um conjunto de pessoas que partilham características semelhantes (neste caso, xxxx).
+        </p>
+
+        <div
+            style="
+                background-color: #f2f2f2;
+                padding: 20px;
+                margin-top: 25px;
+                font-size: 0.95rem;
+                line-height: 1.7;
+            "
+        >
+            <p>
+                [Para percentis atípicos, P1 e P5] - Os valores obtidos em X, Y, Z (valores X, Y, Z referentes a pontuação bruta) situam-se no percentil X, Y, Z, o que parece indicar que o seu nível de sintomas é ligeiramente superior/inferior ao pessoas com características semelhantes tendem a reportar.
+            </p>
+
+            <p>
+                [Para percentis normativos – de P15 a P85] - Os valores obtidos em X, Y, Z (valores X, Y, Z referentes a pontuação bruta) situam-se no percentil X, Y, Z, o que sugere que o seu nível de sintomas para esta/s dimensão/ões situam-se nos intervalos médios esperados face aos valores de referência.
+            </p>
+        </div>
+
+        <div style="margin-top:35px;">
+
+            <img
+                src="{% static 'images/plot_1.png' %}"
+                alt="Perfil Global HiTOP"
+                style="
+                    width:100%;
+                    display:block;
+                "
+            >
+
+        </div>
+
+        <!-- RODAPÉ -->
+
+        <div
+            style="
+                margin-top: 50px;
+                font-size: 0.8rem;
+                color: #444;
+                text-align: justify;
+                border-top: 1px solid #ccc;
+                padding-top: 10px;
+                line-height: 1.5;
+            "
+        >
+
+            Este relatório é gerado automaticamente, sendo os seus resultados meramente indicativos.
+            A discussão dos resultados e respetiva interpretação deve ser feita por profissionais
+            qualificados, enquadrados nos manuais técnicos e integrados com outra informação clínica.
+            Conteúdo confidencial.
+
+        </div>
+
+        <br><br>
+
+        <!-- ===================================== -->
+        <!-- PERFIL DETALHADO -->
+        <!-- ===================================== -->
+
+        <div
+            style="
+                background-color: #dbe7f5;
+                padding: 8px 10px;
+                margin-bottom: 20px;
+            "
+        >
+            <h2
+                style="
+                    margin:0;
+                    font-size: 1.6rem;
+                    font-weight: bold;
+                "
+            >
+                Perfil Detalhado
+            </h2>
+        </div>
+
+        <p
+            style="
+                font-size: 0.95rem;
+                line-height: 1.7;
+                margin-bottom: 50px;
+            "
+        >
+            Os gráficos abaixo apresentam a pontuação bruta e o percentil para cada uma das dimensões dos sintomas e funcionamento psicológico. A pontuação bruta representa a soma direta das pontuações aos itens respondidos. Já o valor do percentil compara os valores individuais com os valores de referência obtidos através de um conjunto de pessoas que partilham características semelhantes (neste caso, xxxx).
+        </p>
+
+        <!-- ===================================== -->
+        <!-- EXTERNALIZAÇÃO -->
+        <!-- ===================================== -->
+
+        <h2
+            style="
+                font-weight: bold;
+                margin-bottom: 25px;
+            "
+        >
+            Externalização
+        </h2>
+
+        <div
+            style="
+                background-color: #f2f2f2;
+                padding: 20px;
+                margin-bottom: 35px;
+                font-size: 0.95rem;
+                line-height: 1.7;
+            "
+        >
+
+            <p>
+                [Para percentis atípicos, P1 e P5] - Os valores obtidos em X, Y, Z (valores X, Y, Z referentes à pontuação bruta) situam-se no percentil X, Y, Z, o que parece indicar que o seu nível de sintomas é ligeiramente superior/inferior ao que pessoas com características semelhantes tendem a reportar.
+            </p>
+
+            <p>
+                [Para percentis normativos – de P15 a P85] - Os valores obtidos em X, Y, Z (valores X, Y, Z referentes à pontuação bruta) situam-se no percentil X, Y, Z, o que sugere que o seu nível de sintomas para esta/s dimensão/ões se situa nos intervalos médios esperados face aos valores de referência.
+            </p>
+
+        </div>
+
+        <!-- GRÁFICO -->
+
+        <div
+            style="
+                margin-top: 20px;
+                margin-bottom: 35px;
+                text-align: center;
+            "
+        >
+
+            <img
+                src="{% static 'images/externalizacao_plot.png' %}"
+                alt="Externalização"
+                style="
+                    width: 100%;
+                    display: block;
+                "
+            >
+
+        </div>
+
+        <!-- TRADUÇÃO DOS SINTOMAS -->
+
+        <div
+            style="
+                font-size: 0.95rem;
+                line-height: 1.7;
+            "
+        >
+
+            <strong style="font-size: 1.2rem;">
+                Tradução dos sintomas:
+            </strong>
+
+            <br><br>
+
+            <strong>Hyperdeliberation</strong> – Hiper-Deliberação,
+            <strong>Perfectionism</strong> – Perfeccionismo,
+            <strong>Rigidity</strong> – Rigidez,
+            <strong>Risk Aversion</strong> – Aversão ao Risco,
+            <strong>Workaholism</strong> – Adição ao trabalho,
+            <strong>Callousness</strong> – Frieza emocional,
+            <strong>Dishonesty</strong> – Desonestidade,
+            <strong>Deceitfulness</strong> – Dissimulação,
+            <strong>Manipulativeness</strong> – Manipulação,
+            <strong>Domineering</strong> – Comportamento de dominância,
+            <strong>Entitlement</strong> – Sentido de privilégio,
+            <strong>Exhibitionism</strong> – Exibicionismo,
+            <strong>Grandiosity</strong> – Grandiosidade,
+            <strong>Social Aggression</strong> – Agressão Social,
+            <strong>Antisocial Behavior</strong> – Comportamento Antissocial,
+            <strong>Oppositionality</strong> – Comportamento de Oposição,
+            <strong>Disorganization</strong> – Falta de organização,
+            <strong>Gambling</strong> – Comportamento problemático de jogo,
+            <strong>Gaming</strong> – Comportamento problemático de videojogos,
+            <strong>Non-persistence</strong> – Ausência de Persistência,
+            <strong>Non-planfulness</strong> – Ausência de Planeamento,
+            <strong>Problematic Shopping</strong> – Compras Problemáticas,
+            <strong>Restlessness</strong> – Inquietação,
+            <strong>Risk Taking</strong> – Tomada de Risco,
+            <strong>Craving</strong> – Desejo Intenso de Consumir,
+            <strong>Hazardous Use</strong> – Uso Problemático,
+            <strong>Impaired Control</strong> – Dificuldade de Controlo,
+            <strong>Role Interference</strong> – Interferência no Funcionamento Diário,
+            <strong>Tolerance</strong> – Tolerância.
+
+        </div>
+
+        <!-- RODAPÉ -->
+
+        <div
+            style="
+                margin-top: 50px;
+                font-size: 0.8rem;
+                color: #444;
+                text-align: justify;
+                border-top: 1px solid #ccc;
+                padding-top: 10px;
+                line-height: 1.5;
+            "
+        >
+
+            Este relatório é gerado automaticamente, sendo os seus resultados meramente indicativos.
+            A discussão dos resultados e respetiva interpretação deve ser feita por profissionais
+            qualificados, enquadrados nos manuais técnicos e integrados com outra informação clínica.
+            Conteúdo confidencial.
+
+        </div>
+
+        <br><br>
+
+        <!-- ===================================== -->
+        <!-- INTERNALIZAÇÃO -->
+        <!-- ===================================== -->
+
+        <h2
+            style="
+                font-weight: bold;
+                margin-bottom: 25px;
+            "
+        >
+            Internalização
+        </h2>
+
+        <div
+            style="
+                background-color: #f2f2f2;
+                padding: 20px;
+                margin-bottom: 35px;
+                font-size: 0.95rem;
+                line-height: 1.7;
+            "
+        >
+
+            <p>
+                [Para percentis atípicos, P1 e P5] - Os valores obtidos em X, Y, Z (valores X, Y, Z referentes à pontuação bruta) situam-se no percentil X, Y, Z, o que parece indicar que o seu nível de sintomas é ligeiramente superior/inferior ao que pessoas com características semelhantes tendem a reportar.
+            </p>
+
+            <p>
+                [Para percentis normativos – de P15 a P85] - Os valores obtidos em X, Y, Z (valores X, Y, Z referentes à pontuação bruta) situam-se no percentil X, Y, Z, o que sugere que o seu nível de sintomas para esta/s dimensão/ões se situa nos intervalos médios esperados face aos valores de referência.
+            </p>
+
+        </div>
+
+        <!-- GRÁFICO -->
+
+        <div
+            style="
+                margin-top: 20px;
+                margin-bottom: 35px;
+                text-align: center;
+            "
+        >
+
+            <img
+                src="{% static 'images/internalizacao_plot.png' %}"
+                alt="Externalização"
+                style="
+                    width: 100%;
+                    display: block;
+                "
+            >
+
+        </div>
+
+        <!-- TRADUÇÃO DOS SINTOMAS -->
+
+        <div
+            style="
+                font-size: 0.95rem;
+                line-height: 1.7;
+            "
+        >
+
+            <strong style="font-size: 1.2rem;">
+                Tradução dos sintomas:
+            </strong>
+
+            <br><br>
+
+            <strong>Cognitive Problems</strong> – Problemas Cognitivos,
+            <strong>Distress-Dysphoria</strong> – Distress-Disforia
+            (<strong>Anhedonia</strong> – Anedonia,
+            <strong>Anxious Worry</strong> – Ansiedade,
+            <strong>Depressed Mood</strong> – Humor Depressivo,
+            <strong>Lassitude</strong> – Lassitude,
+            <strong>Shame/Guilt</strong> – Vergonha/Culpa),
+            <strong>Emotionality</strong> – Reatividade Emocional
+            (<strong>Affective Lability</strong> – Labilidade Afetiva,
+            <strong>Angry Hostility</strong> – Raiva-Hostilidade,
+            <strong>Irritability</strong> – Irritabilidade),
+            <strong>Insomnia</strong> – Insónia,
+            <strong>Nightmares</strong> – Pesadelos Noturnos,
+            <strong>NSSI</strong> – Comportamentos Auto-Lesivos Não Suicidários,
+            <strong>Suicidality</strong> – Ideação e Tentativa de Suicídio,
+            <strong>Appetite Loss</strong> – Perda de Apetite,
+            <strong>Binge Eating</strong> – Compulsão Alimentar,
+            <strong>Body Dissatisfaction</strong> – Insatisfação Corporal,
+            <strong>Body Focus</strong> – Preocupação com o Corpo,
+            <strong>Dietary Restraint</strong> – Dieta Restritiva,
+            <strong>Excessive Exercise</strong> – Exercício Excessivo,
+            <strong>Food Selectivity</strong> – Seletividade Alimentar,
+            <strong>Muscle Building</strong> – Aumento e Hipertrofia da Massa Muscular,
+            <strong>Purging</strong> – Comportamentos Purgativos,
+            <strong>Restricted Eating</strong> – Restrição Alimentar,
+            <strong>Agoraphobia</strong> – Agorafobia,
+            <strong>Checking</strong> – Verificação Compulsiva,
+            <strong>Cleaning</strong> – Limpeza Compulsiva,
+            <strong>Counting</strong> – Contagem Compulsiva,
+            <strong>Excoriation</strong> – Escoriação,
+            <strong>Hoarding</strong> – Acumulação Compulsiva,
+            <strong>Hypervigilance</strong> – Hipervigilância,
+            <strong>Panic</strong> – Pânico,
+            <strong>Specific Phobia Index</strong> – Índice de Fobias Específicas
+            (<strong>Animal-Insect Phobia</strong> – Fobia a Animais/Insetos,
+            <strong>Blood-Injection Phobia</strong> – Fobia a Sangue/Injeções,
+            <strong>Situational Phobias</strong> – Fobias Situacionais),
+            <strong>Trauma Reactions</strong> – Reações ao Trauma,
+            <strong>Trichotillomania</strong> – Tricotilomania,
+            <strong>Difficulties Reaching Orgasm</strong> – Dificuldade em Atingir o Orgasmo,
+            <strong>Low Sexual Arousal</strong> – Baixa Excitação Sexual,
+            <strong>Low Sexual Interest</strong> – Baixo Interesse Sexual,
+            <strong>Paraphilias</strong> – Parafilias,
+            <strong>Premature Orgasm</strong> – Orgasmo Precoce,
+            <strong>Risky Sex</strong> – Comportamento Sexual de Risco,
+            <strong>Sex-Related Substance Use</strong> – Uso de Substâncias Relacionado com a Atividade Sexual,
+            <strong>Sexual Distress</strong> – Distress Sexual,
+            <strong>Sexual Pain</strong> – Dor Sexual.
+
+        </div>
+
+        <!-- RODAPÉ -->
+
+        <div
+            style="
+                margin-top: 50px;
+                font-size: 0.8rem;
+                color: #444;
+                text-align: justify;
+                border-top: 1px solid #ccc;
+                padding-top: 10px;
+                line-height: 1.5;
+            "
+        >
+
+            Este relatório é gerado automaticamente, sendo os seus resultados meramente indicativos.
+            A discussão dos resultados e respetiva interpretação deve ser feita por profissionais
+            qualificados, enquadrados nos manuais técnicos e integrados com outra informação clínica.
+            Conteúdo confidencial.
+
+        </div>
+
+        <br><br>
+
+        <!-- ===================================== -->
+        <!-- DESAFILIAÇÃO -->
+        <!-- ===================================== -->
+
+        <h2
+            style="
+                font-weight: bold;
+                margin-bottom: 25px;
+            "
+        >
+            Desafiliação
+        </h2>
+
+        <div
+            style="
+                background-color: #f2f2f2;
+                padding: 20px;
+                margin-bottom: 35px;
+                font-size: 0.95rem;
+                line-height: 1.7;
+            "
+        >
+
+            <p>
+                [Para percentis atípicos, P1 e P5] - Os valores obtidos em X, Y, Z (valores X, Y, Z referentes à pontuação bruta) situam-se no percentil X, Y, Z, o que parece indicar que o seu nível de sintomas é ligeiramente superior/inferior ao que pessoas com características semelhantes tendem a reportar.
+            </p>
+
+            <p>
+                [Para percentis normativos – de P15 a P85] - Os valores obtidos em X, Y, Z (valores X, Y, Z referentes à pontuação bruta) situam-se no percentil X, Y, Z, o que sugere que o seu nível de sintomas para esta/s dimensão/ões se situa nos intervalos médios esperados face aos valores de referência.
+            </p>
+
+        </div>
+
+        <!-- GRÁFICO -->
+
+        <div
+            style="
+                margin-top: 20px;
+                margin-bottom: 35px;
+                text-align: center;
+            "
+        >
+
+            <img
+                src="{% static 'images/desafiliacao_plot.png' %}"
+                alt="Externalização"
+                style="
+                    width: 100%;
+                    display: block;
+                "
+            >
+
+        </div>
+
+        <!-- TRADUÇÃO DOS SINTOMAS -->
+
+        <div
+            style="
+                font-size: 0.95rem;
+                line-height: 1.7;
+            "
+        >
+
+            <strong style="font-size: 1.2rem;">
+                Tradução dos sintomas:
+            </strong>
+
+            <br><br>
+
+            <strong>Restricted Affectivity</strong> – Afetividade Restrita,
+            <strong>Romantic Disinterest</strong> – Desinteresse em Relações Românticas,
+            <strong>Social Aloofness</strong> – Distanciamento Socioemocional,
+            <strong>Social Anxiety</strong> – Ansiedade Social,
+            <strong>Submissiveness</strong> – Comportamento de Submissão,
+            <strong>Well-being</strong> – Bem-Estar.
+
+        </div>
+
+        <!-- RODAPÉ -->
+
+        <div
+            style="
+                margin-top: 50px;
+                font-size: 0.8rem;
+                color: #444;
+                text-align: justify;
+                border-top: 1px solid #ccc;
+                padding-top: 10px;
+                line-height: 1.5;
+            "
+        >
+
+            Este relatório é gerado automaticamente, sendo os seus resultados meramente indicativos.
+            A discussão dos resultados e respetiva interpretação deve ser feita por profissionais
+            qualificados, enquadrados nos manuais técnicos e integrados com outra informação clínica.
+            Conteúdo confidencial.
+
+        </div>
+
+        <br><br>
+
+        <!-- ===================================== -->
+        <!-- SOMATIZAÇÃO -->
+        <!-- ===================================== -->
+
+        <h2
+            style="
+                font-weight: bold;
+                margin-bottom: 25px;
+            "
+        >
+            Somatização
+        </h2>
+
+        <div
+            style="
+                background-color: #f2f2f2;
+                padding: 20px;
+                margin-bottom: 35px;
+                font-size: 0.95rem;
+                line-height: 1.7;
+            "
+        >
+
+            <p>
+                [Para percentis atípicos, P1 e P5] - Os valores obtidos em X, Y, Z (valores X, Y, Z referentes à pontuação bruta) situam-se no percentil X, Y, Z, o que parece indicar que o seu nível de sintomas é ligeiramente superior/inferior ao que pessoas com características semelhantes tendem a reportar.
+            </p>
+
+            <p>
+                [Para percentis normativos – de P15 a P85] - Os valores obtidos em X, Y, Z (valores X, Y, Z referentes à pontuação bruta) situam-se no percentil X, Y, Z, o que sugere que o seu nível de sintomas para esta/s dimensão/ões se situa nos intervalos médios esperados face aos valores de referência.
+            </p>
+
+        </div>
+
+        <!-- GRÁFICO -->
+
+        <div
+            style="
+                margin-top: 20px;
+                margin-bottom: 35px;
+                text-align: center;
+            "
+        >
+
+            <img
+                src="{% static 'images/somatizacao_plot.png' %}"
+                alt="Externalização"
+                style="
+                    width: 100%;
+                    display: block;
+                "
+            >
+
+        </div>
+
+        <!-- TRADUÇÃO DOS SINTOMAS -->
+
+        <div
+            style="
+                font-size: 0.95rem;
+                line-height: 1.7;
+            "
+        >
+
+            <strong style="font-size: 1.2rem;">
+                Tradução dos sintomas:
+            </strong>
+
+            <br><br>
+
+            <strong>Health Anxiety</strong> – Ansiedade em Relação à Saúde,
+            <strong>Somatic Preoccupation</strong> – Preocupação com Sensações Corporais,
+            <strong>Conversion Symptoms</strong> – Sintomas de Conversão,
+            <strong>Disease Conviction</strong> – Convicção de Doença,
+            <strong>Bodily Distress</strong> – Distress Corporal,
+            <strong>Dissociation</strong> – Dissociação,
+            <strong>Eccentricity</strong> – Excentricidade.
+
+        </div>
+
+        <!-- RODAPÉ -->
+
+        <div
+            style="
+                margin-top: 50px;
+                font-size: 0.8rem;
+                color: #444;
+                text-align: justify;
+                border-top: 1px solid #ccc;
+                padding-top: 10px;
+                line-height: 1.5;
+            "
+        >
+
+            Este relatório é gerado automaticamente, sendo os seus resultados meramente indicativos.
+            A discussão dos resultados e respetiva interpretação deve ser feita por profissionais
+            qualificados, enquadrados nos manuais técnicos e integrados com outra informação clínica.
+            Conteúdo confidencial.
+
+        </div>
+
+        <br><br>
+
+        <!-- ===================================== -->
+        <!-- ALTERAÇÕES DE PENSAMENTO -->
+        <!-- ===================================== -->
+
+        <h2
+            style="
+                font-weight: bold;
+                margin-bottom: 25px;
+            "
+        >
+            Alterações de pensamento
+        </h2>
+
+        <div
+            style="
+                background-color: #f2f2f2;
+                padding: 20px;
+                margin-bottom: 35px;
+                font-size: 0.95rem;
+                line-height: 1.7;
+            "
+        >
+
+            <p>
+                [Para percentis atípicos, P1 e P5] - Os valores obtidos em X, Y, Z (valores X, Y, Z referentes à pontuação bruta) situam-se no percentil X, Y, Z, o que parece indicar que o seu nível de sintomas é ligeiramente superior/inferior ao que pessoas com características semelhantes tendem a reportar.
+            </p>
+
+            <p>
+                [Para percentis normativos – de P15 a P85] - Os valores obtidos em X, Y, Z (valores X, Y, Z referentes à pontuação bruta) situam-se no percentil X, Y, Z, o que sugere que o seu nível de sintomas para esta/s dimensão/ões se situa nos intervalos médios esperados face aos valores de referência.
+            </p>
+
+        </div>
+
+        <!-- GRÁFICO -->
+
+        <div
+            style="
+                margin-top: 20px;
+                margin-bottom: 35px;
+                text-align: center;
+            "
+        >
+
+            <img
+                src="{% static 'images/alteracoesdepensamento_plot.png' %}"
+                alt="Externalização"
+                style="
+                    width: 100%;
+                    display: block;
+                "
+            >
+
+        </div>
+
+        <!-- TRADUÇÃO DOS SINTOMAS -->
+
+        <div
+            style="
+                font-size: 0.95rem;
+                line-height: 1.7;
+            "
+        >
+
+            <strong style="font-size: 1.2rem;">
+                Tradução dos sintomas:
+            </strong>
+
+            <br><br>
+            
+            <strong>Fantasy Proneness</strong> – Propensão à Fantasia,
+            <strong>Mistrust</strong> – Desconfiança
+            (<strong>Cynicism</strong> – Cinismo,
+            <strong>Suspiciousness</strong> – Suspeição),
+            <strong>Reality Distortion</strong> – Distorção da Realidade
+            (<strong>Delusions</strong> – Delírios,
+            <strong>Hallucinations</strong> – Alucinações),
+            <strong>Manic Energy</strong> – Ativação Maníaca.
+
+        </div>
+
+        <!-- RODAPÉ -->
+
+        <div
+            style="
+                margin-top: 50px;
+                font-size: 0.8rem;
+                color: #444;
+                text-align: justify;
+                border-top: 1px solid #ccc;
+                padding-top: 10px;
+                line-height: 1.5;
+            "
+        >
+
+            Este relatório é gerado automaticamente, sendo os seus resultados meramente indicativos.
+            A discussão dos resultados e respetiva interpretação deve ser feita por profissionais
+            qualificados, enquadrados nos manuais técnicos e integrados com outra informação clínica.
+            Conteúdo confidencial.
+
+        </div>
+
+        <br><br>
+
+        <!-- ===================================== -->
+        <!-- ANAMNESE E INFORMAÇÃO CLÍNICA COMPLEMENTAR -->
+        <!-- ===================================== -->
+
+        <h1
+            style="
+                font-weight: bold;
+                font-size: 2rem;
+            "
+        >
+            Anamnese e Informação Clínica Complementar
+        </h1>
+
+        <br>
+
+        <!-- MOTIVO -->
+
+        <div class="mb-5">
+
+            <div style="background-color:#dbe7f5;padding:4px 10px;margin-bottom:6px;">
+                <h4 style="margin:0;font-weight:bold;">
+                    Motivo da Avaliação / Encaminhamento
+                </h4>
+            </div>
+
+            <div style="background:#fff;border:1px solid #d9d9d9;min-height:80px;padding:12px;margin-bottom:8px;">
+                [CAMPO EDITÁVEL]
+            </div>
+
+            <div style="color:#a8a8a8;font-size:0.95rem;">
+                e.g., contextualizar brevemente o motivo da procura/encaminhamento.
+            </div>
+
+        </div>
+
+        <!-- PROGRESSÃO -->
+
+        <div class="mb-5">
+
+            <div style="background-color:#dbe7f5;padding:4px 10px;margin-bottom:6px;">
+                <h4 style="margin:0;font-weight:bold;">
+                    Progressão e Impacto da Sintomatologia
+                </h4>
+            </div>
+
+            <div style="background:#fff;border:1px solid #d9d9d9;min-height:140px;padding:12px;margin-bottom:8px;">
+                [CAMPO EDITÁVEL]
+            </div>
+
+            <div style="color:#a8a8a8;font-size:0.95rem;">
+                e.g., Curso temporal: início, evolução, fatores precipitantes, principais queixas e sintomas; autonomia, impacto funcional no dia-a-dia das queixas apresentadas; tentativas prévias de tratamento/intervenção.
+            </div>
+
+        </div>
+
+        <!-- FINALIDADE -->
+
+        <div class="mb-5">
+
+            <div style="background-color:#dbe7f5;padding:4px 10px;margin-bottom:6px;">
+                <h4 style="margin:0;font-weight:bold;">
+                    Finalidade da Avaliação
+                </h4>
+            </div>
+
+            <div style="background:#fff;border:1px solid #d9d9d9;min-height:80px;padding:12px;margin-bottom:8px;">
+                [CAMPO EDITÁVEL]
+            </div>
+
+            <div style="color:#a8a8a8;font-size:0.95rem;">
+                e.g., objetivo: diagnóstico, caracterização funcional, apoio escolar, tomada de decisão clínica, etc.
+            </div>
+
+        </div>
+
+        <!-- CIRCUNSTÂNCIAS -->
+
+        <div class="mb-5">
+
+            <div style="background-color:#dbe7f5;padding:4px 10px;margin-bottom:6px;">
+                <h4 style="margin:0;font-weight:bold;">
+                    Circunstâncias em que decorreu a avaliação
+                </h4>
+            </div>
+
+            <div style="background:#fff;border:1px solid #d9d9d9;min-height:80px;padding:12px;margin-bottom:8px;">
+                [CAMPO EDITÁVEL]
+            </div>
+
+            <div style="color:#a8a8a8;font-size:0.95rem;">
+                e.g., local, duração, colaboração/motivação, fatores interferentes, adaptações.
+            </div>
+
+        </div>
+
+        <!-- DESENVOLVIMENTAL -->
+
+        <div class="mb-5">
+
+            <div style="background-color:#dbe7f5;padding:4px 10px;margin-bottom:6px;">
+                <h4 style="margin:0;font-weight:bold;">
+                    Histórico Desenvolvimental
+                </h4>
+            </div>
+
+            <div style="background:#fff;border:1px solid #d9d9d9;min-height:180px;padding:12px;margin-bottom:8px;">
+                [CAMPO EDITÁVEL]
+            </div>
+
+            <div style="color:#a8a8a8;font-size:0.95rem;">
+                e.g., Gravidez, parto, desenvolvimento motor e da linguagem, alterações significativas ao nível de marcos e tarefas desenvolvimentais, socialização, comportamento na infância/adolescência, rendimento académico, dificuldades específicas, respostas à adaptação, retenções.
+            </div>
+
+        </div>
+
+        <!-- FAMILIAR -->
+
+        <div class="mb-5">
+
+            <div style="background-color:#dbe7f5;padding:4px 10px;margin-bottom:6px;">
+                <h4 style="margin:0;font-weight:bold;">
+                    Histórico e Dinâmica Familiar
+                </h4>
+            </div>
+
+            <div style="background:#fff;border:1px solid #d9d9d9;min-height:220px;padding:12px;margin-bottom:8px;">
+                [CAMPO EDITÁVEL]
+            </div>
+
+            <div style="color:#a8a8a8;font-size:0.95rem;">
+                e.g., estrutura, relações, acontecimentos significativos, perturbações psiquiátricas na família, histórico de suicídio, uso de substâncias, problemas legais e registo de criminalidade, problemas de custódia, doenças crónicas ou com elevado impacto na funcionalidade na família. Enquadramento socioeconómico, condições materiais, apoio social e contexto habitacional.
+            </div>
+
+        </div>
+
+        <!-- LABORAL -->
+
+        <div class="mb-5">
+
+            <div style="background-color:#dbe7f5;padding:4px 10px;margin-bottom:6px;">
+                <h4 style="margin:0;font-weight:bold;">
+                    Histórico Laboral
+                </h4>
+            </div>
+
+            <div style="background:#fff;border:1px solid #d9d9d9;min-height:100px;padding:12px;margin-bottom:8px;">
+                [CAMPO EDITÁVEL]
+            </div>
+
+            <div style="color:#a8a8a8;font-size:0.95rem;">
+                e.g., ambiente laboral, histórico de absentismo, relações com colegas de trabalho.
+            </div>
+
+        </div>
+
+        <!-- MÉDICO -->
+
+        <div class="mb-5">
+
+            <div style="background-color:#dbe7f5;padding:4px 10px;margin-bottom:6px;">
+                <h4 style="margin:0;font-weight:bold;">
+                    Histórico Médico e Psiquiátrico
+                </h4>
+            </div>
+
+            <div style="background:#fff;border:1px solid #d9d9d9;min-height:220px;padding:12px;margin-bottom:8px;">
+                [CAMPO EDITÁVEL]
+            </div>
+
+            <div style="color:#a8a8a8;font-size:0.95rem;">
+                e.g., lesões e estados de coma com impacto neurológico, doenças crónicas, diagnósticos psiquiátricos prévios, hospitalizações/internamentos, condições físicas, medicação atual e passada e respetiva resposta, tratamentos não farmacológicos e respetiva resposta.
+            </div>
+
+        </div>
+
+        <!-- CULTURAL -->
+
+        <div class="mb-5">
+
+            <div style="background-color:#dbe7f5;padding:4px 10px;margin-bottom:6px;">
+                <h4 style="margin:0;font-weight:bold;">
+                    Enquadramento Cultural e Religioso
+                </h4>
+            </div>
+
+            <div style="background:#fff;border:1px solid #d9d9d9;min-height:120px;padding:12px;margin-bottom:8px;">
+                [CAMPO EDITÁVEL]
+            </div>
+
+            <div style="color:#a8a8a8;font-size:0.95rem;">
+                e.g., identidade cultural, imigração e sentido de pertença, crenças, prática religiosa/espiritual e o seu papel.
+            </div>
+
+        </div>
+
+        <!-- ESTILO DE VIDA -->
+
+        <div class="mb-5">
+
+            <div style="background-color:#dbe7f5;padding:4px 10px;margin-bottom:6px;">
+                <h4 style="margin:0;font-weight:bold;">
+                    Estilo de Vida e Circunstâncias Atuais
+                </h4>
+            </div>
+
+            <div style="background:#fff;border:1px solid #d9d9d9;min-height:180px;padding:12px;margin-bottom:8px;">
+                [CAMPO EDITÁVEL]
+            </div>
+
+            <div style="color:#a8a8a8;font-size:0.95rem;">
+                e.g., stressores que podem estar a agravar ou atenuar os sintomas; condição económica, rotinas, hobbies, exercício, família, sono, consumo de álcool, tabaco ou outras drogas, eventos de vida, recursos e rede de apoio.
+            </div>
+
+        </div>
+
+        <!-- OBSERVAÇÕES -->
+
+        <div class="mb-5">
+
+            <div style="background-color:#dbe7f5;padding:4px 10px;margin-bottom:6px;">
+                <h4 style="margin:0;font-weight:bold;">
+                    Observações Clínicas
+                </h4>
+            </div>
+
+            <div style="background:#fff;border:1px solid #d9d9d9;min-height:220px;padding:12px;margin-bottom:8px;">
+                [CAMPO EDITÁVEL]
+            </div>
+
+            <div style="color:#a8a8a8;font-size:0.95rem;">
+                e.g., organização e qualidade do discurso e pensamento, contacto ocular, alterações de perceção e estados de humor, falhas cognitivas, nível de insight, motivação e comportamentos relevantes ocorridos durante outros momentos da avaliação/intervenção.
+            </div>
+
+        </div>
+
+        <!-- OUTROS INSTRUMENTOS -->
+
+        <div class="mb-5">
+
+            <div style="background-color:#dbe7f5;padding:4px 10px;margin-bottom:6px;">
+                <h4 style="margin:0;font-weight:bold;">
+                    Resultados de Outros Instrumentos de Avaliação
+                </h4>
+            </div>
+
+            <div style="background:#fff;border:1px solid #d9d9d9;min-height:150px;padding:12px;margin-bottom:8px;">
+                [CAMPO EDITÁVEL]
+            </div>
+
+            <div style="color:#a8a8a8;font-size:0.95rem;">
+                e.g., outros questionários, testes neuropsicológicos, entrevistas, etc.
+            </div>
+
+        </div>
+
+        <!-- CONCLUSÃO -->
+
+        <div class="mb-5">
+
+            <h1
+                style="
+                    font-weight: bold;
+                    font-size: 2rem;
+                "
+            >
+                Conclusão e Recomendações
+            </h1>
+
+            <div style="background:#fff;border:1px solid #d9d9d9;min-height:250px;padding:12px;margin-bottom:8px;">
+                [CAMPO EDITÁVEL]
+            </div>
+
+            <div style="color:#a8a8a8;font-size:0.95rem;">
+                e.g., síntese integrativa, tipo de intervenção aconselhada, frequência, objetivos iniciais, medidas ou necessidades específicas, encaminhamentos.
+            </div>
+
+        </div>
+
+        <!-- RODAPÉ FINAL -->
+
+        <div
+            style="
+                margin-top: 120px;
+                padding-top: 30px;
+            "
+        >
+
+            <div
+                style="
+                    background-color: #efefef;
+                    padding: 35px 50px;
+                "
+            >
+
+                <div
+                    style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        gap: 60px;
+                    "
+                >
+
+                    <!-- ASSINATURA -->
+
+                    <div
+                        style="
+                            flex: 1;
+                            text-align: center;
+                        "
+                    >
+
+                        <div
+                            style="
+                                width: 220px;
+                                margin: 0 auto;
+                            "
+                        >
+
+                            <div
+                                style="
+                                    border-top: 3px solid #a0a0a0;
+                                    width: 100%;
+                                "
+                            ></div>
+
+                            <div
+                                style="
+                                    margin-top: 6px;
+                                    font-size: 0.85rem;
+                                "
+                            >
+                                ASSINATURA
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- CENTRO -->
+
+                    <div
+                        style="
+                            flex: 1;
+                            text-align: left;
+                        "
+                    >
+
+                        <div
+                            style="
+                                font-size: 1.5rem;
+                                font-weight: bold;
+                                margin-bottom: 10px;
+                            "
+                        >
+                            {{ report.professional_name|upper }}
+                        </div>
+
+                        <div
+                            style="
+                                font-size: 1rem;
+                                line-height: 1.7;
+                            "
+                        >
+                            {{ report.professional_area|upper }}<br>
+
+                            Nº CÉDULA PROFISSIONAL:
+                            {{ report.professional_license }}<br>
+
+                            Nº CERTIFICAÇÃO HITOP
+                        </div>
+
+                    </div>
+
+                    <!-- CONTACTOS -->
+
+                    <div
+                        style="
+                            flex: 1;
+                            text-align: left;
+                            font-size: 0.9rem;
+                            line-height: 2;
+                        "
+                    >
+
+                        +351 XXX XXX XXX<br>
+
+                        profissional@email.pt<br>
+
+                        www.website.pt<br>
+
+                        Cidade, Portugal
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- RODAPÉ -->
+
+        <div
+            style="
+                margin-top: 50px;
+                font-size: 0.8rem;
+                color: #444;
+                text-align: justify;
+                border-top: 1px solid #ccc;
+                padding-top: 10px;
+                line-height: 1.5;
+            "
+        >
+
+            Este relatório é gerado automaticamente, sendo os seus resultados meramente indicativos.
+            A discussão dos resultados e respetiva interpretação deve ser feita por profissionais
+            qualificados, enquadrados nos manuais técnicos e integrados com outra informação clínica.
+            Conteúdo confidencial.
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

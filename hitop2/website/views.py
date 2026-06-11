@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.urls import reverse
 from .forms import SignUpForm, CreatePatientForm, EditPatientForm
 from .models import UserProfile
-from polls.models import UserAnswer, QuestionnaireSubmission, Spectra
+from polls.models import UserAnswer, QuestionnaireSubmission, Spectra, SociodemographicAnswer
 
 def home(request):
     if request.method == 'POST':
@@ -302,3 +302,65 @@ def submission_detail(request, submission_id):
         "submission": submission,
         "answers": answers
     })
+
+@login_required
+def report_preview(request, submission_id):
+
+    submission = get_object_or_404(
+        QuestionnaireSubmission,
+        id=submission_id
+    )
+
+    if submission.user.userprofile.professional != request.user:
+        messages.error(request, "Acesso negado.")
+        return redirect("website:my_patients")
+
+    patient = submission.user
+
+    professional = patient.userprofile.professional
+
+    socio = {
+        answer.question_id: answer.answer_label
+        for answer in SociodemographicAnswer.objects.filter(
+            user=patient
+        )
+    }
+
+    report_data = {
+
+        "patient_name":
+            patient.username,
+
+        "age":
+            socio.get("age", "-"),
+
+        "sex":
+            socio.get("sex", "-"),
+
+        "gender":
+            socio.get("gender", "-"),
+
+        "education":
+            socio.get("education", "-"),
+
+        "professional_name":
+            professional.get_full_name()
+            or professional.username,
+
+        "professional_area":
+            professional.userprofile.area_formacao,
+
+        "professional_license":
+            professional.userprofile.cedula_profissional,
+
+        "submission_date":
+            submission.started_at,
+    }
+
+    return render(
+        request,
+        "website/report_preview.html",
+        {
+            "report": report_data
+        }
+    )
