@@ -9,25 +9,62 @@ from .models import UserProfile
 from polls.models import UserAnswer, QuestionnaireSubmission, Spectra, SociodemographicAnswer
 
 def home(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            messages.success(request, "Logged in successfully!")
-            if request.user.userprofile.user_type == 'patient':
-                return redirect('polls:questionnaire')
-            elif request.user.userprofile.user_type == 'professional':
-                return redirect('website:my_patients')
-            else:
-                return redirect('website:home')
+
+    # Se já estiver autenticado, não faz sentido mostrar a landing page
+    if request.user.is_authenticated:
+
+        if request.user.userprofile.user_type == "professional":
+            return redirect("website:dashboard")
+
+        elif request.user.userprofile.user_type == "patient":
+            return redirect("polls:questionnaire")
 
         else:
-            messages.error(request, "Invalid username or password.")
-            return redirect('website:home')
-    else:
-        return render(request, 'website/home.html')
+            return redirect("website:home")
+
+    # Login
+    if request.method == "POST":
+
+        username = request.POST["username"]
+        password = request.POST["password"]
+
+        user = authenticate(
+            request,
+            username=username,
+            password=password
+        )
+
+        if user is not None:
+
+            login(request, user)
+
+            messages.success(
+                request,
+                "Logged in successfully!"
+            )
+
+            if user.userprofile.user_type == "patient":
+                return redirect("polls:questionnaire")
+
+            elif user.userprofile.user_type == "professional":
+                return redirect("website:dashboard")
+
+            else:
+                return redirect("website:home")
+
+        else:
+
+            messages.error(
+                request,
+                "Invalid username or password."
+            )
+
+            return redirect("website:home")
+
+    return render(
+        request,
+        "website/home.html"
+    )
 
 def logout_user(request):
     logout(request)
@@ -62,7 +99,7 @@ def register_user(request):
             login(request, user)
 
             messages.success(request, f"Registo realizado com sucesso! O seu nome de utilizador é: {user.username}")
-            return redirect('website:my_patients')
+            return redirect('website:dashboard')
 
     else:
         form = SignUpForm()
@@ -129,14 +166,14 @@ def edit_patient(request, patient_id):
 
     if patient_profile.professional != request.user:
         messages.error(request, "Sem permissão.")
-        return redirect('website:my_patients')
+        return redirect('website:dashboard')
 
     if request.method == "POST":
         form = EditPatientForm(request.POST, instance=patient_profile)
         if form.is_valid():
             form.save()
             messages.success(request, "Paciente atualizado com sucesso.")
-            return redirect('website:my_patients')
+            return redirect('website:dashboard')
     else:
         form = EditPatientForm(instance=patient_profile)
 
@@ -156,7 +193,7 @@ def new_questionnaire(request, patient_id):
 
     if patient_profile.professional != request.user:
         messages.error(request, "Sem permissão.")
-        return redirect("website:my_patients")
+        return redirect("website:dashboard")
 
     spectra = Spectra.objects.all()
 
@@ -202,7 +239,7 @@ def new_questionnaire(request, patient_id):
             "Novo questionário criado com sucesso."
         )
 
-        return redirect("website:my_patients")
+        return redirect("website:dashboard")
 
     return render(
         request,
@@ -214,14 +251,53 @@ def new_questionnaire(request, patient_id):
     )
 
 @login_required
-def my_patients(request):
-    # Apenas profissionais podem acessar
-    if request.user.userprofile.user_type != 'professional':
-        messages.error(request, "Acesso negado.")
-        return redirect('website:home')
+def dashboard(request):
 
-    patients = request.user.patients.all()  # todos os pacientes associados
-    return render(request, 'website/my_patients.html', {'patients': patients})
+    if request.user.userprofile.user_type != "professional":
+        messages.error(request, "Acesso negado.")
+        return redirect("website:home")
+
+    patients = request.user.patients.all()
+
+    patient_cards = []
+
+    for patient in patients:
+
+        submissions = QuestionnaireSubmission.objects.filter(
+            user=patient.user
+        ).order_by("-started_at")
+
+        last_submission = submissions.first()
+
+        patient_cards.append({
+            "profile": patient,
+            "submission_count": submissions.count(),
+            "open_count": submissions.filter(is_open=True).count(),
+            "last_submission": last_submission,
+            "spectra": last_submission.spectra.all() if last_submission else [],
+        })
+
+    total_patients = len(patient_cards)
+
+    total_submissions = QuestionnaireSubmission.objects.filter(
+        user__userprofile__professional=request.user
+    ).count()
+
+    open_submissions = QuestionnaireSubmission.objects.filter(
+        user__userprofile__professional=request.user,
+        is_open=True
+    ).count()
+
+    return render(
+        request,
+        "website/dashboard.html",
+        {
+            "patients": patient_cards,
+            "total_patients": total_patients,
+            "total_submissions": total_submissions,
+            "open_submissions": open_submissions,
+        },
+    )
 
 @login_required
 def patient_answers(request, submission_id):
@@ -234,7 +310,7 @@ def patient_answers(request, submission_id):
     # segurança
     if submission.user.userprofile.professional != request.user:
         messages.error(request, "Acesso negado.")
-        return redirect("website:my_patients")
+        return redirect("website:dashboard")
 
     answers = UserAnswer.objects.filter(
         submission=submission
@@ -253,7 +329,7 @@ def patient_submissions(request, patient_id):
     # segurança: só profissional dono pode ver
     if patient.userprofile.professional != request.user:
         messages.error(request, "Acesso negado.")
-        return redirect("website:my_patients")
+        return redirect("website:dashboard")
 
     submissions = QuestionnaireSubmission.objects.filter(
         user=patient,
@@ -275,6 +351,8 @@ def patient_submissions(request, patient_id):
             )
         )
 
+        submission.spectra_list = submission.spectra.all()
+
     return render(request, "website/patient_submissions.html", {
         "patient": patient,
         "submissions": submissions,
@@ -292,7 +370,7 @@ def submission_detail(request, submission_id):
     # segurança: só o profissional dono pode ver
     if submission.user.userprofile.professional != request.user:
         messages.error(request, "Acesso negado.")
-        return redirect("website:my_patients")
+        return redirect("website:dashboard")
 
     answers = UserAnswer.objects.filter(
         submission=submission
@@ -313,7 +391,7 @@ def report_preview(request, submission_id):
 
     if submission.user.userprofile.professional != request.user:
         messages.error(request, "Acesso negado.")
-        return redirect("website:my_patients")
+        return redirect("website:dashboard")
 
     patient = submission.user
 

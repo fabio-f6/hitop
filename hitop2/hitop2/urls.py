@@ -1,10 +1,12 @@
 from django.contrib import admin
-from django.urls import path, include
-from django.shortcuts import redirect
+from django.urls import include, path
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('website/', include('website.urls', namespace='website')),
-    path('polls/', include('polls.urls', namespace='polls')),
-    path('', lambda request: redirect('website:home')),
+    path("admin/", admin.site.urls),
+
+    # Landing page / autenticação
+    path("", include("website.urls", namespace="website")),
+
+    # Questionários
+    path("polls/", include("polls.urls", namespace="polls")),
 ]

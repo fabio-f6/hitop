@@ -1,87 +1,139 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+{% load static %}
 
-   <div class="container-fluid">
+<nav
+    class="navbar navbar-expand-lg"
+    style="
+        background-color:#eef4fb;
+        border-bottom:1px solid #d5dde8;
+    "
+>
 
-      <a class="navbar-brand" href="{% url 'website:home' %}">
-         HiTOP
-      </a>
+    <div class="container">
 
-      <button
-         class="navbar-toggler"
-         type="button"
-         data-bs-toggle="collapse"
-         data-bs-target="#navbarSupportedContent"
-         aria-controls="navbarSupportedContent"
-         aria-expanded="false"
-         aria-label="Toggle navigation"
-      >
-         <span class="navbar-toggler-icon"></span>
-      </button>
+        <!-- LOGO -->
 
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <a
+            class="navbar-brand d-flex align-items-center fw-thin"
+            href="{% url 'website:home' %}"
+            style="
+                color:#222;
+                font-size:1.45rem;
+                gap:12px;
+            "
+        >
 
-         {% if request.session.anonymous_questionnaire %}
+            <img
+                src="{% static 'images/hitop_icon-removebg-preview.png' %}"
+                alt="HiTOP"
+                style="
+                    height:38px;
+                    width:auto;
+                "
+            >
 
-         {% elif user.is_authenticated %}
+            HiTOP
 
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        </a>
 
-               {% if request.user.userprofile.user_type == 'admin' %}
-                  <li class="nav-item">
-                     <a class="nav-link" href="{% url 'admin:index' %}">
-                        Admin
-                     </a>
-                  </li>
-               {% endif %}
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent"
+        >
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-               {% if request.user.userprofile.user_type == 'professional' %}
-                  <li class="nav-item">
-                     <a class="nav-link" href="{% url 'website:my_patients' %}">
-                        Meus pacientes
-                     </a>
-                  </li>
-               {% endif %}
+        <div
+            class="collapse navbar-collapse"
+            id="navbarSupportedContent"
+        >
 
-               {% if request.user.userprofile.user_type == 'patient' %}
-                  <li class="nav-item">
-                     <a class="nav-link" href="{% url 'polls:questionnaire' %}">
-                        Questionário
-                     </a>
-                  </li>
-               {% endif %}
+            {% if request.session.anonymous_questionnaire %}
 
-            </ul>
+            {% elif user.is_authenticated %}
 
-            <ul class="navbar-nav ms-auto">
-               <li class="nav-item">
-                  <a class="nav-link" href="{% url 'website:logout' %}">
-                     Logout
-                  </a>
-               </li>
-            </ul>
+                <ul class="navbar-nav me-auto">
 
-         {% else %}
+                    {% if request.user.userprofile.user_type == "admin" %}
 
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'admin:index' %}">
+                                Admin
+                            </a>
+                        </li>
 
-               <li class="nav-item">
-                  <a class="nav-link" href="{% url 'website:register' %}">
-                     Register
-                  </a>
-               </li>
+                    {% endif %}
 
-               <li class="nav-item">
-                  <a class="nav-link" href="{% url 'website:home' %}">
-                     Login
-                  </a>
-               </li>
+                    {% if request.user.userprofile.user_type == "professional" %}
 
-            </ul>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'website:dashboard' %}">
+                                Dashboard
+                            </a>
+                        </li>
 
-         {% endif %}
+                    {% endif %}
 
-      </div>
+                    {% if request.user.userprofile.user_type == "patient" %}
 
-   </div>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'polls:questionnaire' %}">
+                                Questionário
+                            </a>
+                        </li>
+
+                    {% endif %}
+
+                </ul>
+
+                <ul class="navbar-nav align-items-center">
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'website:logout' %}">
+                            Logout
+                        </a>
+                    </li>
+
+                </ul>
+
+            {% else %}
+
+                <ul class="navbar-nav ms-auto align-items-center">
+
+                    <li class="nav-item">
+
+                        <a
+                            class="nav-link"
+                            href="{% url 'website:home' %}"
+                        >
+                            Entrar
+                        </a>
+
+                    </li>
+
+                    <li class="nav-item ms-2">
+
+                        <a
+                            href="{% url 'website:register' %}"
+                            class="btn btn-sm rounded-0"
+                            style="
+                                background-color:#dbe7f5;
+                                border:1px solid #9ec9ff;
+                                padding:7px 18px;
+                            "
+                        >
+                            Criar Conta
+                        </a>
+
+                    </li>
+
+                </ul>
+
+            {% endif %}
+
+        </div>
+
+    </div>
 
 </nav>

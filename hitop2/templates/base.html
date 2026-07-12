@@ -1,20 +1,144 @@
+{% load static %}
+
 <!doctype html>
-<html lang="en">
-  <head>
+
+<html lang="pt">
+
+<head>
+
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>HiTOP</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-  </head>
-  <body>
-    {% include 'navbar.html' %}
-    <div class="container">
-    </br>
-    {% include "components/messages.html" %}
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>HiTOP Platform</title>
+
+    <meta
+        name="description"
+        content="HiTOP Platform - Clinical assessment and reporting system."
+    >
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="{% static 'images/hitop_icon-removebg-preview.png' %}"
+    >
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+        crossorigin="anonymous"
+    >
+
+</head>
+
+<body
+    style="
+        background:#ffffff;
+        min-height:100vh;
+        display:flex;
+        flex-direction:column;
+    "
+>
+
+    {% include "navbar.html" %}
+
+    <main
+        class="container py-3"
+        style="flex:1;"
+    >
+
+        {% include "components/messages.html" %}
+
         {% block content %}
         {% endblock %}
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-  </body>
+    </main>
+
+    <footer
+        style="
+            margin-top:60px;
+            border-top:1px solid #e6e6e6;
+            padding:30px 0;
+            font-size:.9rem;
+            color:#777;
+            background:#ffffff;
+        "
+    >
+
+        <div class="container">
+
+            <div class="row align-items-center">
+
+                <!-- ESQUERDA -->
+
+                <div class="col-md-6">
+
+                    <div
+                        style="
+                            display:flex;
+                            align-items:center;
+                            gap:12px;
+                        "
+                    >
+
+                        <img
+                            src="{% static 'images/hitop_icon-removebg-preview.png' %}"
+                            alt="HiTOP"
+                            style="
+                                width:28px;
+                                height:28px;
+                            "
+                        >
+
+                        <div>
+
+                            <strong
+                                style="
+                                    display:block;
+                                    color:#444;
+                                "
+                            >
+                                HiTOP Platform
+                            </strong>
+
+                            Hierarchical Taxonomy of Psychopathology
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- DIREITA -->
+
+                <div
+                    class="col-md-6 text-md-end mt-3 mt-md-0"
+                >
+
+                    Universidade Lusófona
+
+                    <br>
+
+                    Version 1.0
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"
+    ></script>
+
+</body>
+
 </html>

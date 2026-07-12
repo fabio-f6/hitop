@@ -1,57 +1,69 @@
 from django.urls import path
 from . import views
 
-app_name = 'website'
+app_name = "website"
 
 urlpatterns = [
+
+    # Landing page
     path(
-        '',
+        "",
         views.home,
-        name='home'
+        name="home",
     ),
+
+    # Autenticação
     path(
-        'logout/',
-        views.logout_user,
-        name='logout'
-    ),
-    path(
-        'register/',
+        "register/",
         views.register_user,
-        name='register'
+        name="register",
     ),
     path(
-        'my_patients/',
-        views.my_patients,
-        name='my_patients'
+        "logout/",
+        views.logout_user,
+        name="logout",
     ),
+
+    # Dashboard
     path(
-        'create_patient/',
+        "dashboard/",
+        views.dashboard,
+        name="dashboard",
+    ),
+
+    # Pacientes
+    path(
+        "patients/create/",
         views.create_patient,
-        name='create_patient'
+        name="create_patient",
     ),
     path(
-        'edit_patient/<int:patient_id>/',
+        "patients/<int:patient_id>/edit/",
         views.edit_patient,
-        name='edit_patient'
+        name="edit_patient",
     ),
     path(
-        'patient/<int:patient_id>/submissions/',
+        "patients/<int:patient_id>/submissions/",
         views.patient_submissions,
-        name='patient_submissions'
+        name="patient_submissions",
     ),
     path(
-        'submission/<int:submission_id>/answers/',
-        views.patient_answers,
-        name='patient_answers'
-    ),
-    path(
-        'new-questionnaire/<int:patient_id>/',
+        "patients/<int:patient_id>/new-questionnaire/",
         views.new_questionnaire,
-        name='new_questionnaire'
+        name="new_questionnaire",
     ),
+
+    # Submissões
     path(
-        "report-preview/<int:submission_id>/",
+        "submissions/<int:submission_id>/answers/",
+        views.patient_answers,
+        name="patient_answers",
+    ),
+
+    # Relatórios
+    path(
+        "reports/<int:submission_id>/preview/",
         views.report_preview,
-        name="report_preview"
+        name="report_preview",
     ),
 ]

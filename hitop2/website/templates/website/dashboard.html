@@ -1,0 +1,351 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+    <!-- CABEÇALHO -->
+
+    <div class="mb-5">
+
+        <h1
+            style="
+                font-size:2rem;
+                font-weight:500;
+                margin-bottom:6px;
+                color:#222;
+            "
+        >
+            Olá, {{ user.first_name|default:user.username }}!
+        </h1>
+
+        <p
+            style="
+                color:#666;
+                font-size:1rem;
+                margin:0;
+                line-height:1.6;
+            "
+        >
+            Gerencie pacientes, acompanhe submissões e gere relatórios clínicos.
+        </p>
+
+    </div>
+
+    <!-- ESTATÍSTICAS -->
+
+    <div class="row g-4 mb-5">
+
+        <div class="col-md-4">
+
+            <div
+                style="
+                    background:#e2f0ff;
+                    border:1px solid #9ec9ff;
+                    padding:25px;
+                "
+            >
+
+                <div
+                    style="
+                        font-size:2.3rem;
+                        font-weight:bold;
+                    "
+                >
+                    {{ total_patients }}
+                </div>
+
+                <div
+                    style="
+                        font-size:1rem;
+                    "
+                >
+                    Pacientes
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div
+                style="
+                    background:#e2f0ff;
+                    border:1px solid #9ec9ff;
+                    padding:25px;
+                "
+            >
+
+                <div
+                    style="
+                        font-size:2.3rem;
+                        font-weight:bold;
+                    "
+                >
+                    {{ total_submissions }}
+                </div>
+
+                <div>
+                    Submissões
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div
+                style="
+                    background:#e2f0ff;
+                    border:1px solid #9ec9ff;
+                    padding:25px;
+                "
+            >
+
+                <div
+                    style="
+                        font-size:2.3rem;
+                        font-weight:bold;
+                    "
+                >
+                    {{ open_submissions }}
+                </div>
+
+                <div>
+                    Questionários em aberto
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- CABEÇALHO LISTA -->
+
+    <div
+        class="d-flex justify-content-between align-items-center mb-3"
+    >
+
+        <h3
+            style="
+                margin:0;
+                font-weight:bold;
+            "
+        >
+            Pacientes
+        </h3>
+
+        <a
+            href="{% url 'website:create_patient' %}"
+            class="btn rounded-0"
+            style="
+                background:#e2f0ff;
+                border:1px solid #9ec9ff;
+                color:black;
+                padding:10px 18px;
+            "
+        >
+            + Criar Paciente
+        </a>
+
+    </div>
+
+    <!-- LISTA -->
+
+    <div class="row g-4">
+
+    {% for patient in patients %}
+
+    <div class="col-lg-6">
+
+        <div
+            style="
+                border:1px solid #dddddd;
+                padding:22px;
+                height:100%;
+                background:white;
+            "
+        >
+
+            <div
+                style="
+                    font-size:1.15rem;
+                    font-weight:500;
+                    color:#222;
+                    margin-bottom:12px;
+                "
+            >
+                {{ patient.profile.user.username }}
+            </div>
+
+            <hr
+                style="
+                    border:0;
+                    border-top:1px solid #e6e6e6;
+                    opacity:1;
+                    margin:18px 0;
+                "
+            >
+
+            <div
+                style="
+                    color:#666;
+                    line-height:1.9;
+                    margin-bottom:25px;
+                "
+            >
+
+                <strong>Submissões</strong>
+                <span style="float:right;">
+                    {{ patient.submission_count }}
+                </span>
+
+                <br>
+
+                <strong>Questionários em aberto:</strong>
+                <span style="float:right;">
+                {{ patient.open_count }}
+                </span>
+
+                <br>
+
+                <strong>Última submissão:</strong>
+                <span style="float:right;">
+                {% if patient.last_submission %}
+                    {{ patient.last_submission.started_at|date:"d/m/Y" }}
+                {% else %}
+                    —
+                {% endif %}
+                </span>
+
+            </div>
+
+            {% if patient.spectra %}
+
+            <hr
+                style="
+                    border:0;
+                    border-top:1px solid #e6e6e6;
+                    opacity:1;
+                    margin:18px 0;
+                "
+            >
+
+            <div
+                style="
+                    margin-bottom:22px;
+                "
+            >
+
+                <strong
+                    style="
+                        display:block;
+                        margin-bottom:10px;
+                    "
+                >
+                    Módulos incluídos
+                </strong>
+
+                <div
+                    style="
+                        display:flex;
+                        flex-wrap:wrap;
+                        gap:8px;
+                    "
+                >
+
+                    {% for spectrum in patient.spectra %}
+
+                        <span
+                            style="
+                                background:#eef6ff;
+                                border:1px solid #bfdcff;
+                                padding:5px 10px;
+                                font-size:.85rem;
+                            "
+                        >
+                            {{ spectrum.name }}
+                        </span>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+            <a
+                href="{% url 'website:patient_submissions' patient.profile.user.id %}"
+                class="btn rounded-0"
+                style="
+                    background:#e2f0ff;
+                    border:1px solid #9ec9ff;
+                    color:black;
+                "
+            >
+                Ver Submissões
+            </a>
+
+        </div>
+
+    </div>
+
+    {% empty %}
+
+    <div class="col-12">
+
+        <div
+            style="
+                border:1px dashed #cfcfcf;
+                padding:60px;
+                text-align:center;
+                background:#fafafa;
+            "
+        >
+
+            <h4
+                style="
+                    font-weight:500;
+                    margin-bottom:15px;
+                "
+            >
+                Ainda não existem pacientes registados.
+            </h4>
+
+            <p
+                style="
+                    color:#666;
+                    margin-bottom:30px;
+                "
+            >
+                Comece por criar o primeiro registo de paciente para iniciar uma nova avaliação HiTOP.
+            </p>
+
+            <a
+                href="{% url 'website:create_patient' %}"
+                class="btn rounded-0"
+                style="
+                    background:#e2f0ff;
+                    border:1px solid #9ec9ff;
+                    color:black;
+                    padding:10px 20px;
+                "
+            >
+                Criar primeiro paciente
+            </a>
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

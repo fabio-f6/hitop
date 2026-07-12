@@ -2,67 +2,330 @@
 
 {% block content %}
 
-<h3>Submissões de {{ patient.username }}</h3>
+<!-- CABEÇALHO -->
+
+<div class="mb-5">
+
+    <h1
+        style="
+            font-size:2rem;
+            font-weight:500;
+            margin-bottom:6px;
+            color:#222;
+        "
+    >
+        {{ patient.username }}
+    </h1>
+
+    <p
+        style="
+            color:#666;
+            font-size:1rem;
+            margin:0;
+            line-height:1.6;
+        "
+    >
+        Histórico de aplicações HiTOP, respetivas respostas e relatórios clínicos.
+    </p>
+
+</div>
+
+<!-- CABEÇALHO DA LISTA -->
+
+<div
+    class="d-flex justify-content-between align-items-center mb-3"
+>
+
+    <h3
+        style="
+            margin:0;
+            font-weight:bold;
+        "
+    >
+        Submissões
+    </h3>
+
+    {% if not has_open_submission %}
+
+    <a
+        href="{% url 'website:new_questionnaire' patient.userprofile.id %}"
+        class="btn rounded-0"
+        style="
+            background:#e2f0ff;
+            border:1px solid #9ec9ff;
+            color:black;
+            padding:10px 18px;
+        "
+    >
+        + Nova aplicação
+    </a>
+
+    {% endif %}
+
+</div>
+
+<div class="row g-4">
 
 {% for s in submissions %}
-    <div style="
-        border: 1px solid #ddd;
-        padding: 15px;
-        margin-bottom: 10px;
-    ">
 
-        Título:
-        <strong>{{s.title}}</strong>
-        <br>
+<div class="col-lg-6">
 
-        <input
-            type="hidden"
-            id="link-{{ s.id }}"
-            value="{{ s.access_link }}"
+    <div
+        style="
+            border:1px solid #dddddd;
+            padding:22px;
+            height:100%;
+            background:white;
+        "
+    >
+
+        <div
+            style="
+                font-size:1.15rem;
+                font-weight:500;
+                color:#222;
+            "
+        >
+            {{ s.title }}
+        </div>
+
+        <hr
+            style="
+                border:0;
+                border-top:1px solid #e6e6e6;
+                opacity:1;
+                margin:18px 0;
+            "
         >
 
-        Data: {{ s.started_at|date:"d/m/Y H:i" }}<br>
+        <div
+            style="
+                color:#666;
+                line-height:1.9;
+                margin-bottom:22px;
+            "
+        >
 
-        Estado:
-        {% if s.completed %}
-            <span style="color: green;">Finalizado</span>
-        {% else %}
-            <span style="color: orange;">Em progresso</span>
+            <strong>Data</strong>
+
+            <span style="float:right;">
+                {{ s.started_at|date:"d/m/Y H:i" }}
+            </span>
+
+            <br>
+
+            <strong>Estado</strong>
+
+            <span style="float:right;">
+
+                {% if s.completed %}
+
+                    <span
+                        style="
+                            background:#e7f7ec;
+                            border:1px solid #a8d5b5;
+                            color:#2f6f3e;
+                            padding:3px 8px;
+                            font-size:.82rem;
+                            font-weight:500;
+                        "
+                    >
+                        Finalizado
+                    </span>
+
+                {% else %}
+
+                    <span
+                        style="
+                            background:#eef6ff;
+                            border:1px solid #bfdcff;
+                            color:#2c5d8f;
+                            padding:3px 8px;
+                            font-size:.82rem;
+                            font-weight:500;
+                        "
+                    >
+                        Em progresso
+                    </span>
+
+                {% endif %}
+
+            </span>
+
+        </div>
+
+        <hr
+            style="
+                border:0;
+                border-top:1px solid #e6e6e6;
+                opacity:1;
+                margin:18px 0;
+            "
+        >
+
+        {% if s.spectra_list %}
+
+        <div
+            style="
+                margin-bottom:22px;
+            "
+        >
+
+            <strong
+                style="
+                    display:block;
+                    margin-bottom:10px;
+                "
+            >
+                Módulos incluídos
+            </strong>
+
+            <div
+                style="
+                    display:flex;
+                    flex-wrap:wrap;
+                    gap:8px;
+                "
+            >
+
+                {% for spectrum in s.spectra_list %}
+
+                    <span
+                        style="
+                            background:#eef6ff;
+                            border:1px solid #bfdcff;
+                            padding:5px 10px;
+                            font-size:.85rem;
+                        "
+                    >
+                        {{ spectrum.name }}
+                    </span>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+        <hr
+            style="
+                border:0;
+                border-top:1px solid #e6e6e6;
+                opacity:1;
+                margin:18px 0;
+            "
+        >
+
         {% endif %}
 
-        <br>
+        <div
+            class="d-flex flex-wrap gap-2"
+        >
 
-        <div class="mt-2">
+            <a
+                href="{% url 'website:report_preview' s.id %}"
+                class="btn rounded-0"
+                style="
+                    background:#dbe7f5;
+                    border:1px solid #9ec9ff;
+                    color:black;
+                    font-weight:600;
+                "
+            >
+                Relatório
+            </a>
+
+            <a
+                href="{% url 'website:patient_answers' s.id %}"
+                class="btn rounded-0"
+                style="
+                    background:#e2f0ff;
+                    border:1px solid #9ec9ff;
+                    color:black;
+                "
+            >
+                Respostas
+            </a>
+
+            <input
+                type="hidden"
+                id="link-{{ s.id }}"
+                value="{{ s.access_link }}"
+            >
 
             <button
                 type="button"
                 onclick="copyLink('link-{{ s.id }}')"
-                class="btn btn-sm btn-secondary rounded-0"
-                style="background-color: #e2f0ff; color: #000; border: 1px solid #9ec9ff;"
+                class="btn rounded-0"
+                style="
+                    background:#e2f0ff;
+                    border:1px solid #9ec9ff;
+                    color:black;
+                "
             >
-                Copiar link de acesso
+                Copiar Link
             </button>
-
-            <a href="{% url 'website:patient_answers' s.id %}"
-                class="btn btn-sm btn-secondary rounded-0"
-                style="background-color: #e2f0ff; color: #000; border: 1px solid #9ec9ff;">
-                Ver respostas completas
-            </a>
-
-            <a href="{% url 'website:report_preview' s.id %}"
-                class="btn btn-sm btn-secondary rounded-0"
-                style="background-color: #e2f0ff; color: #000; border: 1px solid #9ec9ff;">
-                Pré-visualizar relatório
-            </a>
 
         </div>
 
     </div>
+
+</div>
+
 {% empty %}
-    <p>Este paciente ainda não tem submissões.</p>
+
+<div class="col-12">
+
+    <div
+        style="
+            border:1px dashed #cfcfcf;
+            padding:60px;
+            text-align:center;
+            background:#fafafa;
+        "
+    >
+
+        <h4
+            style="
+                font-weight:500;
+                margin-bottom:15px;
+            "
+        >
+            Ainda não existem aplicações HiTOP.
+        </h4>
+
+        <p
+            style="
+                color:#666;
+                margin-bottom:30px;
+            "
+        >
+            Crie uma nova aplicação para este paciente.
+        </p>
+
+        <a
+            href="{% url 'website:new_questionnaire' patient.userprofile.id %}"
+            class="btn rounded-0"
+            style="
+                background:#e2f0ff;
+                border:1px solid #9ec9ff;
+                color:black;
+                padding:10px 20px;
+            "
+        >
+            Criar primeira aplicação
+        </a>
+
+    </div>
+
+</div>
+
 {% endfor %}
 
+</div>
+
 {% if not has_open_submission %}
+<br>
 <a href="{% url 'website:new_questionnaire' patient.userprofile.id %}"
     class="btn btn-sm btn-warning rounded-0"
     style="background-color: #ffe2e2; color: #000; border: 1px solid #ff9e9e;">
@@ -70,13 +333,80 @@
 </a>
 {% endif %}
 
+<div
+    id="copy-message-container"
+    style="
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 9999;
+        width: 385px;
+        display:none;
+    "
+>
+
+    <div
+        id="copy-message"
+        class="alert alert-dismissible fade show rounded-0"
+        style="
+            background-color:#e2f0ff;
+            border:1px solid #9ec9ff;
+            position:relative;
+            padding:12px;
+            margin-bottom:10px;
+        "
+    >
+
+        <div style="padding-right:25px;">
+            Ligação copiada para a área de transferência.
+        </div>
+
+        <button
+            type="button"
+            class="btn-close"
+            onclick="hideCopyMessage()"
+            style="
+                position:absolute;
+                top:50%;
+                right:10px;
+                transform:translateY(-50%);
+                padding:0;
+                margin:0;
+            "
+        ></button>
+
+    </div>
+
+</div>
+
 <script>
 
-function copyLink(inputId) {
-    const input = document.getElementById(inputId);
-    navigator.clipboard.writeText(input.value);
-    alert("Link copiado para a área de transferência.");
-}
+    function copyLink(inputId) {
+
+        const input = document.getElementById(inputId);
+
+        navigator.clipboard.writeText(input.value);
+
+        const container = document.getElementById("copy-message-container");
+
+        container.style.display = "block";
+
+        clearTimeout(window.copyMessageTimeout);
+
+        window.copyMessageTimeout = setTimeout(() => {
+            hideCopyMessage();
+        }, 5000);
+
+    }
+
+    function hideCopyMessage() {
+
+        const container = document.getElementById("copy-message-container");
+
+        container.style.display = "none";
+
+    }
+
 </script>
 
 {% endblock %}
