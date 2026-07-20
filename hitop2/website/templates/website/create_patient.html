@@ -3,38 +3,76 @@
 
 <div class="col-md-6 offset-md-3">
 
-<h2>Novo paciente e aplicação HiTOP</h2>
-<br>
-
-<form method="POST">
-    {% csrf_token %}
-
-    <div class="mb-3">
-        {{ form.username.label_tag }}
-        {{ form.username }}
-    </div>
-
-    <div class="mb-3">
-        {{ form.title.label_tag }}
-        {{ form.title }}
-    </div>
-
-    <div class="mb-3">
-        <label>
-            Spectras incluídos
-        </label>
-        {{ form.spectra }}
-    </div>
+    <h2>Novo paciente e aplicação HiTOP</h2>
 
     <br>
 
-    <button type="submit" class="btn btn-sm rounded-0"
-   style="background-color: #e2f0ff; color: #000; 
-          border: 1px solid #9ec9ff; padding: 0.5rem 1rem;">
-        Criar registro
-    </button>
+    <form method="POST">
 
-</form>
+        {% csrf_token %}
+
+        <div class="mb-3">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.title.label_tag }}
+            {{ form.title }}
+        </div>
+
+        <div class="mb-4">
+
+            <label
+                style="
+                    display:block;
+                    font-weight:500;
+                    margin-bottom:10px;
+                "
+            >
+                {{ form.simulation_mode.label }}
+            </label>
+
+            {{ form.simulation_mode }}
+
+            <div
+                style="
+                    color:#666;
+                    font-size:.9rem;
+                    margin-top:8px;
+                "
+            >
+                Utilize um modo de simulação para gerar automaticamente respostas de teste.
+            </div>
+
+        </div>
+
+        <div class="mb-3">
+
+            <label>
+                Spectras incluídos
+            </label>
+
+            {{ form.spectra }}
+
+        </div>
+
+        <br>
+
+        <button
+            type="submit"
+            class="btn btn-sm rounded-0"
+            style="
+                background-color:#e2f0ff;
+                color:#000;
+                border:1px solid #9ec9ff;
+                padding:.5rem 1rem;
+            "
+        >
+            Criar registo
+        </button>
+
+    </form>
 
 </div>
 

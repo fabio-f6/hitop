@@ -10,6 +10,8 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.paginator import Paginator
 
+from .questions import get_questions_for_submission
+
 from .models import Question, QuestionCategory, DynamicAnswer, UserAnswer, SociodemographicAnswer, QuestionnaireSubmission
 from .socio_config import SOCIO_QUESTIONS
 
@@ -97,10 +99,9 @@ def questionnaire(request):
     # ----------------------------
     if 'question_order' not in request.session:
         questions = list(
-            Question.objects.filter(
-                scale__subfactor__spectra__in=submission.spectra.all()
-            ).distinct()
+            get_questions_for_submission(submission)
         )
+
         random.shuffle(questions)
         request.session['question_order'] = [q.id for q in questions]
 

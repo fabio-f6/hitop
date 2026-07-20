@@ -4,7 +4,7 @@
 
 <div class="container mt-4">
 
-    <h2>Nova Aplicação HITOP</h2>
+    <h2>Nova Aplicação HiTOP</h2>
 
     <p>
         Paciente:
@@ -27,6 +27,88 @@
                 class="form-control"
                 placeholder="Ex: Avaliação após 3 meses de terapia"
             >
+
+        </div>
+
+        <div class="mb-4">
+
+            <label
+                style="
+                    display:block;
+                    font-weight:500;
+                    margin-bottom:10px;
+                "
+            >
+                Modo da aplicação
+            </label>
+
+            <div class="form-check">
+
+                <input
+                    class="form-check-input"
+                    type="radio"
+                    name="simulation_mode"
+                    id="normal"
+                    value="normal"
+                    checked
+                >
+
+                <label
+                    class="form-check-label"
+                    for="normal"
+                >
+                    Aplicação normal
+                </label>
+
+            </div>
+
+            <div class="form-check">
+
+                <input
+                    class="form-check-input"
+                    type="radio"
+                    name="simulation_mode"
+                    id="simulated"
+                    value="simulated"
+                >
+
+                <label
+                    class="form-check-label"
+                    for="simulated"
+                >
+                    Simular respostas
+                </label>
+
+            </div>
+
+            <div class="form-check">
+
+                <input
+                    class="form-check-input"
+                    type="radio"
+                    name="simulation_mode"
+                    id="simulated_nulls"
+                    value="simulated_nulls"
+                >
+
+                <label
+                    class="form-check-label"
+                    for="simulated_nulls"
+                >
+                    Simular respostas com omissões
+                </label>
+
+            </div>
+
+            <div
+                style="
+                    color:#666;
+                    font-size:.9rem;
+                    margin-top:8px;
+                "
+            >
+                Utilize um modo de simulação para gerar automaticamente respostas de teste.
+            </div>
 
         </div>
 
@@ -59,10 +141,14 @@
 
         <button
             type="submit"
-            class="btn btn-sm btn-secondary rounded-0"
-            style="background-color: #e2f0ff; color: #000; border: 1px solid #9ec9ff;"
+            class="btn rounded-0"
+            style="
+                background:#e2f0ff;
+                color:#000;
+                border:1px solid #9ec9ff;
+            "
         >
-            Criar e abrir questionário
+            Criar aplicação
         </button>
 
     </form>

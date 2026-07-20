@@ -2,7 +2,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
 from .models import UserProfile
-from polls.models import Spectra
+from polls.models import Spectra, QuestionnaireSubmission
 import random
 import string
 
@@ -81,9 +81,9 @@ class CreatePatientForm(UserCreationForm):
         label="ID de Utilizador",
         required=False,
         widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'readonly': True,
-            'style': 'background-color: #f5f5f5;'
+            "class": "form-control",
+            "readonly": True,
+            "style": "background-color: #f5f5f5;",
         })
     )
 
@@ -91,15 +91,16 @@ class CreatePatientForm(UserCreationForm):
         label="Palavra-passe",
         required=False,
         widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'readonly': True,
-            'style': 'background-color: #f5f5f5;',
+            "class": "form-control",
+            "readonly": True,
+            "style": "background-color: #f5f5f5;",
         })
     )
 
     password2 = forms.CharField(
         required=False,
-        widget=forms.HiddenInput())
+        widget=forms.HiddenInput()
+    )
 
     title = forms.CharField(
         label="Nome da aplicação",
@@ -108,46 +109,71 @@ class CreatePatientForm(UserCreationForm):
         initial="Avaliação Inicial",
         widget=forms.TextInput(attrs={
             "class": "form-control"
-            })
-        )
+        })
+    )
+
+    simulation_mode = forms.TypedChoiceField(
+        label="Modo da aplicação",
+        choices=QuestionnaireSubmission.SIMULATION_MODES,
+        initial="normal",
+        widget=forms.RadioSelect,
+        coerce=str,
+    )
 
     spectra = forms.ModelMultipleChoiceField(
         queryset=Spectra.objects.all(),
         widget=forms.CheckboxSelectMultiple,
-        required=True
+        required=True,
     )
 
     class Meta:
         model = User
-        fields = ('username', 'password1', 'password2')
+        fields = (
+            "username",
+            "password1",
+            "password2",
+        )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         def generate_username():
-            return 'P_' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+            return "P_" + "".join(
+                random.choices(
+                    string.ascii_lowercase + string.digits,
+                    k=6
+                )
+            )
 
         def generate_password():
-            return 'PW_' + ''.join(random.choices(string.ascii_letters + string.digits, k=6))
+            return "PW_" + "".join(
+                random.choices(
+                    string.ascii_letters + string.digits,
+                    k=6
+                )
+            )
 
         username = generate_username()
-        while User.objects.filter(username=username).exists():
+
+        while User.objects.filter(
+            username=username
+        ).exists():
             username = generate_username()
 
         self.generated_username = username
-        self.fields['username'].initial = username
+        self.fields["username"].initial = username
 
         password = generate_password()
         self.generated_password = password
 
-        self.fields['password1'].initial = password
-        self.fields['password2'].initial = password
+        self.fields["password1"].initial = password
+        self.fields["password2"].initial = password
 
     def clean(self):
         cleaned_data = super().clean()
 
-        cleaned_data['password1'] = self.generated_password
-        cleaned_data['password2'] = self.generated_password
+        cleaned_data["password1"] = self.generated_password
+        cleaned_data["password2"] = self.generated_password
 
         return cleaned_data
 

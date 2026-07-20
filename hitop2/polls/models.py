@@ -28,10 +28,11 @@ class Question(models.Model):
     question_text = models.TextField()
 
     ANSWER_CHOICES = [
-        ('1', 'Nunca'),
-        ('2', 'Raramente'),
-        ('3', 'Às vezes'),
-        ('4', 'Sempre'),
+        ("1", "Nunca"),
+        ("2", "Raramente"),
+        ("3", "Às vezes"),
+        ("4", "Sempre"),
+        ("5", "Não sei / Prefiro não responder"),
     ]
 
     def __str__(self):
@@ -46,7 +47,17 @@ class Question(models.Model):
         return self.scale.subfactor.spectra
 
 class QuestionnaireSubmission(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    SIMULATION_MODES = [
+        ("normal", "Aplicação normal"),
+        ("simulated", "Simular respostas"),
+        ("simulated_nulls", "Simular respostas com omissões"),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
 
     access_token = models.UUIDField(
         default=uuid.uuid4,
@@ -59,11 +70,33 @@ class QuestionnaireSubmission(models.Model):
         blank=True
     )
 
-    questionnaire_type = models.CharField(max_length=50, default="hitop")
-    completed = models.BooleanField(default=False)
-    started_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
-    is_open = models.BooleanField(default=True)
+    questionnaire_type = models.CharField(
+        max_length=50,
+        default="hitop"
+    )
+
+    completed = models.BooleanField(
+        default=False
+    )
+
+    started_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    completed_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    is_open = models.BooleanField(
+        default=True
+    )
+
+    simulation_mode = models.CharField(
+        max_length=20,
+        choices=SIMULATION_MODES,
+        default="normal",
+    )
 
     spectra = models.ManyToManyField(
         Spectra,

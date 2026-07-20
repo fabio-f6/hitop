@@ -7,6 +7,7 @@ from django.urls import reverse
 from .forms import SignUpForm, CreatePatientForm, EditPatientForm
 from .models import UserProfile
 from polls.models import UserAnswer, QuestionnaireSubmission, Spectra, SociodemographicAnswer
+from polls.simulation import simulate_submission
 
 def home(request):
 
@@ -137,12 +138,16 @@ def create_patient(request):
                 questionnaire_type="hitop",
                 title=form.cleaned_data["title"],
                 completed=False,
-                is_open=True
+                is_open=True,
+                simulation_mode=form.cleaned_data["simulation_mode"],
             )
 
             submission.spectra.set(
                 form.cleaned_data["spectra"]
             )
+
+            if submission.simulation_mode != "normal":
+                simulate_submission(submission)
 
             request.session.pop('temp_credentials', None)
 
@@ -229,10 +234,14 @@ def new_questionnaire(request, patient_id):
             questionnaire_type="hitop",
             title=title,
             completed=False,
-            is_open=True
+            is_open=True,
+            simulation_mode=request.POST.get("simulation_mode", "normal"),
         )
 
         submission.spectra.set(selected_spectra_ids)
+
+        if submission.simulation_mode != "normal":
+            simulate_submission(submission)
 
         messages.success(
             request,
