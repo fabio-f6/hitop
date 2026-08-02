@@ -8,6 +8,9 @@ from .forms import SignUpForm, CreatePatientForm, EditPatientForm
 from .models import UserProfile
 from polls.models import UserAnswer, QuestionnaireSubmission, Spectra, SociodemographicAnswer
 from polls.simulation import simulate_submission
+from polls.scoring import calculate_scale_scores
+from collections import defaultdict
+from polls.report_constants import SPECTRUM_KEYS
 
 def home(request):
 
@@ -404,6 +407,27 @@ def report_preview(request, submission_id):
 
     patient = submission.user
 
+    scale_scores = calculate_scale_scores(submission)
+
+    grouped_scores = defaultdict(list)
+
+    for scale, score in scale_scores.items():
+
+        spectrum_name = scale.subfactor.spectra.name
+
+        print(scale.subfactor.spectra.name)
+
+        group_key = SPECTRUM_KEYS.get(
+            spectrum_name,
+            "other",
+        )
+
+        grouped_scores[group_key].append({
+
+            "scale": scale,
+            "score": score,
+        })
+
     professional = patient.userprofile.professional
 
     socio = {
@@ -448,6 +472,8 @@ def report_preview(request, submission_id):
         request,
         "website/report_preview.html",
         {
-            "report": report_data
+            "report": report_data,
+            "scale_scores": scale_scores,
+            "grouped_scores": grouped_scores,
         }
     )

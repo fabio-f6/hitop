@@ -1,0 +1,55 @@
+{% if scales %}
+
+<div style="margin-top:35px;">
+
+    <table class="table table-sm">
+
+        <thead>
+
+            <tr>
+
+                <th>Escala</th>
+
+                <th class="text-end">
+                    Valor bruto
+                </th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for item in scales %}
+
+            <tr>
+
+                <td>
+                    {{ item.scale.name }}
+                </td>
+
+                <td class="text-end">
+
+                    {% if item.score is None %}
+
+                        —
+
+                    {% else %}
+
+                        {{ item.score|floatformat:2 }}
+
+                    {% endif %}
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endif %}

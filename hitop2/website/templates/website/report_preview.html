@@ -311,52 +311,7 @@
 
         </div>
 
-        <!-- TRADUÇÃO DOS SINTOMAS -->
-
-        <div
-            style="
-                font-size: 0.95rem;
-                line-height: 1.7;
-            "
-        >
-
-            <strong style="font-size: 1.2rem;">
-                Tradução dos sintomas:
-            </strong>
-
-            <br><br>
-
-            <strong>Hyperdeliberation</strong> – Hiper-Deliberação,
-            <strong>Perfectionism</strong> – Perfeccionismo,
-            <strong>Rigidity</strong> – Rigidez,
-            <strong>Risk Aversion</strong> – Aversão ao Risco,
-            <strong>Workaholism</strong> – Adição ao trabalho,
-            <strong>Callousness</strong> – Frieza emocional,
-            <strong>Dishonesty</strong> – Desonestidade,
-            <strong>Deceitfulness</strong> – Dissimulação,
-            <strong>Manipulativeness</strong> – Manipulação,
-            <strong>Domineering</strong> – Comportamento de dominância,
-            <strong>Entitlement</strong> – Sentido de privilégio,
-            <strong>Exhibitionism</strong> – Exibicionismo,
-            <strong>Grandiosity</strong> – Grandiosidade,
-            <strong>Social Aggression</strong> – Agressão Social,
-            <strong>Antisocial Behavior</strong> – Comportamento Antissocial,
-            <strong>Oppositionality</strong> – Comportamento de Oposição,
-            <strong>Disorganization</strong> – Falta de organização,
-            <strong>Gambling</strong> – Comportamento problemático de jogo,
-            <strong>Gaming</strong> – Comportamento problemático de videojogos,
-            <strong>Non-persistence</strong> – Ausência de Persistência,
-            <strong>Non-planfulness</strong> – Ausência de Planeamento,
-            <strong>Problematic Shopping</strong> – Compras Problemáticas,
-            <strong>Restlessness</strong> – Inquietação,
-            <strong>Risk Taking</strong> – Tomada de Risco,
-            <strong>Craving</strong> – Desejo Intenso de Consumir,
-            <strong>Hazardous Use</strong> – Uso Problemático,
-            <strong>Impaired Control</strong> – Dificuldade de Controlo,
-            <strong>Role Interference</strong> – Interferência no Funcionamento Diário,
-            <strong>Tolerance</strong> – Tolerância.
-
-        </div>
+        {% include "components/scale_table.html" with scales=grouped_scores.externalizing %}
 
         <!-- RODAPÉ -->
 
@@ -435,71 +390,7 @@
 
         </div>
 
-        <!-- TRADUÇÃO DOS SINTOMAS -->
-
-        <div
-            style="
-                font-size: 0.95rem;
-                line-height: 1.7;
-            "
-        >
-
-            <strong style="font-size: 1.2rem;">
-                Tradução dos sintomas:
-            </strong>
-
-            <br><br>
-
-            <strong>Cognitive Problems</strong> – Problemas Cognitivos,
-            <strong>Distress-Dysphoria</strong> – Distress-Disforia
-            (<strong>Anhedonia</strong> – Anedonia,
-            <strong>Anxious Worry</strong> – Ansiedade,
-            <strong>Depressed Mood</strong> – Humor Depressivo,
-            <strong>Lassitude</strong> – Lassitude,
-            <strong>Shame/Guilt</strong> – Vergonha/Culpa),
-            <strong>Emotionality</strong> – Reatividade Emocional
-            (<strong>Affective Lability</strong> – Labilidade Afetiva,
-            <strong>Angry Hostility</strong> – Raiva-Hostilidade,
-            <strong>Irritability</strong> – Irritabilidade),
-            <strong>Insomnia</strong> – Insónia,
-            <strong>Nightmares</strong> – Pesadelos Noturnos,
-            <strong>NSSI</strong> – Comportamentos Auto-Lesivos Não Suicidários,
-            <strong>Suicidality</strong> – Ideação e Tentativa de Suicídio,
-            <strong>Appetite Loss</strong> – Perda de Apetite,
-            <strong>Binge Eating</strong> – Compulsão Alimentar,
-            <strong>Body Dissatisfaction</strong> – Insatisfação Corporal,
-            <strong>Body Focus</strong> – Preocupação com o Corpo,
-            <strong>Dietary Restraint</strong> – Dieta Restritiva,
-            <strong>Excessive Exercise</strong> – Exercício Excessivo,
-            <strong>Food Selectivity</strong> – Seletividade Alimentar,
-            <strong>Muscle Building</strong> – Aumento e Hipertrofia da Massa Muscular,
-            <strong>Purging</strong> – Comportamentos Purgativos,
-            <strong>Restricted Eating</strong> – Restrição Alimentar,
-            <strong>Agoraphobia</strong> – Agorafobia,
-            <strong>Checking</strong> – Verificação Compulsiva,
-            <strong>Cleaning</strong> – Limpeza Compulsiva,
-            <strong>Counting</strong> – Contagem Compulsiva,
-            <strong>Excoriation</strong> – Escoriação,
-            <strong>Hoarding</strong> – Acumulação Compulsiva,
-            <strong>Hypervigilance</strong> – Hipervigilância,
-            <strong>Panic</strong> – Pânico,
-            <strong>Specific Phobia Index</strong> – Índice de Fobias Específicas
-            (<strong>Animal-Insect Phobia</strong> – Fobia a Animais/Insetos,
-            <strong>Blood-Injection Phobia</strong> – Fobia a Sangue/Injeções,
-            <strong>Situational Phobias</strong> – Fobias Situacionais),
-            <strong>Trauma Reactions</strong> – Reações ao Trauma,
-            <strong>Trichotillomania</strong> – Tricotilomania,
-            <strong>Difficulties Reaching Orgasm</strong> – Dificuldade em Atingir o Orgasmo,
-            <strong>Low Sexual Arousal</strong> – Baixa Excitação Sexual,
-            <strong>Low Sexual Interest</strong> – Baixo Interesse Sexual,
-            <strong>Paraphilias</strong> – Parafilias,
-            <strong>Premature Orgasm</strong> – Orgasmo Precoce,
-            <strong>Risky Sex</strong> – Comportamento Sexual de Risco,
-            <strong>Sex-Related Substance Use</strong> – Uso de Substâncias Relacionado com a Atividade Sexual,
-            <strong>Sexual Distress</strong> – Distress Sexual,
-            <strong>Sexual Pain</strong> – Dor Sexual.
-
-        </div>
+        {% include "components/scale_table.html" with scales=grouped_scores.internalizing %}
 
         <!-- RODAPÉ -->
 
@@ -578,29 +469,7 @@
 
         </div>
 
-        <!-- TRADUÇÃO DOS SINTOMAS -->
-
-        <div
-            style="
-                font-size: 0.95rem;
-                line-height: 1.7;
-            "
-        >
-
-            <strong style="font-size: 1.2rem;">
-                Tradução dos sintomas:
-            </strong>
-
-            <br><br>
-
-            <strong>Restricted Affectivity</strong> – Afetividade Restrita,
-            <strong>Romantic Disinterest</strong> – Desinteresse em Relações Românticas,
-            <strong>Social Aloofness</strong> – Distanciamento Socioemocional,
-            <strong>Social Anxiety</strong> – Ansiedade Social,
-            <strong>Submissiveness</strong> – Comportamento de Submissão,
-            <strong>Well-being</strong> – Bem-Estar.
-
-        </div>
+        {% include "components/scale_table.html" with scales=grouped_scores.detachment %}
 
         <!-- RODAPÉ -->
 
@@ -679,30 +548,7 @@
 
         </div>
 
-        <!-- TRADUÇÃO DOS SINTOMAS -->
-
-        <div
-            style="
-                font-size: 0.95rem;
-                line-height: 1.7;
-            "
-        >
-
-            <strong style="font-size: 1.2rem;">
-                Tradução dos sintomas:
-            </strong>
-
-            <br><br>
-
-            <strong>Health Anxiety</strong> – Ansiedade em Relação à Saúde,
-            <strong>Somatic Preoccupation</strong> – Preocupação com Sensações Corporais,
-            <strong>Conversion Symptoms</strong> – Sintomas de Conversão,
-            <strong>Disease Conviction</strong> – Convicção de Doença,
-            <strong>Bodily Distress</strong> – Distress Corporal,
-            <strong>Dissociation</strong> – Dissociação,
-            <strong>Eccentricity</strong> – Excentricidade.
-
-        </div>
+        {% include "components/scale_table.html" with scales=grouped_scores.somatization %}
 
         <!-- RODAPÉ -->
 
@@ -781,31 +627,7 @@
 
         </div>
 
-        <!-- TRADUÇÃO DOS SINTOMAS -->
-
-        <div
-            style="
-                font-size: 0.95rem;
-                line-height: 1.7;
-            "
-        >
-
-            <strong style="font-size: 1.2rem;">
-                Tradução dos sintomas:
-            </strong>
-
-            <br><br>
-            
-            <strong>Fantasy Proneness</strong> – Propensão à Fantasia,
-            <strong>Mistrust</strong> – Desconfiança
-            (<strong>Cynicism</strong> – Cinismo,
-            <strong>Suspiciousness</strong> – Suspeição),
-            <strong>Reality Distortion</strong> – Distorção da Realidade
-            (<strong>Delusions</strong> – Delírios,
-            <strong>Hallucinations</strong> – Alucinações),
-            <strong>Manic Energy</strong> – Ativação Maníaca.
-
-        </div>
+        {% include "components/scale_table.html" with scales=grouped_scores.thought_disorder %}
 
         <!-- RODAPÉ -->
 
