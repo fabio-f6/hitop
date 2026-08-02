@@ -1,8 +1,5 @@
 from collections import defaultdict
-
 from polls.models import UserAnswer
-
-from polls.questions import get_questions_for_submission
 
 def calculate_average(values):
 
@@ -11,23 +8,7 @@ def calculate_average(values):
 
     return sum(values) / len(values)
 
-
-def calculate_scale_scores(submission):
-
-    questions = get_questions_for_submission(
-        submission
-    )
-
-    scales = {
-        question.scale
-        for question in questions
-    }
-
-    answers = UserAnswer.objects.filter(
-        submission=submission
-    ).select_related(
-        "question__scale"
-    )
+def calculate_scale_scores_from_answers(answers):
 
     responses_by_scale = defaultdict(list)
 
@@ -44,10 +25,20 @@ def calculate_scale_scores(submission):
 
     scale_scores = {}
 
-    for scale in scales:
-
-        values = responses_by_scale[scale]
+    for scale, values in responses_by_scale.items():
 
         scale_scores[scale] = calculate_average(values)
 
     return scale_scores
+
+def calculate_scale_scores(submission):
+
+    answers = UserAnswer.objects.filter(
+        submission=submission
+    ).select_related(
+        "question__scale"
+    )
+
+    return calculate_scale_scores_from_answers(
+        answers
+    )

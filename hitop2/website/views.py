@@ -11,6 +11,7 @@ from polls.simulation import simulate_submission
 from polls.scoring import calculate_scale_scores
 from collections import defaultdict
 from polls.report_constants import SPECTRUM_KEYS
+from polls.percentiles import calculate_percentile
 
 def home(request):
 
@@ -415,8 +416,6 @@ def report_preview(request, submission_id):
 
         spectrum_name = scale.subfactor.spectra.name
 
-        print(scale.subfactor.spectra.name)
-
         group_key = SPECTRUM_KEYS.get(
             spectrum_name,
             "other",
@@ -426,6 +425,10 @@ def report_preview(request, submission_id):
 
             "scale": scale,
             "score": score,
+            "percentile": calculate_percentile(
+                scale,
+                score,
+            ),
         })
 
     professional = patient.userprofile.professional

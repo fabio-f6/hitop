@@ -1,17 +1,21 @@
 {% if scales %}
 
-<div style="margin-top:35px;">
+<div class="mt-4">
 
-    <table class="table table-sm">
+    <table class="table table-sm table-hover align-middle">
 
-        <thead>
+        <thead class="table-light">
 
             <tr>
 
                 <th>Escala</th>
 
-                <th class="text-end">
+                <th class="text-end" style="width: 120px;">
                     Valor bruto
+                </th>
+
+                <th class="text-center" style="width: 100px;">
+                    Percentil
                 </th>
 
             </tr>
@@ -31,13 +35,19 @@
                 <td class="text-end">
 
                     {% if item.score is None %}
-
-                        —
-
+                        &mdash;
                     {% else %}
-
                         {{ item.score|floatformat:2 }}
+                    {% endif %}
 
+                </td>
+
+                <td class="text-center">
+
+                    {% if item.percentile is not None %}
+                        {{ item.percentile }}
+                    {% else %}
+                        &mdash;
                     {% endif %}
 
                 </td>

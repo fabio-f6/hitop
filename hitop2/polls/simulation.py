@@ -6,7 +6,7 @@ from polls.models import UserAnswer
 from polls.questions import get_questions_for_submission
 
 
-NULL_PROBABILITY = 0.95
+NULL_PROBABILITY = 0.1
 
 
 def simulate_submission(submission):
@@ -17,7 +17,7 @@ def simulate_submission(submission):
 
         if submission.simulation_mode == "simulated":
 
-            answer = str(random.randint(1, 4))
+            answer = str(random.randint(1, 2))
 
         elif submission.simulation_mode == "simulated_nulls":
 

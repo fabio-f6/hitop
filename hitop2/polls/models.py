@@ -223,3 +223,72 @@ class DynamicAnswer(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.question.question_id}"
+
+class NormativeParticipant(models.Model):
+
+    sex = models.CharField(
+        max_length=20,
+        blank=True
+    )
+
+    age = models.IntegerField(
+        null=True,
+        blank=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return f"Participante {self.id}"
+
+
+class NormativeAnswer(models.Model):
+
+    participant = models.ForeignKey(
+        NormativeParticipant,
+        on_delete=models.CASCADE,
+        related_name="answers"
+    )
+
+    question = models.ForeignKey(
+        Question,
+        on_delete=models.CASCADE
+    )
+
+    answer = models.CharField(
+        max_length=1,
+        choices=Question.ANSWER_CHOICES
+    )
+
+    def __str__(self):
+        return f"P{self.participant.id} - {self.question.item_code}: {self.answer}"
+
+class NormativeScaleScore(models.Model):
+
+    participant = models.ForeignKey(
+        NormativeParticipant,
+        on_delete=models.CASCADE,
+        related_name="scale_scores"
+    )
+
+    scale = models.ForeignKey(
+        Scale,
+        on_delete=models.CASCADE
+    )
+
+    raw_score = models.FloatField()
+
+    class Meta:
+        unique_together = (
+            "participant",
+            "scale"
+        )
+
+    def __str__(self):
+        return (
+            f"{self.participant} - "
+            f"{self.scale}: "
+            f"{self.raw_score:.2f}"
+        )
