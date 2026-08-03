@@ -431,6 +431,97 @@ def report_preview(request, submission_id):
             ),
         })
 
+    grouped_chart_data = {}
+
+    # Gráfico
+
+    GRAPH_LEFT = 600
+    GRAPH_RIGHT = 1160
+    GRAPH_WIDTH = GRAPH_RIGHT - GRAPH_LEFT
+
+    PERCENTILE_MARKS = [
+
+        {
+            "label": "P1",
+            "line_x": GRAPH_LEFT + (1 / 100) * GRAPH_WIDTH,
+            "label_x": GRAPH_LEFT + 12,
+        },
+
+        {
+            "label": "P5",
+            "line_x": GRAPH_LEFT + (5 / 100) * GRAPH_WIDTH,
+            "label_x": GRAPH_LEFT + 35,
+        },
+
+        {
+            "label": "P15",
+            "line_x": GRAPH_LEFT + (15 / 100) * GRAPH_WIDTH,
+            "label_x": GRAPH_LEFT + 85,
+        },
+
+        {
+            "line_x": GRAPH_LEFT + (50 / 100) * GRAPH_WIDTH,
+        },
+
+        {
+            "label": "P85",
+            "line_x": GRAPH_LEFT + (85 / 100) * GRAPH_WIDTH,
+            "label_x": GRAPH_RIGHT - 85,
+        },
+
+        {
+            "label": "P95",
+            "line_x": GRAPH_LEFT + (95 / 100) * GRAPH_WIDTH,
+            "label_x": GRAPH_RIGHT - 28,
+        },
+
+        {
+            "label": "P99",
+            "line_x": GRAPH_LEFT + (99 / 100) * GRAPH_WIDTH,
+            "label_x": GRAPH_RIGHT + 6,
+        },
+
+    ]
+
+    FIRST_ROW_Y = 55
+    ROW_HEIGHT = 28
+
+    for spectrum, items in grouped_scores.items():
+
+        chart_items = []
+
+        chart_height = FIRST_ROW_Y + len(items) * ROW_HEIGHT
+
+        y = FIRST_ROW_Y
+
+        for item in items:
+
+            if item["percentile"] is None:
+                continue
+
+            chart_items.append({
+
+                "name": item["scale"].name,
+                "score": item["score"],
+                "percentile": item["percentile"],
+
+                "x": GRAPH_LEFT + (
+                    item["percentile"] / 100
+                ) * GRAPH_WIDTH,
+
+                "y": y,
+
+            })
+
+            y += ROW_HEIGHT
+
+        grouped_chart_data[spectrum] = {
+
+            "items": chart_items,
+            "height": chart_height,
+
+        }
+
     professional = patient.userprofile.professional
 
     socio = {
@@ -478,5 +569,10 @@ def report_preview(request, submission_id):
             "report": report_data,
             "scale_scores": scale_scores,
             "grouped_scores": grouped_scores,
+            "grouped_chart_data": grouped_chart_data,
+            "percentile_marks": PERCENTILE_MARKS,
+            "graph_left": GRAPH_LEFT,
+            "graph_right": GRAPH_RIGHT,
+            "graph_width": GRAPH_WIDTH,
         }
     )

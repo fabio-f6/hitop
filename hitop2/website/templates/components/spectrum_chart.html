@@ -1,0 +1,141 @@
+<!-- GRÁFICO -->
+
+        <svg
+            style="width:100%; height:auto;"
+            viewBox="0 0 1200 {{ chart.height }}"
+        >
+
+        <defs>
+
+            <linearGradient
+                id="percentileGradient"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="0%"
+            >
+
+                <stop offset="0%" stop-color="#e6b8b8"/>
+                <stop offset="5%" stop-color="#e6b8b8"/>
+
+                <stop offset="15%" stop-color="#f4e3b5"/>
+
+                <stop offset="50%" stop-color="#c9e6c8"/>
+
+                <stop offset="85%" stop-color="#f4e3b5"/>
+
+                <stop offset="95%" stop-color="#e6b8b8"/>
+                <stop offset="100%" stop-color="#e6b8b8"/>
+
+            </linearGradient>
+
+        </defs>
+
+        <!-- Cabeçalhos -->
+
+        <text
+            x="360"
+            y="15"
+            font-size="13"
+            text-anchor="middle"
+        >
+        VALOR BRUTO
+        </text>
+
+        <text
+            x="470"
+            y="15"
+            font-size="13"
+            text-anchor="middle"
+        >
+        PERCENTIL
+        </text>
+
+        <!-- Escala -->
+
+        {% for mark in percentile_marks %}
+
+        <line
+            x1="{{ mark.line_x }}"
+            y1="35"
+            x2="{{ mark.line_x }}"
+            y2="{{ chart.height|add:'-20' }}"
+            stroke="#cfcfcf"
+            stroke-width="1"
+            stroke-dasharray="4 4"
+        />
+
+        {% endfor %}
+
+        {% for mark in percentile_marks %}
+
+        <text
+            x="{{ mark.label_x }}"
+            y="22"
+            font-size="13"
+            text-anchor="middle"
+        >
+            {{ mark.label }}
+        </text>
+
+        {% endfor %}
+
+        {% for item in chart.items %}
+
+        <!-- Nome -->
+
+        <text
+            x="20"
+            y="{{ item.y }}"
+            font-size="15"
+        >
+            {{ item.name }}
+        </text>
+
+        <!-- Valor bruto -->
+
+        <text
+            x="360"
+            y="{{ item.y }}"
+            font-size="15"
+            text-anchor="middle"
+        >
+            {{ item.score|floatformat:2 }}
+        </text>
+
+        <!-- Percentil -->
+
+        <text
+            x="470"
+            y="{{ item.y }}"
+            font-size="15"
+            text-anchor="middle"
+        >
+            {{ item.percentile }}
+        </text>
+
+        <!-- Barra -->
+
+        <rect
+            x="{{ graph_left }}"
+            y="{{ item.y|add:'-9' }}"
+            width="{{ graph_width }}"
+            height="8"
+            fill="url(#percentileGradient)"
+            fill-opacity="0.75"
+        />
+
+        <!-- Bolinha -->
+
+        <circle
+            cx="{{ item.x }}"
+            cy="{{ item.y|add:'-5' }}"
+            r="5"
+            fill="white"
+            stroke="#999999"
+            stroke-width="4"
+        />
+
+        {% endfor %}
+
+        </svg>

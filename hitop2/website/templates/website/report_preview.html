@@ -3,6 +3,8 @@
 
 {% block content %}
 
+<div class="report-container">
+
 <div class="container mt-4">
 
     <div
@@ -189,19 +191,6 @@
             </p>
         </div>
 
-        <div style="margin-top:35px;">
-
-            <img
-                src="{% static 'images/plot_1.png' %}"
-                alt="Perfil Global HiTOP"
-                style="
-                    width:100%;
-                    display:block;
-                "
-            >
-
-        </div>
-
         <!-- RODAPÉ -->
 
         <div
@@ -292,26 +281,7 @@
 
         <!-- GRÁFICO -->
 
-        <div
-            style="
-                margin-top: 20px;
-                margin-bottom: 35px;
-                text-align: center;
-            "
-        >
-
-            <img
-                src="{% static 'images/externalizacao_plot.png' %}"
-                alt="Externalização"
-                style="
-                    width: 100%;
-                    display: block;
-                "
-            >
-
-        </div>
-
-        {% include "components/scale_table.html" with scales=grouped_scores.externalizing %}
+        {% include "components/spectrum_chart.html" with chart=grouped_chart_data.externalizing %}
 
         <!-- RODAPÉ -->
 
@@ -371,26 +341,7 @@
 
         <!-- GRÁFICO -->
 
-        <div
-            style="
-                margin-top: 20px;
-                margin-bottom: 35px;
-                text-align: center;
-            "
-        >
-
-            <img
-                src="{% static 'images/internalizacao_plot.png' %}"
-                alt="Externalização"
-                style="
-                    width: 100%;
-                    display: block;
-                "
-            >
-
-        </div>
-
-        {% include "components/scale_table.html" with scales=grouped_scores.internalizing %}
+        {% include "components/spectrum_chart.html" with chart=grouped_chart_data.internalizing %}
 
         <!-- RODAPÉ -->
 
@@ -450,26 +401,7 @@
 
         <!-- GRÁFICO -->
 
-        <div
-            style="
-                margin-top: 20px;
-                margin-bottom: 35px;
-                text-align: center;
-            "
-        >
-
-            <img
-                src="{% static 'images/desafiliacao_plot.png' %}"
-                alt="Externalização"
-                style="
-                    width: 100%;
-                    display: block;
-                "
-            >
-
-        </div>
-
-        {% include "components/scale_table.html" with scales=grouped_scores.detachment %}
+        {% include "components/spectrum_chart.html" with chart=grouped_chart_data.detachment %}
 
         <!-- RODAPÉ -->
 
@@ -529,26 +461,7 @@
 
         <!-- GRÁFICO -->
 
-        <div
-            style="
-                margin-top: 20px;
-                margin-bottom: 35px;
-                text-align: center;
-            "
-        >
-
-            <img
-                src="{% static 'images/somatizacao_plot.png' %}"
-                alt="Externalização"
-                style="
-                    width: 100%;
-                    display: block;
-                "
-            >
-
-        </div>
-
-        {% include "components/scale_table.html" with scales=grouped_scores.somatization %}
+        {% include "components/spectrum_chart.html" with chart=grouped_chart_data.somatization %}
 
         <!-- RODAPÉ -->
 
@@ -608,26 +521,7 @@
 
         <!-- GRÁFICO -->
 
-        <div
-            style="
-                margin-top: 20px;
-                margin-bottom: 35px;
-                text-align: center;
-            "
-        >
-
-            <img
-                src="{% static 'images/alteracoesdepensamento_plot.png' %}"
-                alt="Externalização"
-                style="
-                    width: 100%;
-                    display: block;
-                "
-            >
-
-        </div>
-
-        {% include "components/scale_table.html" with scales=grouped_scores.thought_disorder %}
+        {% include "components/spectrum_chart.html" with chart=grouped_chart_data.thought_disorder %}
 
         <!-- RODAPÉ -->
 
@@ -1075,6 +969,8 @@
         </div>
 
     </div>
+
+</div>
 
 </div>
 

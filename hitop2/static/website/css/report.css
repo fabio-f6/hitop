@@ -1,0 +1,35 @@
+/* ==========================================================
+   HiTOP Report
+   ========================================================== */
+
+.report-chart {
+    width: 100%;
+    margin-top: 40px;
+}
+
+.report-chart svg {
+    width: 100%;
+    height: auto;
+}
+
+.report-chart text {
+    font-size: 13px;
+}
+
+.report-chart .grid-line {
+    stroke: #d9d9d9;
+    stroke-width: 1;
+}
+
+.report-chart .axis-line {
+    stroke: #999;
+    stroke-width: 1.5;
+}
+
+.report-chart .point {
+    fill: #0d6efd;
+}
+
+.report-chart .point:hover {
+    r: 6;
+}
