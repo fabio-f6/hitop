@@ -29,25 +29,25 @@
             <tr>
 
                 <td>
-                    {{ item.scale.name }}
+                    {{ item.name }}
                 </td>
 
                 <td class="text-end">
 
-                    {% if item.score is None %}
-                        &mdash;
-                    {% else %}
+                    {% if item.is_valid %}
                         {{ item.score|floatformat:2 }}
+                    {% else %}
+                        Nulo
                     {% endif %}
 
                 </td>
 
                 <td class="text-center">
 
-                    {% if item.percentile is not None %}
+                    {% if item.is_valid %}
                         {{ item.percentile }}
                     {% else %}
-                        &mdash;
+                        Nulo
                     {% endif %}
 
                 </td>

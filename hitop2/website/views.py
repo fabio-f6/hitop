@@ -1,17 +1,32 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from collections import defaultdict
+
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from .forms import SignUpForm, CreatePatientForm, EditPatientForm
-from .models import UserProfile
-from polls.models import UserAnswer, QuestionnaireSubmission, Spectra, SociodemographicAnswer
-from polls.simulation import simulate_submission
-from polls.scoring import calculate_scale_scores
-from collections import defaultdict
-from polls.report_constants import SPECTRUM_KEYS
+
+from polls.models import (
+    QuestionnaireSubmission,
+    SociodemographicAnswer,
+    Spectra,
+    UserAnswer,
+)
 from polls.percentiles import calculate_percentile
+from polls.report_constants import SPECTRUM_KEYS
+from polls.scoring import calculate_scale_scores
+from polls.simulation import simulate_submission
+from polls.translations import (
+    SCALE_TRANSLATIONS,
+    translate_scale,
+    translate_spectrum,
+    translate_subfactor,
+)
+
+from .forms import CreatePatientForm, EditPatientForm, SignUpForm
+from .models import UserProfile
+
 
 def home(request):
 
@@ -412,7 +427,7 @@ def report_preview(request, submission_id):
 
     grouped_scores = defaultdict(list)
 
-    for scale, score in scale_scores.items():
+    for scale, scale_data in scale_scores.items():
 
         spectrum_name = scale.subfactor.spectra.name
 
@@ -424,11 +439,33 @@ def report_preview(request, submission_id):
         grouped_scores[group_key].append({
 
             "scale": scale,
-            "score": score,
-            "percentile": calculate_percentile(
-                scale,
-                score,
-            ),
+
+            "name":
+                    translate_scale(
+                        scale.name,
+                    ),
+
+            "score":
+                scale_data["score"],
+
+            "percentile":
+                calculate_percentile(
+                    scale,
+                    scale_data["score"],
+                ) if scale_data["is_valid"] else None,
+
+            "missing_answers":
+                scale_data["missing_answers"],
+
+            "missing_percentage":
+                scale_data["missing_percentage"],
+
+            "is_valid":
+                scale_data["is_valid"],
+
+            "total_items":
+                scale_data["total_items"],
+
         })
 
     grouped_chart_data = {}
@@ -496,20 +533,34 @@ def report_preview(request, submission_id):
 
         for item in items:
 
-            if item["percentile"] is None:
-                continue
-
             chart_items.append({
 
-                "name": item["scale"].name,
-                "score": item["score"],
-                "percentile": item["percentile"],
+                "name":
+                    item["name"],
 
-                "x": GRAPH_LEFT + (
-                    item["percentile"] / 100
-                ) * GRAPH_WIDTH,
+                "score":
+                    item["score"],
 
-                "y": y,
+                "percentile":
+                    item["percentile"],
+
+                "missing_answers":
+                    item["missing_answers"],
+
+                "missing_percentage":
+                    item["missing_percentage"],
+
+                "is_valid":
+                    item["is_valid"],
+
+                "x":
+                    None if item["percentile"] is None else
+                    GRAPH_LEFT + (
+                        item["percentile"] / 100
+                    ) * GRAPH_WIDTH,
+
+                "y":
+                    y,
 
             })
 

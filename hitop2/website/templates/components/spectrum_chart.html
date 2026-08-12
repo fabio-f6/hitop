@@ -100,7 +100,11 @@
             font-size="15"
             text-anchor="middle"
         >
-            {{ item.score|floatformat:2 }}
+            {% if item.is_valid %}
+                {{ item.score|floatformat:2 }}
+            {% else %}
+                Nulo
+            {% endif %}
         </text>
 
         <!-- Percentil -->
@@ -111,7 +115,11 @@
             font-size="15"
             text-anchor="middle"
         >
-            {{ item.percentile }}
+            {% if item.is_valid %}
+                {{ item.percentile }}
+            {% else %}
+                Nulo
+            {% endif %}
         </text>
 
         <!-- Barra -->
@@ -127,6 +135,8 @@
 
         <!-- Bolinha -->
 
+        {% if item.is_valid %}
+
         <circle
             cx="{{ item.x }}"
             cy="{{ item.y|add:'-5' }}"
@@ -135,6 +145,8 @@
             stroke="#999999"
             stroke-width="4"
         />
+
+        {% endif %}
 
         {% endfor %}
 
