@@ -1,0 +1,94 @@
+id,name_en,name_pt
+1,Hyperdeliberation,Hiper-Deliberação
+2,Perfectionism,Perfecionismo
+3,Rigidity,Rigidez
+4,Risk Aversion,Aversão ao Risco
+5,Workaholism,Adição ao Trabalho
+6,Callousness,Frieza Emocional
+7,Dishonesty,Desonestidade
+8,Deceitfulness,Dissimulação
+9,Manipulativeness,Manipulação
+10,Domineering,Comportamento de Dominância
+11,Entitlement,Sentido de Privilégio
+12,Exhibitionism,Exibicionismo
+13,Grandiosity,Grandiosidade
+14,Social Aggression,Agressão Social
+15,Antisocial Behavior,Comportamento Antissocial
+16,Oppositionality,Comportamento de Oposição
+17,Disorganization,Falta de Organização
+18,Gambling,Comportamento Problemático de Jogo a Dinheiro
+19,Gaming,Comportamento Problemático de (Video)Jogos Online
+20,Non-persistence,Ausência de Persistência
+21,Non-planfulness,Ausência de Planeamento
+22,Problematic Shopping,Comportamentos de Compra Problemática
+23,Restlessness,Inquietação
+24,Risk Taking,Tomada de Risco
+25,Craving,Desejo Intenso de Consumir
+26,Hazardous Use,Uso Problemático
+27,Impaired Control,Dificuldade de controlar o uso
+28,Role Interference,Interferência dos Consumos de X no Funcionamento Diário
+29,Tolerance,Tolerância para X
+30,Cognitive Problems,Problemas Cognitivos
+31,Distress - Dysphoria (Anhedonia),Distress - Disforia (Anedonia)
+32,Distress - Dysphoria (Anxious Worry),Distress - Disforia (Ansiedade)
+33,Distress - Dysphoria (Depressed Mood),Distress - Disforia (Humor Depressivo)
+34,Distress - Dysphoria (Lassitude),Distress - Disforia (Lassitude)
+35,Distress - Dysphoria (Shame/Guilt),Distress - Disforia (Vergonha / Culpa)
+36,Emotionality (Affective Lability),Reatividade Emocional (Labilidade Afetiva)
+37,Emotionality (Angry Hostility),Reatividade Emocional (Raiva-Hostilidade)
+38,Emotionality (Irritability),Reatividade Emocional (Irritabilidade)
+39,Insomnia,Insónia
+40,Nightmares,Pesadelos Noturnos
+41,NSSI,Comportamentos Auto-Lesivos Não Suicidários
+42,Suicidality,Ideação e Tentativa de Suicídio
+43,Appetite Loss,Perda de Apetite
+44,Binge Eating,Compulsão Alimentar
+45,Body Dissatisfaction,Insatisfação Corporal
+46,Body Focus,Preocupação com o Corpo
+47,Dietary Restraint,Dieta Restritiva
+48,Excessive Exercise,Exercício Excessivo
+49,Food Selectivity,Seletividade Alimentar
+50,Muscle Building,Aumento e Hipertrofia da Massa Muscular
+51,Purging,Comportamentos Purgativos
+52,Restricted Eating,Restrição Alimentar
+53,Agoraphobia,Agorafobia
+54,Checking,Verificação Compulsiva
+55,Cleaning,Limpeza Compulsiva
+56,Counting,Contagem Compulsiva
+57,Excoriation,Escoriação
+58,Hoarding,Acumulação Compulsiva
+59,Hypervigilance,Hipervigilância
+60,Panic,Pânico
+61,Specific Phobia (Animal-insect),Fobias Específicas (Fobia a Animais-insetos)
+62,Specific Phobia (Blood-Injection Phobia),Fobias Específicas (Fobia a Sangue-Injeções)
+63,Specific Phobia (situational),Fobias Específicas (situacionais)
+64,Trauma Reactions,Reações ao Trauma
+65,Trichotillomania,Tricotilomania
+66,Difficulties Reaching Orgasm,Dificuldade em Atingir o Orgasmo
+67,Low Sexual Arousal,Baixa Excitação Sexual
+68,Low Sexual Interest,Baixo Interesse Sexual
+69,Paraphilias,Parafilias
+70,Premature Orgasm,Orgasmo Precoce
+71,Risky Sex,Comportamento Sexual de Risco
+72,Sex-Related Substance Use,Uso de Substâncias Relacionado com a Atividade Sexual
+73,Sexual Distress,Distress Sexual
+74,Sexual Pain,Dor Sexual
+75,Restricted Affectivity,Afetividade Restrita
+76,Romantic Disinterest,Desinteresse em Relações Românticas
+77,Social Aloofness,Distanciamento Socioemocional
+78,Social Anxiety,Ansiedade Social
+79,Submissiveness,Comportamento de Submissão
+80,Well-being,Bem-Estar
+81,Health Anxiety,Ansiedade em relação à Saúde
+82,Somatic Preoccupation,Preocupação com Sensações Corporais
+83,Conversion Symptoms,Sintomas de Conversão
+84,Disease Conviction,Convicção de Doença
+85,Bodily Distress,Distress Corporal
+86,Dissociation,Dissociação
+87,Eccentricity,Excentricidade
+88,Fantasy Proneness,Propensão à Fantasia
+89,Mistrust (Cynicism),Desconfiança (Cinismo)
+90,Mistrust (Suspiciousness),Desconfiança (Suspeição)
+91,Reality Distortion (Delusions),Distorção da Realidade (Delírios)
+92,Reality Distortion (Hallucinations),Distorção da Realidade (Alucinações)
+93,Manic Energy,Ativação Maníaca

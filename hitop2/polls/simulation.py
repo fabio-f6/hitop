@@ -16,7 +16,7 @@ def simulate_submission(submission):
 
         if submission.simulation_mode == "simulated":
 
-            answer = str(random.randint(1, 4))
+            answer = str(random.randint(1, 2))
 
         elif submission.simulation_mode == "simulated_nulls":
 

@@ -15,6 +15,7 @@ from polls.models import (
 )
 from polls.percentiles import calculate_percentile
 from polls.report_constants import SPECTRUM_KEYS
+from polls.report_interpretation import build_report_analysis
 from polls.scoring import calculate_scale_scores
 from polls.simulation import simulate_submission
 from polls.translations import (
@@ -613,6 +614,14 @@ def report_preview(request, submission_id):
             submission.started_at,
     }
 
+    analysis = {}
+
+    for spectrum, items in grouped_scores.items():
+
+        analysis[spectrum] = build_report_analysis(
+            items
+        )
+
     return render(
         request,
         "website/report_preview.html",
@@ -621,6 +630,7 @@ def report_preview(request, submission_id):
             "scale_scores": scale_scores,
             "grouped_scores": grouped_scores,
             "grouped_chart_data": grouped_chart_data,
+            "analysis": analysis,
             "percentile_marks": PERCENTILE_MARKS,
             "graph_left": GRAPH_LEFT,
             "graph_right": GRAPH_RIGHT,
