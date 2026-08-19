@@ -1,13 +1,16 @@
 from django.core.management.base import BaseCommand
 
 from polls.models import (
-    NormativeParticipant,
     NormativeAnswer,
+    NormativeParticipant,
     NormativeScaleScore,
+    NormativeSpectrumScore,
 )
-
 from polls.scoring import (
     calculate_scale_scores_from_answers,
+)
+from polls.spectrum_scores import (
+    calculate_spectrum_scores,
 )
 
 
@@ -18,6 +21,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         NormativeScaleScore.objects.all().delete()
+        NormativeSpectrumScore.objects.all().delete()
 
         participants = NormativeParticipant.objects.all()
 
@@ -37,7 +41,13 @@ class Command(BaseCommand):
                 answers
             )
 
-            for scale, raw_score in scale_scores.items():
+            spectrum_scores = calculate_spectrum_scores(
+                scale_scores
+            )
+
+            for scale, scale_data in scale_scores.items():
+
+                raw_score = scale_data["score"]
 
                 if raw_score is None:
                     continue
@@ -48,8 +58,23 @@ class Command(BaseCommand):
                     raw_score=raw_score,
                 )
 
+            for spectrum, spectrum_data in spectrum_scores.items():
+
+                raw_score = spectrum_data["score"]
+
+                if raw_score is None:
+                    continue
+
+                NormativeSpectrumScore.objects.create(
+                    participant=participant,
+                    spectrum=spectrum,
+                    raw_score=raw_score,
+                )
+
         self.stdout.write(
             self.style.SUCCESS(
-                f"Foram calculados {NormativeScaleScore.objects.count()} valores."
+                f"Foram calculados "
+                f"{NormativeScaleScore.objects.count()} valores de escalas e "
+                f"{NormativeSpectrumScore.objects.count()} valores de espectros."
             )
         )

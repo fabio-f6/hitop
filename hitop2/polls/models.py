@@ -292,3 +292,31 @@ class NormativeScaleScore(models.Model):
             f"{self.scale}: "
             f"{self.raw_score:.2f}"
         )
+
+class NormativeSpectrumScore(models.Model):
+
+    participant = models.ForeignKey(
+        NormativeParticipant,
+        on_delete=models.CASCADE,
+        related_name="spectrum_scores",
+    )
+
+    spectrum = models.ForeignKey(
+        Spectra,
+        on_delete=models.CASCADE,
+    )
+
+    raw_score = models.FloatField()
+
+    class Meta:
+        unique_together = (
+            "participant",
+            "spectrum",
+        )
+
+    def __str__(self):
+        return (
+            f"{self.participant} - "
+            f"{self.spectrum}: "
+            f"{self.raw_score:.2f}"
+        )

@@ -1,15 +1,8 @@
-from polls.translations import SCALE_TRANSLATIONS
-
-
 def translated_name(item):
 
-    return SCALE_TRANSLATIONS.get(
-        item["scale"].name,
-        item["scale"].name,
-    )
+    return item["name"]
 
-
-def join_scale_names(items):
+def join_item_names(items):
 
     return ", ".join(
         translated_name(item)
@@ -29,14 +22,14 @@ def build_atypical_text(
     if p1:
 
         parts.append(
-            f"Os valores obtidos em {join_scale_names(p1)} "
+            f"Os valores obtidos em {join_item_names(p1)} "
             "situam-se no percentil igual ou inferior a P1."
         )
 
     if p2_p5:
 
         parts.append(
-            f"Os valores obtidos em {join_scale_names(p2_p5)} "
+            f"Os valores obtidos em {join_item_names(p2_p5)} "
             "situam-se entre P2 e P5."
         )
 
@@ -51,14 +44,14 @@ def build_atypical_text(
     if p99:
 
         parts.append(
-            f"Os valores obtidos em {join_scale_names(p99)} "
+            f"Os valores obtidos em {join_item_names(p99)} "
             "situam-se no percentil igual ou superior a P99."
         )
 
     if p95_p98:
 
         parts.append(
-            f"Os valores obtidos em {join_scale_names(p95_p98)} "
+            f"Os valores obtidos em {join_item_names(p95_p98)} "
             "situam-se entre P95 e P98."
         )
 
@@ -79,7 +72,7 @@ def build_normal_text(p15_p85):
         return None
 
     return (
-        f"Os valores obtidos em {join_scale_names(p15_p85)} "
+        f"Os valores obtidos em {join_item_names(p15_p85)} "
         "situam-se entre P15 e P85, o que sugere que o nível de "
         "sintomatologia se situa nos intervalos médios esperados "
         "face aos valores de referência."
@@ -93,7 +86,7 @@ def build_null_text(null_items):
 
     return (
         f"Não foi possível calcular os valores obtidos em "
-        f"{join_scale_names(null_items)}, uma vez que 25% ou mais "
+        f"{join_item_names(null_items)}, uma vez que 25% ou mais "
         "dos itens foram respondidos com a opção "
         "\"Não sei / Não aplicável\". Assim, não foi possível "
         "determinar a respetiva pontuação bruta nem comparar "

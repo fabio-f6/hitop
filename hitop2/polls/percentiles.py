@@ -1,15 +1,13 @@
-from polls.models import NormativeScaleScore
+from polls.models import (
+    NormativeScaleScore,
+    NormativeSpectrumScore,
+)
 
-def calculate_percentile(scale, raw_score):
+
+def _calculate_percentile(normative_scores, raw_score):
 
     if raw_score is None:
         return None
-
-    normative_scores = (
-        NormativeScaleScore.objects
-        .filter(scale=scale)
-        .values_list("raw_score", flat=True)
-    )
 
     total = len(normative_scores)
 
@@ -26,3 +24,31 @@ def calculate_percentile(scale, raw_score):
     )
 
     return percentile
+
+
+def calculate_percentile(scale, raw_score):
+
+    normative_scores = (
+        NormativeScaleScore.objects
+        .filter(scale=scale)
+        .values_list("raw_score", flat=True)
+    )
+
+    return _calculate_percentile(
+        normative_scores,
+        raw_score,
+    )
+
+
+def calculate_spectrum_percentile(spectrum, raw_score):
+
+    normative_scores = (
+        NormativeSpectrumScore.objects
+        .filter(spectrum=spectrum)
+        .values_list("raw_score", flat=True)
+    )
+
+    return _calculate_percentile(
+        normative_scores,
+        raw_score,
+    )

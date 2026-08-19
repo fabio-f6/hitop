@@ -13,11 +13,15 @@ from polls.models import (
     Spectra,
     UserAnswer,
 )
-from polls.percentiles import calculate_percentile
+from polls.percentiles import (
+    calculate_percentile,
+    calculate_spectrum_percentile,
+    )
 from polls.report_constants import SPECTRUM_KEYS
 from polls.report_interpretation import build_report_analysis
 from polls.scoring import calculate_scale_scores
 from polls.simulation import simulate_submission
+from polls.spectrum_scores import calculate_spectrum_scores
 from polls.translations import (
     SCALE_TRANSLATIONS,
     translate_scale,
@@ -426,6 +430,39 @@ def report_preview(request, submission_id):
 
     scale_scores = calculate_scale_scores(submission)
 
+    spectrum_scores = calculate_spectrum_scores(
+        scale_scores
+    )
+
+    spectrum_results = {}
+
+    for spectrum, spectrum_data in spectrum_scores.items():
+
+        spectrum_results[spectrum] = {
+
+            "score":
+                spectrum_data["score"],
+
+            "percentile":
+                calculate_spectrum_percentile(
+                    spectrum,
+                    spectrum_data["score"],
+                ) if spectrum_data["is_valid"] else None,
+
+            "missing_answers":
+                spectrum_data["missing_answers"],
+
+            "missing_percentage":
+                spectrum_data["missing_percentage"],
+
+            "is_valid":
+                spectrum_data["is_valid"],
+
+            "total_items":
+                spectrum_data["total_items"],
+
+        }
+
     grouped_scores = defaultdict(list)
 
     for scale, scale_data in scale_scores.items():
@@ -470,6 +507,8 @@ def report_preview(request, submission_id):
         })
 
     grouped_chart_data = {}
+
+    global_chart_data = {}
 
     # Gráfico
 
@@ -571,8 +610,60 @@ def report_preview(request, submission_id):
 
             "items": chart_items,
             "height": chart_height,
-
         }
+
+    global_items = []
+
+    chart_height = (
+        FIRST_ROW_Y
+        + len(spectrum_results) * ROW_HEIGHT
+    )
+
+    y = FIRST_ROW_Y
+
+    for spectrum, data in spectrum_results.items():
+
+        global_items.append({
+
+            "name":
+                translate_spectrum(
+                    spectrum.name,
+                ),
+
+            "score":
+                data["score"],
+
+            "percentile":
+                data["percentile"],
+
+            "missing_answers":
+                data["missing_answers"],
+
+            "missing_percentage":
+                data["missing_percentage"],
+
+            "is_valid":
+                data["is_valid"],
+
+            "x":
+                None if data["percentile"] is None else
+                GRAPH_LEFT + (
+                    data["percentile"] / 100
+                ) * GRAPH_WIDTH,
+
+            "y":
+                y,
+
+        })
+
+        y += ROW_HEIGHT
+
+
+    global_chart_data = {
+
+        "items": global_items,
+        "height": chart_height,
+    }
 
     professional = patient.userprofile.professional
 
@@ -616,6 +707,16 @@ def report_preview(request, submission_id):
 
     analysis = {}
 
+    global_analysis = build_report_analysis(
+        [
+            {
+                "name": translate_spectrum(spectrum.name),
+                **data,
+            }
+            for spectrum, data in spectrum_results.items()
+        ]
+    )
+
     for spectrum, items in grouped_scores.items():
 
         analysis[spectrum] = build_report_analysis(
@@ -631,6 +732,9 @@ def report_preview(request, submission_id):
             "grouped_scores": grouped_scores,
             "grouped_chart_data": grouped_chart_data,
             "analysis": analysis,
+            "spectrum_results": spectrum_results,
+            "global_chart_data": global_chart_data,
+            "global_analysis": global_analysis,
             "percentile_marks": PERCENTILE_MARKS,
             "graph_left": GRAPH_LEFT,
             "graph_right": GRAPH_RIGHT,
