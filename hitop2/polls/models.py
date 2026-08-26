@@ -30,7 +30,7 @@ class Question(models.Model):
     is_attention_check = models.BooleanField(default=False)
 
     expected_answer = models.CharField(
-        max_length=255,
+        max_length=1,
         blank=True,
         default=""
     )

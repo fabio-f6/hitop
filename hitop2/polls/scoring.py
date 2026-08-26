@@ -2,6 +2,8 @@ from collections import defaultdict
 
 from polls.models import UserAnswer
 
+from .attention_checks import evaluate_attention_checks
+
 
 def calculate_average(values):
 
@@ -16,6 +18,9 @@ def calculate_scale_scores_from_answers(answers):
     total_items_by_scale = defaultdict(int)
 
     for answer in answers:
+
+        if answer.question.is_attention_check:
+            continue
 
         scale = answer.question.scale
 
@@ -80,6 +85,15 @@ def calculate_scale_scores(submission):
         "question__scale"
     )
 
-    return calculate_scale_scores_from_answers(
+    scale_scores = calculate_scale_scores_from_answers(
         answers
     )
+
+    attention = evaluate_attention_checks(
+        answers
+    )
+
+    return {
+        "scale_scores": scale_scores,
+        "attention_checks": attention,
+    }

@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
+from polls.attention_checks import evaluate_attention_checks
 from polls.models import (
     QuestionnaireSubmission,
     SociodemographicAnswer,
@@ -16,10 +17,10 @@ from polls.models import (
 from polls.percentiles import (
     calculate_percentile,
     calculate_spectrum_percentile,
-    )
+)
 from polls.report_constants import SPECTRUM_KEYS
 from polls.report_interpretation import build_report_analysis
-from polls.scoring import calculate_scale_scores
+from polls.scoring import calculate_scale_scores, calculate_scale_scores_from_answers
 from polls.simulation import simulate_submission
 from polls.spectrum_scores import calculate_spectrum_scores
 from polls.translations import (
@@ -428,7 +429,15 @@ def report_preview(request, submission_id):
 
     patient = submission.user
 
-    scale_scores = calculate_scale_scores(submission)
+    answers = UserAnswer.objects.filter(
+        submission=submission
+    ).select_related(
+        "question__scale"
+    )
+
+    scale_scores = calculate_scale_scores_from_answers(answers)
+
+    attention_checks = evaluate_attention_checks(answers)
 
     spectrum_scores = calculate_spectrum_scores(
         scale_scores
@@ -729,6 +738,7 @@ def report_preview(request, submission_id):
         {
             "report": report_data,
             "scale_scores": scale_scores,
+            "attention_checks": attention_checks,
             "grouped_scores": grouped_scores,
             "grouped_chart_data": grouped_chart_data,
             "analysis": analysis,

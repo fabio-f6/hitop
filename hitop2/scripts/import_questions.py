@@ -8,6 +8,12 @@ django.setup()
 
 from polls.models import Spectra, Subfactor, Scale, Question
 
+NEVER = "1"
+RARELY = "2"
+SOMETIMES = "3"
+ALWAYS = "4"
+DONT_KNOW = "5"
+
 spectra_list = [
     "Detachment",
     "Externalizing",
@@ -596,13 +602,13 @@ questions_data =[
     {"scale": "Tolerance", "item_code": "sud072", "question_text": "Precisei de consumir muito mais - por exemplo, álcool, nicotina, drogas ilícitas, medicamentos fora da indicação médica - do que as outras pessoas para sentir algum efeito."},
     {"scale": "Withdrawal", "item_code": "exp28", "question_text": "Ao deixar ou reduzir o consumo de substâncias (ex: álcool, nicotina, drogas ilícitas, medicamentos fora da indicação médica, etc) tive sintomas físicos no meu corpo como suores, tremores, náuseas, diarreia, alterações do apetite, dores corporais, alterações do sono ou mal-estar geral."},
     {"scale": "Withdrawal", "item_code": "exp29", "question_text": "Ao deixar ou reduzir o consumo de substâncias (ex: álcool, nicotina, drogas ilícitas, medicamentos fora da indicação médica, etc) tive sintomas como nervosismo, tristeza, irritabilidade, agitação, pensamento lento ou confuso, dificuldade de concentração ou alterações percetivas."},
-    {"scale": "Catch", "item_code": "catch_1", "question_text": "Para confirmar que está atento(a) ao questionário, indique \"Nunca\".", "is_attention_check": True, "expected_answer": "Nunca"},
-    {"scale": "Catch", "item_code": "catch_2", "question_text": "O planeta Marte é azul. Por favor, selecione a resposta  \"Sempre\".", "is_attention_check": True, "expected_answer": "Sempre"},
-    {"scale": "Catch", "item_code": "catch_3", "question_text": "Por favor selecione \"Raramente\" para indicar que está a responder com atenção.", "is_attention_check": True, "expected_answer": "Raramente"},
-    {"scale": "Catch", "item_code": "catch_4", "question_text": "Os seres humanos têm quatro olhos. Por favor, selecione \"Raramente\".", "is_attention_check": True, "expected_answer": "Raramente"},
-    {"scale": "Catch", "item_code": "catch_5", "question_text": "Para fins de controlo de qualidade, escolha a opção \"Às vezes\".", "is_attention_check": True, "expected_answer": "Às vezes"},
-    {"scale": "Catch", "item_code": "catch_6", "question_text": "A capital de Portugal é Lisboa. Por favor, selecione \"Nunca\".", "is_attention_check": True, "expected_answer": "Nunca"},
-    {"scale": "Catch", "item_code": "catch_7", "question_text": "Para confirmar que está a ler com atenção, por favor selecione \"Sempre\" nesta afirmação.", "is_attention_check": True, "expected_answer": "Sempre"}
+    {"scale": "Catch", "item_code": "catch_1", "question_text": "Para confirmar que está atento(a) ao questionário, indique \"Nunca\".", "is_attention_check": True, "expected_answer": NEVER},
+    {"scale": "Catch", "item_code": "catch_2", "question_text": "O planeta Marte é azul. Por favor, selecione a resposta  \"Sempre\".", "is_attention_check": True, "expected_answer": ALWAYS},
+    {"scale": "Catch", "item_code": "catch_3", "question_text": "Por favor selecione \"Raramente\" para indicar que está a responder com atenção.", "is_attention_check": True, "expected_answer": RARELY},
+    {"scale": "Catch", "item_code": "catch_4", "question_text": "Os seres humanos têm quatro olhos. Por favor, selecione \"Raramente\".", "is_attention_check": True, "expected_answer": RARELY},
+    {"scale": "Catch", "item_code": "catch_5", "question_text": "Para fins de controlo de qualidade, escolha a opção \"Às vezes\".", "is_attention_check": True, "expected_answer": SOMETIMES},
+    {"scale": "Catch", "item_code": "catch_6", "question_text": "A capital de Portugal é Lisboa. Por favor, selecione \"Nunca\".", "is_attention_check": True, "expected_answer": NEVER},
+    {"scale": "Catch", "item_code": "catch_7", "question_text": "Para confirmar que está a ler com atenção, por favor selecione \"Sempre\" nesta afirmação.", "is_attention_check": True, "expected_answer": ALWAYS}
 ]
 
 for q in questions_data:
