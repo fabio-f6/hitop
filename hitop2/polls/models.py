@@ -27,6 +27,14 @@ class Question(models.Model):
     item_code = models.CharField(max_length=20, unique=True)
     question_text = models.TextField()
 
+    is_attention_check = models.BooleanField(default=False)
+
+    expected_answer = models.CharField(
+        max_length=255,
+        blank=True,
+        default=""
+    )
+
     ANSWER_CHOICES = [
         ("1", "Nunca"),
         ("2", "Raramente"),

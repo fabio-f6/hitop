@@ -347,9 +347,6 @@ questions_data =[
     {"scale": "Grandiosity", "item_code": "ext_219", "question_text": "As pessoas admiraram-me."},
     {"scale": "Grandiosity", "item_code": "ext_380", "question_text": "Reconheci que tinha muitas qualidades especiais."},
     {"scale": "Grandiosity", "item_code": "ext_41", "question_text": "Gostei de pensar sobre o meu futuro e as coisas boas que ele traria."},
-    {"scale": "Catch", "item_code": "catch_1", "question_text": "Para confirmar que está atento(a) ao questionário, indique \"Nada\"."},
-    {"scale": "Catch", "item_code": "catch_2", "question_text": "O planeta Marte é azul. Por favor, selecione a resposta  \"Muito\"."},
-    {"scale": "Catch", "item_code": "catch_3", "question_text": "Por favor selecione \"Moderadamente\" para indicar que está a responder com atenção."},
     {"scale": "Grandiosity", "item_code": "ext_43", "question_text": "Gostei de me olhar ao espelho."},
     {"scale": "Grandiosity", "item_code": "ext_441", "question_text": "A maioria das pessoas gostaria de ser como eu sou."},
     {"scale": "Grandiosity", "item_code": "ext_498", "question_text": "Estive muito confiante de mim ao pé de outras pessoas."},
@@ -462,8 +459,6 @@ questions_data =[
     {"scale": "Reality Distortion (Delusions)", "item_code": "hitop_533", "question_text": "Reparei que algumas mensagens eram enviadas especialmente para mim através de jornais, TV, cartazes, letras de música, etc."},
     {"scale": "Reality Distortion (Delusions)", "item_code": "hitop_534", "question_text": "Pensei, em alguns momentos, ter sido escolhido por Deus (ou outra entidade divina) para cumprir uma missão especial."},
     {"scale": "Reality Distortion (Hallucinations)", "item_code": "hitop_594", "question_text": "Experienciei visões ou sons estranhos."},
-    {"scale": "Catch", "item_code": "catch_4", "question_text": "Os seres humanos têm quatro olhos. Por favor, selecione \"Moderadamente\"."},
-    {"scale": "Catch", "item_code": "catch_5", "question_text": "Para fins de controlo de qualidade, escolha a opção \"Um pouco\"."},
     {"scale": "Reality Distortion (Hallucinations)", "item_code": "hitop_595", "question_text": "Em alguns momentos, senti cheiros que mais ninguém sentiu."},
     {"scale": "Reality Distortion (Hallucinations)", "item_code": "hitop_596", "question_text": "Vi coisas que não estavam realmente presentes."},
     {"scale": "Reality Distortion (Hallucinations)", "item_code": "hitop_601", "question_text": "Vi uma pessoa, mas depois percebi que era só uma sombra."},
@@ -601,17 +596,26 @@ questions_data =[
     {"scale": "Tolerance", "item_code": "sud072", "question_text": "Precisei de consumir muito mais - por exemplo, álcool, nicotina, drogas ilícitas, medicamentos fora da indicação médica - do que as outras pessoas para sentir algum efeito."},
     {"scale": "Withdrawal", "item_code": "exp28", "question_text": "Ao deixar ou reduzir o consumo de substâncias (ex: álcool, nicotina, drogas ilícitas, medicamentos fora da indicação médica, etc) tive sintomas físicos no meu corpo como suores, tremores, náuseas, diarreia, alterações do apetite, dores corporais, alterações do sono ou mal-estar geral."},
     {"scale": "Withdrawal", "item_code": "exp29", "question_text": "Ao deixar ou reduzir o consumo de substâncias (ex: álcool, nicotina, drogas ilícitas, medicamentos fora da indicação médica, etc) tive sintomas como nervosismo, tristeza, irritabilidade, agitação, pensamento lento ou confuso, dificuldade de concentração ou alterações percetivas."},
-    {"scale": "Catch", "item_code": "catch_6", "question_text": "A capital de Portugal é Lisboa. Por favor, selecione \"Nada\"."},
-    {"scale": "Catch", "item_code": "catch_7", "question_text": "Para confirmar que está a ler com atenção, por favor selecione \"Muito\" nesta afirmação."}
+    {"scale": "Catch", "item_code": "catch_1", "question_text": "Para confirmar que está atento(a) ao questionário, indique \"Nunca\".", "is_attention_check": True, "expected_answer": "Nunca"},
+    {"scale": "Catch", "item_code": "catch_2", "question_text": "O planeta Marte é azul. Por favor, selecione a resposta  \"Sempre\".", "is_attention_check": True, "expected_answer": "Sempre"},
+    {"scale": "Catch", "item_code": "catch_3", "question_text": "Por favor selecione \"Raramente\" para indicar que está a responder com atenção.", "is_attention_check": True, "expected_answer": "Raramente"},
+    {"scale": "Catch", "item_code": "catch_4", "question_text": "Os seres humanos têm quatro olhos. Por favor, selecione \"Raramente\".", "is_attention_check": True, "expected_answer": "Raramente"},
+    {"scale": "Catch", "item_code": "catch_5", "question_text": "Para fins de controlo de qualidade, escolha a opção \"Às vezes\".", "is_attention_check": True, "expected_answer": "Às vezes"},
+    {"scale": "Catch", "item_code": "catch_6", "question_text": "A capital de Portugal é Lisboa. Por favor, selecione \"Nunca\".", "is_attention_check": True, "expected_answer": "Nunca"},
+    {"scale": "Catch", "item_code": "catch_7", "question_text": "Para confirmar que está a ler com atenção, por favor selecione \"Sempre\" nesta afirmação.", "is_attention_check": True, "expected_answer": "Sempre"}
 ]
 
 for q in questions_data:
     scale_obj = scale[q["scale"]]
 
-    question_obj, created = Question.objects.get_or_create(
+    question_obj, created = Question.objects.update_or_create(
         scale=scale_obj,
         item_code=q["item_code"],
-        question_text=q["question_text"]
+        defaults={
+            "question_text": q["question_text"],
+            "is_attention_check": q.get("is_attention_check", False),
+            "expected_answer": q.get("expected_answer", ""),
+        },
     )
 
 print(f"{len(questions_data)} perguntas criadas com sucesso!")
