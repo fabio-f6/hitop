@@ -25,6 +25,11 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     user_type = models.CharField(max_length=20, choices=USER_TYPES)
 
+    is_verified = models.BooleanField(
+        default=False,
+        verbose_name="Verificado",
+    )
+
     professional = models.ForeignKey(
         User, null=True, blank=True,
         on_delete=models.SET_NULL,

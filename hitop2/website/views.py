@@ -2,7 +2,6 @@ from collections import defaultdict
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -32,12 +31,22 @@ from polls.translations import (
 
 from .forms import CreatePatientForm, EditPatientForm, SignUpForm
 from .models import UserProfile
+from .decorators import (
+    PENDING_VERIFICATION_MESSAGE,
+    is_unverified_professional,
+    verified_professional_required,
+)
 
 
 def home(request):
 
     # Se já estiver autenticado, não faz sentido mostrar a landing page
     if request.user.is_authenticated:
+
+        if is_unverified_professional(request.user):
+            logout(request)
+            messages.error(request, PENDING_VERIFICATION_MESSAGE)
+            return redirect("website:home")
 
         if request.user.userprofile.user_type == "professional":
             return redirect("website:dashboard")
@@ -61,6 +70,10 @@ def home(request):
         )
 
         if user is not None:
+
+            if is_unverified_professional(user):
+                messages.error(request, PENDING_VERIFICATION_MESSAGE)
+                return redirect("website:home")
 
             login(request, user)
 
@@ -111,28 +124,26 @@ def register_user(request):
             # atualiza o perfil que já foi criado automaticamente
             profile = user.userprofile
             profile.user_type = 'professional'  # apenas profissionais podem registrar
+            profile.is_verified = False
             profile.area_formacao = form.cleaned_data['area_formacao']
             profile.objetivo_uso = form.cleaned_data['objetivo_uso']
             profile.cedula_profissional = form.cleaned_data['cedula_profissional']
             profile.save()
 
-            # autentica e loga o usuário
-            user = authenticate(
+            messages.success(
                 request,
-                username=user.username,
-                password=form.cleaned_data['password1']
+                "O pedido de registo foi submetido com sucesso. "
+                "A sua conta aguarda verificação por um administrador. "
+                f"O seu nome de utilizador é: {user.username}",
             )
-            login(request, user)
-
-            messages.success(request, f"Registo realizado com sucesso! O seu nome de utilizador é: {user.username}")
-            return redirect('website:dashboard')
+            return redirect('website:home')
 
     else:
         form = SignUpForm()
 
     return render(request, 'website/register.html', {'form': form})
 
-@login_required
+@verified_professional_required
 def create_patient(request):
 
     # garante que apenas profissionais podem acessar
@@ -191,6 +202,7 @@ def create_patient(request):
 
     return render(request, 'website/create_patient.html', {'form': form})
 
+@verified_professional_required
 def edit_patient(request, patient_id):
     patient_profile = get_object_or_404(UserProfile, id=patient_id, user_type='patient')
 
@@ -212,7 +224,7 @@ def edit_patient(request, patient_id):
             'patient': patient_profile
             })
 
-@login_required
+@verified_professional_required
 def new_questionnaire(request, patient_id):
 
     patient_profile = get_object_or_404(
@@ -284,7 +296,7 @@ def new_questionnaire(request, patient_id):
         }
     )
 
-@login_required
+@verified_professional_required
 def dashboard(request):
 
     if request.user.userprofile.user_type != "professional":
@@ -333,7 +345,7 @@ def dashboard(request):
         },
     )
 
-@login_required
+@verified_professional_required
 def patient_answers(request, submission_id):
 
     submission = get_object_or_404(
@@ -355,7 +367,7 @@ def patient_answers(request, submission_id):
         "answers": answers
     })
 
-@login_required
+@verified_professional_required
 def patient_submissions(request, patient_id):
 
     patient = get_object_or_404(User, id=patient_id)
@@ -393,7 +405,7 @@ def patient_submissions(request, patient_id):
         "has_open_submission": has_open_submission,
     })
 
-@login_required
+@verified_professional_required
 def submission_detail(request, submission_id):
 
     submission = get_object_or_404(
@@ -415,7 +427,7 @@ def submission_detail(request, submission_id):
         "answers": answers
     })
 
-@login_required
+@verified_professional_required
 def report_preview(request, submission_id):
 
     submission = get_object_or_404(
