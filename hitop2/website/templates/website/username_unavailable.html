@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div
+    style="
+        max-width:620px;
+        margin:60px auto;
+        padding:40px;
+        background:#f8fbff;
+        border:1px solid #d7e9ff;
+        text-align:center;
+    "
+>
+
+    <h2
+        style="
+            font-size:1.7rem;
+            font-weight:500;
+            margin-bottom:20px;
+        "
+    >
+        Nome de utilizador indisponível
+    </h2>
+
+    <p style="color:#555; line-height:1.7; margin-bottom:16px;">
+        Já existe uma conta com o nome de utilizador gerado a partir do endereço de email indicado.
+    </p>
+
+    <p style="color:#555; line-height:1.7; margin-bottom:28px;">
+        Para concluir o registo, utilize um endereço de email diferente ou contacte um administrador caso necessite de ajuda.
+    </p>
+
+    <a
+        href="{% url 'website:register' %}"
+        class="btn rounded-0"
+        style="
+            background:#e2f0ff;
+            color:#000;
+            border:1px solid #9ec9ff;
+            padding:9px 24px;
+        "
+    >
+        Voltar ao registo
+    </a>
+
+</div>
+
+{% endblock %}

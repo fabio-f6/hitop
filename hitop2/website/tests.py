@@ -41,6 +41,31 @@ class ProfessionalVerificationTests(TestCase):
         self.assertNotIn("_auth_user_id", self.client.session)
         self.assertContains(response, "aguarda verificação por um administrador")
 
+    def test_duplicate_generated_username_shows_friendly_error_page(self):
+        self.create_user("ana.silva", "professional")
+
+        response = self.client.post(
+            reverse("website:register"),
+            {
+                "first_name": "Outra",
+                "last_name": "Pessoa",
+                "email": "ana.silva@outro-dominio.pt",
+                "password1": "Uma-palavra-passe-segura-123",
+                "password2": "Uma-palavra-passe-segura-123",
+                "area_formacao": "Psicologia",
+                "objetivo_uso": "clinico",
+                "cedula_profissional": "67890",
+            },
+        )
+
+        self.assertEqual(response.status_code, 409)
+        self.assertContains(
+            response,
+            "Nome de utilizador indisponível",
+            status_code=409,
+        )
+        self.assertEqual(User.objects.filter(username="ana.silva").count(), 1)
+
     def test_unverified_professional_cannot_log_in(self):
         self.create_user("pending-professional", "professional")
 

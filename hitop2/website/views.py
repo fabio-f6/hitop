@@ -3,6 +3,7 @@ from collections import defaultdict
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
@@ -116,6 +117,15 @@ def logout_user(request):
     messages.success(request, "Logged out successfully!")
     return redirect('website:home')
 
+
+def username_unavailable(request):
+    return render(
+        request,
+        "website/username_unavailable.html",
+        status=409,
+    )
+
+
 def register_user(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
@@ -125,7 +135,14 @@ def register_user(request):
 
             # gera username automaticamente a partir do email
             user.username = form.cleaned_data['email'].split('@')[0]
-            user.save()
+
+            if User.objects.filter(username=user.username).exists():
+                return username_unavailable(request)
+
+            try:
+                user.save()
+            except IntegrityError:
+                return username_unavailable(request)
 
             # atualiza o perfil que já foi criado automaticamente
             profile = user.userprofile
