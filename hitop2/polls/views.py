@@ -396,15 +396,19 @@ def questionnaire_by_token(request, token):
     ).first()
 
     if not submission:
-        request.session.pop("submission_id", None)
-        request.session.pop("anonymous_questionnaire", None)
-
-        return render(
-            request,
-            "polls/invalid_link.html"
-        )
+        return invalid_questionnaire_link(request, token)
 
     request.session["submission_id"] = submission.id
     request.session["anonymous_questionnaire"] = True
 
     return redirect("polls:questionnaire")
+
+
+def invalid_questionnaire_link(request, token):
+    request.session.pop("submission_id", None)
+    request.session.pop("anonymous_questionnaire", None)
+
+    return render(
+        request,
+        "polls/invalid_link.html"
+    )

@@ -12,6 +12,11 @@ urlpatterns = [
         views.questionnaire_by_token,
         name="questionnaire_by_token"
     ),
+    path(
+        "access/<str:token>/",
+        views.invalid_questionnaire_link,
+        name="invalid_questionnaire_link",
+    ),
 
     path("thank-you/", views.thank_you, name="thank_you"),
     path('export_pdf/<int:user_id>/', views.export_patient_pdf, name='export_patient_pdf'),
