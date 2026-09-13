@@ -107,4 +107,23 @@ class ProfessionalVerificationTests(TestCase):
             fetch_redirect_response=False,
         )
 
+    def test_admin_login_redirects_to_django_admin_dashboard(self):
+        admin_user = self.create_user("admin", "admin")
+        admin_user.is_staff = True
+        admin_user.save()
+
+        response = self.client.post(
+            reverse("website:home"),
+            {
+                "username": "admin",
+                "password": "Uma-palavra-passe-segura-123",
+            },
+        )
+
+        self.assertRedirects(
+            response,
+            reverse("admin:index"),
+            fetch_redirect_response=False,
+        )
+
 # Create your tests here.

@@ -54,6 +54,9 @@ def home(request):
         elif request.user.userprofile.user_type == "patient":
             return redirect("polls:questionnaire")
 
+        elif request.user.userprofile.user_type == "admin":
+            return redirect("admin:index")
+
         else:
             return redirect("website:home")
 
@@ -87,6 +90,9 @@ def home(request):
 
             elif user.userprofile.user_type == "professional":
                 return redirect("website:dashboard")
+
+            elif user.userprofile.user_type == "admin":
+                return redirect("admin:index")
 
             else:
                 return redirect("website:home")
