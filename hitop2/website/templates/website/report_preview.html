@@ -3,6 +3,24 @@
 
 {% block content %}
 
+<style>
+    .attention-check-alert {
+        border: 1px solid #f0ad4e;
+        padding: 14px 18px;
+        margin-bottom: 25px;
+        background-color: #fff8e6;
+    }
+
+    .attention-check-alert-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .attention-check-alert-text {
+        font-size: 14px;
+    }
+</style>
+
 <div class="report-container">
 
 <div class="container mt-4">
@@ -145,6 +163,24 @@
         >
             Resultados
         </h1>
+
+        {% if attention_checks.incorrect > 0 %}
+        <div class="attention-check-alert">
+            <div class="attention-check-alert-title">
+                Atenção
+            </div>
+
+            <div class="attention-check-alert-text">
+                Este paciente falhou {{ attention_checks.incorrect }}
+                {% if attention_checks.incorrect == 1 %}
+                    check de atenção
+                {% else %}
+                    checks de atenção
+                {% endif %}
+                num total de {{ attention_checks.total }}.
+            </div>
+        </div>
+        {% endif %}
 
         <!-- ===================================== -->
         <!-- PERFIL GLOBAL -->
