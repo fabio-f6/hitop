@@ -1,7 +1,5 @@
 from django.contrib import admin
-from .models import Record, UserProfile
-
-admin.site.register(Record)
+from .models import UserProfile
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
