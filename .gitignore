@@ -180,3 +180,4 @@ gymme-gains-c8a467f8722b.json
 credentials.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python
+/hitop2/.vscode
