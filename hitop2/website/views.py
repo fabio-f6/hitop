@@ -557,7 +557,7 @@ def report_preview(request, submission_id):
     # Gráfico
 
     GRAPH_LEFT = 640
-    GRAPH_RIGHT = 1200
+    GRAPH_RIGHT = 1170
     GRAPH_WIDTH = GRAPH_RIGHT - GRAPH_LEFT
 
     PERCENTILE_MARKS = [
