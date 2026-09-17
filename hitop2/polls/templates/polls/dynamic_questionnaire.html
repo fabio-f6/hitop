@@ -1,31 +1,49 @@
 {% extends 'base.html' %}
+{% load custom_tags %}
 
 {% block content %}
 
-<div class="container mt-4">
+<div class="container mt-4" style="max-width: 760px;">
 
-    <h2>{{ category.name }}</h2>
+    <p class="text-muted mb-1">{{ section_index|add:1 }} / {{ section_total }}</p>
+    <h2 class="h4 mb-4">{{ section_name }}</h2>
 
-    <form method="POST">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} mt-3" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" action="?section={{ section_index }}">
 
         {% csrf_token %}
 
         {% for question in questions %}
 
-            <div class="mb-4">
+            <div class="mb-4" data-question-id="{{ question.question_id }}"
+                 data-show-if="{{ question.show_if_question }}"
+                 data-show-values="{{ question.show_if_values|join:',' }}">
 
-                <label>
+                <label class="form-label">
                     <strong>{{ question.label }}</strong>
+                    {% if question.required %}<span aria-hidden="true">*</span>{% endif %}
                 </label>
+
+                {% if question.description %}
+                    <div class="form-text mb-2">{{ question.description }}</div>
+                {% endif %}
 
                 <!-- TEXT -->
                 {% if question.question_type == "text" %}
 
-                    <input
-                        type="text"
+                    <textarea
                         name="question_{{ question.id }}"
                         class="form-control"
-                    >
+                        rows="2"
+                        {% if question.required and not question.show_if_question %}required{% endif %}
+                    >{{ answers|get_item:question.id|default:'' }}</textarea>
 
                 <!-- NUMBER -->
                 {% elif question.question_type == "number" %}
@@ -34,6 +52,8 @@
                         type="number"
                         name="question_{{ question.id }}"
                         class="form-control"
+                        value="{{ answers|get_item:question.id|default:'' }}"
+                        {% if question.required and not question.show_if_question %}required{% endif %}
                     >
 
                 <!-- RADIO -->
@@ -45,12 +65,15 @@
 
                             <input
                                 type="radio"
+                                id="question_{{ question.id }}_{{ forloop.counter }}"
                                 name="question_{{ question.id }}"
                                 value="{{ choice.value }}"
                                 class="form-check-input"
+                                {% if answers|get_item:question.id == choice.value %}checked{% endif %}
+                                {% if question.required and not question.show_if_question %}required{% endif %}
                             >
 
-                            <label class="form-check-label">
+                            <label class="form-check-label" for="question_{{ question.id }}_{{ forloop.counter }}">
                                 {{ choice.label }}
                             </label>
 
@@ -61,24 +84,28 @@
                 <!-- CHECKBOX -->
                 {% elif question.question_type == "checkbox" %}
 
+                    {% with selected_values=answers|get_item:question.id %}
                     {% for choice in question.choices.all %}
 
                         <div class="form-check">
 
                             <input
                                 type="checkbox"
+                                id="question_{{ question.id }}_{{ forloop.counter }}"
                                 name="question_{{ question.id }}"
                                 value="{{ choice.value }}"
                                 class="form-check-input"
+                                {% if selected_values and choice.value in selected_values %}checked{% endif %}
                             >
 
-                            <label class="form-check-label">
+                            <label class="form-check-label" for="question_{{ question.id }}_{{ forloop.counter }}">
                                 {{ choice.label }}
                             </label>
 
                         </div>
 
                     {% endfor %}
+                    {% endwith %}
 
                 {% endif %}
 
@@ -86,12 +113,45 @@
 
         {% endfor %}
 
-        <button type="submit" class="btn btn-primary">
-            Enviar
+        {% if previous_index >= 0 %}
+            <a class="btn btn-outline-secondary me-2" href="?section={{ previous_index }}">Voltar</a>
+        {% endif %}
+        <button type="submit"
+                class="btn btn-primary rounded-0"
+                style="background-color: #e2f0ff; color: #000; border: 1px solid #9ec9ff;">
+            {{ submit_label|default:"Enviar" }}
         </button>
 
     </form>
 
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const questions = [...document.querySelectorAll("[data-question-id]")];
+    const byId = Object.fromEntries(questions.map(element => [element.dataset.questionId, element]));
+
+    function updateVisibility() {
+        for (const element of questions) {
+            const parent = byId[element.dataset.showIf];
+            if (!parent) continue;
+            const selected = [...parent.querySelectorAll("input:checked")].map(input => input.value);
+            const text = parent.querySelector("input[type=text], input[type=number], textarea");
+            if (text) selected.push(text.value);
+            const allowed = element.dataset.showValues.split(",");
+            const visible = !parent.hidden && selected.some(value => allowed.includes(value));
+            element.hidden = !visible;
+            for (const input of element.querySelectorAll("input, textarea")) {
+                input.disabled = !visible;
+                input.required = visible && element.querySelector("[aria-hidden=true]") !== null
+                    && input.type !== "checkbox";
+            }
+        }
+    }
+
+    document.querySelector("form").addEventListener("change", updateVisibility);
+    updateVisibility();
+});
+</script>
 
 {% endblock %}

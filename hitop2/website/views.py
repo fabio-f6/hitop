@@ -9,6 +9,7 @@ from django.urls import reverse
 
 from polls.attention_checks import evaluate_attention_checks
 from polls.models import (
+    DynamicAnswer,
     QuestionnaireSubmission,
     SociodemographicAnswer,
     Spectra,
@@ -450,6 +451,36 @@ def submission_detail(request, submission_id):
         "answers": answers
     })
 
+def _report_sociodemographics(submission):
+    fields = ("age", "sex", "gender", "education")
+    socio = {
+        answer.question_id: answer.answer_label
+        for answer in SociodemographicAnswer.objects.filter(
+            user=submission.user,
+            question_id__in=fields,
+        )
+    }
+
+    answers = DynamicAnswer.objects.filter(
+        submission=submission,
+        user=submission.user,
+        question__question_id__in=fields,
+    ).select_related("question").prefetch_related("question__choices")
+
+    for answer in answers:
+        question = answer.question
+        if question.question_type in ("radio", "checkbox"):
+            socio[question.question_id] = next(
+                (choice.label for choice in question.choices.all()
+                 if choice.value == answer.answer_value),
+                answer.answer_value,
+            )
+        else:
+            socio[question.question_id] = answer.answer_value
+
+    return socio
+
+
 @verified_professional_required
 def report_preview(request, submission_id):
 
@@ -711,12 +742,7 @@ def report_preview(request, submission_id):
 
     professional = patient.userprofile.professional
 
-    socio = {
-        answer.question_id: answer.answer_label
-        for answer in SociodemographicAnswer.objects.filter(
-            user=patient
-        )
-    }
+    socio = _report_sociodemographics(submission)
 
     report_data = {
 

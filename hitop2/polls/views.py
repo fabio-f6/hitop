@@ -1,3 +1,4 @@
+import json
 import math
 import random
 
@@ -9,11 +10,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.db import transaction
 
 from .questions import get_questions_for_submission
 
-from .models import Question, QuestionCategory, DynamicAnswer, UserAnswer, SociodemographicAnswer, QuestionnaireSubmission
-from .socio_config import SOCIO_QUESTIONS
+from .models import Question, QuestionCategory, DynamicAnswer, UserAnswer, QuestionnaireSubmission
 
 from datetime import datetime
 
@@ -31,6 +32,15 @@ answer_choices = [
 ]
 
 last_page_extra_choice = ('5', 'Não sei / Prefiro não responder')
+
+SOCIODEMOGRAPHIC_CATEGORY_NAME = "Dados Sociodemográficos"
+
+
+def _get_sociodemographic_category():
+    return QuestionCategory.objects.filter(
+        name=SOCIODEMOGRAPHIC_CATEGORY_NAME
+    ).first()
+
 
 def questionnaire(request):
 
@@ -70,19 +80,6 @@ def questionnaire(request):
     # ----------------------------
     # SOCIODEMOGRÁFICO
     # ----------------------------
-    if not SociodemographicAnswer.objects.filter(
-        user=submission.user
-    ).exists():
-
-        return redirect('polls:sociodemographic')
-
-    # ----------------------------
-    # CASO 1: PRIMEIRA VEZ → CRIA
-    # ----------------------------
-   
-    # ----------------------------
-    # CASO 2: NÃO HÁ SUBMISSION ATIVA
-    # ----------------------------
     if not submission:
         return redirect("polls:thank_you")
 
@@ -91,6 +88,9 @@ def questionnaire(request):
     # ----------------------------
     if not submission.is_open:
         return redirect("polls:thank_you")
+
+    if not submission.sociodemographic_completed:
+        return redirect("polls:sociodemographic")
 
     request.session["submission_id"] = submission.id
 
@@ -291,103 +291,184 @@ def export_patient_pdf(request, user_id):
     return response
 
 def sociodemographic_form(request):
-
     submission_id = request.session.get("submission_id")
-
     if not submission_id:
         return redirect("polls:thank_you")
 
     submission = get_object_or_404(
         QuestionnaireSubmission,
-        id=submission_id
+        id=submission_id,
+        questionnaire_type="hitop",
+        is_open=True,
+    )
+    category = _get_sociodemographic_category()
+    if not category or not category.questions.exists():
+        messages.error(request, "As perguntas ainda não foram configuradas.")
+        return redirect("polls:thank_you")
+
+    return _dynamic_questionnaire_response(
+        request=request,
+        category=category,
+        user=submission.user,
+        submission=submission,
+        success_redirect="polls:questionnaire",
     )
 
-    user = submission.user
-
-    if request.method == "POST":
-
-        for q in SOCIO_QUESTIONS:
-            value = request.POST.get(q["id"])
-
-            if value:
-
-                if "choices" in q:
-                    label = dict(q["choices"]).get(value)
-                else:
-                    label = value
-
-                SociodemographicAnswer.objects.update_or_create(
-                    user=user,
-                    question_id=q["id"],
-                    defaults={
-                        "answer_value": value,
-                        "answer_label": label
-                    }
-                )
-
-        return redirect('polls:questionnaire')
-
-    existing_answers = {
-        a.question_id: a.answer_value
-        for a in SociodemographicAnswer.objects.filter(user=user)
-    }
-
-    return render(request, "polls/sociodemographic.html", {
-        "questions": SOCIO_QUESTIONS,
-        "answers": existing_answers
-        })
 
 @login_required
 def dynamic_questionnaire(request, category_id):
-
-    category = get_object_or_404(
-        QuestionCategory,
-        id=category_id
+    category = get_object_or_404(QuestionCategory, id=category_id)
+    return _dynamic_questionnaire_response(
+        request=request,
+        category=category,
+        user=request.user,
+        success_redirect="polls:index",
     )
 
-    questions = category.questions.all().order_by("order")
+
+def _dynamic_answer_value(answer):
+    if answer.question.question_type != "checkbox":
+        return answer.answer_value
+    try:
+        value = json.loads(answer.answer_value)
+    except json.JSONDecodeError:
+        return [answer.answer_value]
+    return value if isinstance(value, list) else [answer.answer_value]
+
+
+def _question_is_visible(question, values):
+    if not question.show_if_question:
+        return True
+    parent_value = values.get(question.show_if_question, "")
+    if not isinstance(parent_value, list):
+        parent_value = [parent_value]
+    return bool(set(parent_value) & set(question.show_if_values))
+
+
+def _dynamic_questionnaire_response(
+    request, category, user, submission=None, success_redirect="polls:index",
+):
+    questions = list(
+        category.questions.all().prefetch_related("choices").order_by("order", "id")
+    )
+    if not questions:
+        messages.error(request, "Este questionário não tem perguntas.")
+        return redirect(success_redirect)
+
+    sections = {}
+    for question in questions:
+        sections.setdefault(question.section or category.name, []).append(question)
+    section_names = list(sections)
+
+    previous_answers = DynamicAnswer.objects.filter(
+        user=user, submission=submission, question__category=category,
+    ).select_related("question")
+    values = {
+        answer.question.question_id: _dynamic_answer_value(answer)
+        for answer in previous_answers
+    }
+
+    first_incomplete = (
+        len(section_names) - 1
+        if submission and not submission.sociodemographic_completed else 0
+    )
+    if submission and not submission.sociodemographic_completed:
+        for index, section_name in enumerate(section_names):
+            if any(
+                question.required
+                and _question_is_visible(question, values)
+                and not values.get(question.question_id)
+                for question in sections[section_name]
+            ):
+                first_incomplete = index
+                break
+
+    try:
+        section_index = int(request.GET.get("section", first_incomplete))
+    except ValueError:
+        section_index = first_incomplete
+    section_index = max(0, min(section_index, len(section_names) - 1))
+    if submission and not submission.sociodemographic_completed:
+        section_index = min(section_index, first_incomplete)
+
+    current_questions = sections[section_names[section_index]]
+    error = False
 
     if request.method == "POST":
-
-        for question in questions:
-
+        submitted = dict(values)
+        for question in current_questions:
             field_name = f"question_{question.id}"
-
-            # checkbox
             if question.question_type == "checkbox":
-
-                values = request.POST.getlist(field_name)
-
-                for value in values:
-
-                    DynamicAnswer.objects.create(
-                        user=request.user,
-                        question=question,
-                        answer_value=value
-                    )
-
-            # restantes
+                submitted[question.question_id] = request.POST.getlist(field_name)
             else:
+                submitted[question.question_id] = request.POST.get(
+                    field_name, ""
+                ).strip()
 
-                value = request.POST.get(field_name)
+        for question in current_questions:
+            if not _question_is_visible(question, submitted):
+                submitted[question.question_id] = [] if question.question_type == "checkbox" else ""
+                continue
 
-                if value:
+            value = submitted[question.question_id]
+            if question.required and not value:
+                error = True
+            if question.question_type in ("radio", "checkbox"):
+                selected = value if isinstance(value, list) else [value]
+                valid = {choice.value for choice in question.choices.all()}
+                if any(option not in valid for option in selected):
+                    error = True
+            if question.question_type == "number" and value:
+                if not value.isdecimal():
+                    error = True
 
-                    DynamicAnswer.objects.create(
-                        user=request.user,
-                        question=question,
-                        answer_value=value
-                    )
+        if error:
+            messages.error(request, "Revise as respostas obrigatórias desta secção.")
+            values = submitted
+        else:
+            with transaction.atomic():
+                DynamicAnswer.objects.filter(
+                    user=user,
+                    submission=submission,
+                    question__in=current_questions,
+                ).delete()
+                for question in current_questions:
+                    value = submitted[question.question_id]
+                    if value:
+                        DynamicAnswer.objects.create(
+                            user=user,
+                            submission=submission,
+                            question=question,
+                            answer_value=(
+                                json.dumps(value)
+                                if isinstance(value, list) else value
+                            ),
+                        )
+                if submission and section_index == len(section_names) - 1:
+                    submission.sociodemographic_completed = True
+                    submission.save(update_fields=["sociodemographic_completed"])
 
-        messages.success(request, "Respostas guardadas.")
+            if section_index == len(section_names) - 1:
+                return redirect(success_redirect)
+            return redirect(f"{request.path}?section={section_index + 1}")
 
-        return redirect("polls:index")
-
+    answers_by_id = {
+        question.id: values.get(question.question_id, "")
+        for question in current_questions
+    }
     return render(request, "polls/dynamic_questionnaire.html", {
         "category": category,
-        "questions": questions
+        "questions": current_questions,
+        "answers": answers_by_id,
+        "section_name": section_names[section_index],
+        "section_index": section_index,
+        "section_total": len(section_names),
+        "previous_index": section_index - 1,
+        "submit_label": (
+            "Concluir" if section_index == len(section_names) - 1
+            else "Guardar e continuar"
+        ),
     })
-
 def questionnaire_by_token(request, token):
 
     submission = QuestionnaireSubmission.objects.filter(
@@ -397,6 +478,10 @@ def questionnaire_by_token(request, token):
 
     if not submission:
         return invalid_questionnaire_link(request, token)
+
+    if request.session.get("submission_id") != submission.id:
+        request.session.pop("question_order", None)
+        request.session.pop("partial_answers", None)
 
     request.session["submission_id"] = submission.id
     request.session["anonymous_questionnaire"] = True

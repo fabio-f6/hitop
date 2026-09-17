@@ -4,7 +4,8 @@ from django.contrib.auth.models import User
 from polls.models import (
     UserAnswer,
     QuestionnaireSubmission,
-    SociodemographicAnswer
+    SociodemographicAnswer,
+    DynamicAnswer
 )
 
 from website.models import UserProfile
@@ -31,6 +32,7 @@ class Command(BaseCommand):
 
         # sociodemográfico
         SociodemographicAnswer.objects.filter(user=user).delete()
+        DynamicAnswer.objects.filter(user=user).delete()
 
         # profile (IMPORTANTE: vem do website)
         UserProfile.objects.filter(user=user).delete()

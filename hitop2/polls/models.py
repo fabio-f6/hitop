@@ -87,6 +87,8 @@ class QuestionnaireSubmission(models.Model):
         default=False
     )
 
+    sociodemographic_completed = models.BooleanField(default=False)
+
     started_at = models.DateTimeField(
         auto_now_add=True
     )
@@ -186,6 +188,10 @@ class DynamicQuestion(models.Model):
         null=True
     )
 
+    section = models.CharField(max_length=100, blank=True)
+    show_if_question = models.CharField(max_length=100, blank=True)
+    show_if_values = models.JSONField(default=list, blank=True)
+
     def __str__(self):
         return self.question_id
 
@@ -199,7 +205,7 @@ class DynamicChoice(models.Model):
 
     value = models.CharField(max_length=20)
 
-    label = models.CharField(max_length=255)
+    label = models.TextField()
 
     order = models.PositiveIntegerField(default=0)
 

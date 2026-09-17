@@ -3,7 +3,17 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.urls import reverse
 
+from polls.models import (
+    DynamicAnswer,
+    DynamicChoice,
+    DynamicQuestion,
+    QuestionCategory,
+    QuestionnaireSubmission,
+    SociodemographicAnswer,
+)
+
 from .models import UserProfile
+from .views import _report_sociodemographics
 
 
 class ProfessionalVerificationTests(TestCase):
@@ -152,3 +162,57 @@ class ProfessionalVerificationTests(TestCase):
         )
 
 # Create your tests here.
+
+
+class ReportSociodemographicsTests(TestCase):
+    def test_current_submission_uses_dynamic_values_and_choice_labels(self):
+        patient = User.objects.create_user(username="report-patient")
+        current = QuestionnaireSubmission.objects.create(user=patient)
+        previous = QuestionnaireSubmission.objects.create(user=patient)
+        category = QuestionCategory.objects.create(name="Dados Sociodemográficos")
+
+        for key, kind, value, label in (
+            ("age", "number", "34", None),
+            ("sex", "radio", "2", "Masculino"),
+            ("gender", "radio", "3", "Não binário"),
+            ("education", "radio", "7", "Ensino Superior concluído"),
+        ):
+            question = DynamicQuestion.objects.create(
+                category=category, question_id=key, label=key,
+                question_type=kind,
+            )
+            if label:
+                DynamicChoice.objects.create(
+                    question=question, value=value, label=label,
+                )
+            DynamicAnswer.objects.create(
+                user=patient, submission=current, question=question,
+                answer_value=value,
+            )
+            if key == "age":
+                DynamicAnswer.objects.create(
+                    user=patient, submission=previous, question=question,
+                    answer_value="58",
+                )
+
+        SociodemographicAnswer.objects.create(
+            user=patient, question_id="age", answer_value="60",
+            answer_label="60",
+        )
+
+        self.assertEqual(_report_sociodemographics(current), {
+            "age": "34",
+            "sex": "Masculino",
+            "gender": "Não binário",
+            "education": "Ensino Superior concluído",
+        })
+
+    def test_legacy_answers_remain_available(self):
+        patient = User.objects.create_user(username="legacy-report-patient")
+        submission = QuestionnaireSubmission.objects.create(user=patient)
+        SociodemographicAnswer.objects.create(
+            user=patient, question_id="sex", answer_value="1",
+            answer_label="Feminino",
+        )
+
+        self.assertEqual(_report_sociodemographics(submission)["sex"], "Feminino")

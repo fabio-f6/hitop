@@ -1,0 +1,5118 @@
+[
+  {
+    "id": "age",
+    "label": "Idade",
+    "type": "number",
+    "section": "Dados Sociodemográficos",
+    "required": true
+  },
+  {
+    "id": "country_born",
+    "label": "Em que país nasceu?",
+    "type": "text",
+    "section": "Dados Sociodemográficos",
+    "required": true
+  },
+  {
+    "id": "country_residence",
+    "label": "Em que país reside atualmente?",
+    "type": "text",
+    "section": "Dados Sociodemográficos",
+    "required": true
+  },
+  {
+    "id": "PT_residence_years",
+    "label": "No total, há quantos anos vive - ou esteve a viver - em Portugal?",
+    "type": "radio",
+    "section": "Dados Sociodemográficos",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Nunca"
+      ],
+      [
+        "2",
+        "Menos de 1 ano"
+      ],
+      [
+        "3",
+        "Menos de 5 anos"
+      ],
+      [
+        "4",
+        "A maior parte da minha vida"
+      ],
+      [
+        "5",
+        "Toda a vida"
+      ],
+      [
+        "6",
+        "Outro (especifique o número de anos)"
+      ]
+    ]
+  },
+  {
+    "id": "PT_residence_years_other",
+    "label": "Quantos anos viveu em Portugal?",
+    "type": "text",
+    "section": "Dados Sociodemográficos",
+    "required": true,
+    "show_if_question": "PT_residence_years",
+    "show_if_values": [
+      "6"
+    ]
+  },
+  {
+    "id": "PT_lang",
+    "label": "Fala com frequência o Português-Europeu na sua vida diária?",
+    "type": "radio",
+    "section": "Dados Sociodemográficos",
+    "required": true,
+    "choices": [
+      [
+        "2",
+        "Sim"
+      ],
+      [
+        "1",
+        "Não"
+      ]
+    ]
+  },
+  {
+    "id": "PT_residence_region",
+    "label": "Zona de residência habitual: (Caso esteja a residir fora de Portugal selecione a opção \"Não aplicável\")",
+    "type": "radio",
+    "section": "Dados Sociodemográficos",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Norte"
+      ],
+      [
+        "2",
+        "Centro"
+      ],
+      [
+        "3",
+        "Grande Lisboa"
+      ],
+      [
+        "4",
+        "Península de Setúbal"
+      ],
+      [
+        "5",
+        "Oeste e Vale do Tejo"
+      ],
+      [
+        "6",
+        "Alentejo"
+      ],
+      [
+        "7",
+        "Algarve"
+      ],
+      [
+        "8",
+        "Região Autónoma dos Açores"
+      ],
+      [
+        "10",
+        "Região Autónoma da Madeira"
+      ],
+      [
+        "9",
+        "Não aplicável"
+      ]
+    ]
+  },
+  {
+    "id": "freguesia",
+    "label": "Indique, por favor, a freguesia onde residiu a maior parte do tempo durante o último ano. (Caso esteja a residir fora de Portugal selecione a opção \"Não aplicável\")",
+    "type": "text",
+    "section": "Dados Sociodemográficos",
+    "required": true,
+    "description": "Se reside fora de Portugal, escreva Não aplicável."
+  },
+  {
+    "id": "urbanicity",
+    "label": "O local onde viveu a maior parte da sua vida é principalmente:",
+    "type": "radio",
+    "section": "Dados Sociodemográficos",
+    "required": true,
+    "choices": [
+      [
+        "3",
+        "Urbano"
+      ],
+      [
+        "2",
+        "Semiurbano"
+      ],
+      [
+        "1",
+        "Rural"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "race",
+    "label": "Pertença étnico-racial (selecione todas as opções que se apliquem).",
+    "type": "checkbox",
+    "section": "Dados Sociodemográficos",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Branca"
+      ],
+      [
+        "2",
+        "Negra"
+      ],
+      [
+        "3",
+        "Asiática"
+      ],
+      [
+        "4",
+        "Cigana"
+      ],
+      [
+        "5",
+        "Hispânica/Latina"
+      ],
+      [
+        "6",
+        "Outra"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "gender",
+    "label": "Com que género se identifica?",
+    "type": "radio",
+    "section": "Dados Sociodemográficos",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Cisgénero (identifica-se com o sexo atribuído à nascença)"
+      ],
+      [
+        "2",
+        "Transgénero (identifica-se com um género diferente daquele que foi atribuído à nascença)"
+      ],
+      [
+        "3",
+        "Não binário (identifica-se com ambos ou com nenhum dos géneros)"
+      ],
+      [
+        "9",
+        "Outro/prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "sex",
+    "label": "Que sexo lhe foi atribuído à nascença?",
+    "type": "radio",
+    "section": "Dados Sociodemográficos",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Feminino"
+      ],
+      [
+        "2",
+        "Masculino"
+      ],
+      [
+        "4",
+        "Intersexo, ou seja, indivíduos que nascem com características (genitália e cromossomas) de ambos os sexos. É uma questão biológica, determinada à nascença, e não deverá ser confundida com as questões de género anteriormente referidas."
+      ]
+    ]
+  },
+  {
+    "id": "education",
+    "label": "Qual o nível mais alto de escolaridade atingido?",
+    "type": "radio",
+    "section": "Dados Sociodemográficos",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Alguma educação primária"
+      ],
+      [
+        "2",
+        "1º Ciclo concluído (1º, 2º, 3º e 4º ano)"
+      ],
+      [
+        "3",
+        "2º Ciclo concluído (5º e 6º ano)"
+      ],
+      [
+        "4",
+        "3º Ciclo concluído (7º, 8º e 9º ano)"
+      ],
+      [
+        "5",
+        "Ensino Secundário concluído (10º, 11º, 12º ano)"
+      ],
+      [
+        "6",
+        "Ensino pós-secundário não superior (cursos técnico-profissionais, cursos de especialização, formação técnica)"
+      ],
+      [
+        "7",
+        "Ensino Superior concluído (Licenciatura/bacharelato, mestrado, doutoramento)"
+      ]
+    ]
+  },
+  {
+    "id": "employment",
+    "label": "Qual é a sua situação profissional principal?",
+    "type": "radio",
+    "section": "Dados Sociodemográficos",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Empregado/a"
+      ],
+      [
+        "2",
+        "Desempregado/a"
+      ],
+      [
+        "3",
+        "Estudante"
+      ],
+      [
+        "4",
+        "Pausa na carreira"
+      ],
+      [
+        "5",
+        "Incapacidade prolongada/Fundo de saúde"
+      ],
+      [
+        "6",
+        "Reformado/a"
+      ],
+      [
+        "9",
+        "Outro/Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "socioeconomic",
+    "label": "Como descreveria o seu nível socioeconómico?",
+    "type": "radio",
+    "section": "Dados Sociodemográficos",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Baixo"
+      ],
+      [
+        "2",
+        "Médio-baixo"
+      ],
+      [
+        "3",
+        "Médio"
+      ],
+      [
+        "4",
+        "Médio-alto"
+      ],
+      [
+        "5",
+        "Alto"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "income",
+    "label": "Qual é, aproximadamente, o rendimento mensal bruto do seu agregado familiar? Esta estimativa deve fazer referência os rendimentos de todas as pessoas com quem vive, considerando o valor recebido por todos no final de cada mês, antes de existir qualquer imposto sobre os mesmos, e inclui-se apenas: - Salário bruto; - Pensões; - Subsídio de desemprego; - Rendimentos e dividendos de investimentos antes da aplicação de impostos.",
+    "type": "radio",
+    "section": "Dados Sociodemográficos",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Até 1 050€"
+      ],
+      [
+        "2",
+        "1 051 - 1 201 €"
+      ],
+      [
+        "3",
+        "1 201 - 1 500 €"
+      ],
+      [
+        "4",
+        "1 501 - 1 800 €"
+      ],
+      [
+        "5",
+        "1 801 - 2800 €"
+      ],
+      [
+        "6",
+        "2 801 - 4 000 €"
+      ],
+      [
+        "7",
+        "4001 - 6000 €"
+      ],
+      [
+        "8",
+        "Mais de 6 000 €"
+      ],
+      [
+        "9",
+        "Não sei/Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "marital_status",
+    "label": "Estado Civil",
+    "type": "radio",
+    "section": "Dados Sociodemográficos",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Solteiro/a"
+      ],
+      [
+        "2",
+        "Casado/a ou em União de Facto"
+      ],
+      [
+        "3",
+        "Separado/a ou Divorciado/a"
+      ],
+      [
+        "4",
+        "Viúvo/a"
+      ],
+      [
+        "9",
+        "Outro/Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "household_adults",
+    "label": "Quantos adultos vivem em sua casa?",
+    "type": "radio",
+    "section": "Dados Sociodemográficos",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "1, sou só eu"
+      ],
+      [
+        "2",
+        "2"
+      ],
+      [
+        "3",
+        "3"
+      ],
+      [
+        "4",
+        "4"
+      ],
+      [
+        "5",
+        "5"
+      ],
+      [
+        "6",
+        "6"
+      ],
+      [
+        "7",
+        "+6"
+      ]
+    ]
+  },
+  {
+    "id": "household_children",
+    "label": "Tem filhos?",
+    "type": "radio",
+    "section": "Dados Sociodemográficos",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Não"
+      ],
+      [
+        "1",
+        "Sim, tenho 1 filho/a"
+      ],
+      [
+        "2",
+        "Sim, tenho 2 filhos/as"
+      ],
+      [
+        "3",
+        "Sim, tenho 3 filhos/as"
+      ],
+      [
+        "4",
+        "Sim, tenho mais de 3 filhos/as"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "spirituality",
+    "label": "A religião ou espiritualidade é importante na sua vida?",
+    "type": "radio",
+    "section": "Dados Sociodemográficos",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Nada Importante"
+      ],
+      [
+        "2",
+        "Pouco Importante"
+      ],
+      [
+        "3",
+        "Mais ou menos importante"
+      ],
+      [
+        "4",
+        "Muito Importante"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_lastyear_alc",
+    "label": "Álcool (etanol)",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Ocasionalmente (1 - 10 vezes em todo o ano)"
+      ],
+      [
+        "2",
+        "Uso mensal (pelo menos 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "4",
+        "Uso diário ou quase diário"
+      ],
+      [
+        "5",
+        "Uso diário ou quase diário, várias vezes por dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ],
+    "description": "No último ano, selecione a frequência com que consumiu as seguintes substâncias. Por favor, considere apenas substâncias que NÃO lhe foram prescritas por um profissional de saúde OU que utilizou de uma forma DIFERENTE da prescrita."
+  },
+  {
+    "id": "subs_use_lastyear_can",
+    "label": "Cannabis (erva, marijuana, haxixe, ganza, óleo, etc)",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Ocasionalmente (1 - 10 vezes em todo o ano)"
+      ],
+      [
+        "2",
+        "Uso mensal (pelo menos 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "4",
+        "Uso diário ou quase diário"
+      ],
+      [
+        "5",
+        "Uso diário ou quase diário, várias vezes por dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_lastyear_nic",
+    "label": "Nicotina/Tabaco (cigarros, vaporizadores/cigarros eletrónicos, adesivos ou pastilhas de nicotina, medicação para deixar de fumar)",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Ocasionalmente (1 - 10 vezes em todo o ano)"
+      ],
+      [
+        "2",
+        "Uso mensal (pelo menos 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "4",
+        "Uso diário ou quase diário"
+      ],
+      [
+        "5",
+        "Uso diário ou quase diário, várias vezes por dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_lastyear_stimulant",
+    "label": "Estimulantes (cocaína, crack, catinonas/khat, metanfetaminas ou anfetaminas, como: speed, cristal, crystal meth, ice).",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Ocasionalmente (1 - 10 vezes em todo o ano)"
+      ],
+      [
+        "2",
+        "Uso mensal (pelo menos 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "4",
+        "Uso diário ou quase diário"
+      ],
+      [
+        "5",
+        "Uso diário ou quase diário, várias vezes por dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_lastyear_inal",
+    "label": "Inalantes (óxido nitroso, cola, combustível, diluentes, etc)",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Ocasionalmente (1 - 10 vezes em todo o ano)"
+      ],
+      [
+        "2",
+        "Uso mensal (pelo menos 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "4",
+        "Uso diário ou quase diário"
+      ],
+      [
+        "5",
+        "Uso diário ou quase diário, várias vezes por dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_lastyear_aluc",
+    "label": "Alucinogénios (LSD, ácido, cogumelos mágios, psilocibina, PCP/pó de anjo, Cetamina/Keta, ecstasy, etc)",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Ocasionalmente (1 - 10 vezes em todo o ano)"
+      ],
+      [
+        "2",
+        "Uso mensal (pelo menos 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "4",
+        "Uso diário ou quase diário"
+      ],
+      [
+        "5",
+        "Uso diário ou quase diário, várias vezes por dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_lastyear_opiod",
+    "label": "Opióides (heroína, ópio, fentanil, etc)",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Ocasionalmente (1 - 10 vezes em todo o ano)"
+      ],
+      [
+        "2",
+        "Uso mensal (pelo menos 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "4",
+        "Uso diário ou quase diário"
+      ],
+      [
+        "5",
+        "Uso diário ou quase diário, várias vezes por dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_lastyear_medicines",
+    "label": "Medicamentos não prescritos por médicos ou utilizados em quantidade fora do prescrito (ex: sedativos/ansiolíticos/benzodiazepinas/sonoríparos como Valium, Diazepam, etc; Estimulantes como Ritalina ou Concerta, etc; Opióides como Oxicodona, Metadona, Buprenorfina, etc)",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Ocasionalmente (1 - 10 vezes em todo o ano)"
+      ],
+      [
+        "2",
+        "Uso mensal (pelo menos 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "4",
+        "Uso diário ou quase diário"
+      ],
+      [
+        "5",
+        "Uso diário ou quase diário, várias vezes por dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_life_4",
+    "label": "Álcool",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Só para experimentar (1-3 vezes na vida)"
+      ],
+      [
+        "2",
+        "Ocasionalmente (menos de 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso mensal (em média 1 vez por mês)"
+      ],
+      [
+        "4",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "5",
+        "Uso quase diário ou diário"
+      ],
+      [
+        "6",
+        "Uso diário ou quase diário e várias vezes ao dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ],
+    "description": "Ao longo de toda a sua vida, que frequência descreve melhor o seu consumo das seguintes substâncias?"
+  },
+  {
+    "id": "subs_use_life_24",
+    "label": "Cannabis",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Só para experimentar (1-3 vezes na vida)"
+      ],
+      [
+        "2",
+        "Ocasionalmente (menos de 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso mensal (em média 1 vez por mês)"
+      ],
+      [
+        "4",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "5",
+        "Uso quase diário ou diário"
+      ],
+      [
+        "6",
+        "Uso diário ou quase diário e várias vezes ao dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_life_25",
+    "label": "Nicotina/Tabaco",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Só para experimentar (1-3 vezes na vida)"
+      ],
+      [
+        "2",
+        "Ocasionalmente (menos de 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso mensal (em média 1 vez por mês)"
+      ],
+      [
+        "4",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "5",
+        "Uso quase diário ou diário"
+      ],
+      [
+        "6",
+        "Uso diário ou quase diário e várias vezes ao dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_life_26",
+    "label": "Estimulantes, inalantes, alucinogénicos ou opióides",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Só para experimentar (1-3 vezes na vida)"
+      ],
+      [
+        "2",
+        "Ocasionalmente (menos de 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso mensal (em média 1 vez por mês)"
+      ],
+      [
+        "4",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "5",
+        "Uso quase diário ou diário"
+      ],
+      [
+        "6",
+        "Uso diário ou quase diário e várias vezes ao dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_life_27",
+    "label": "Medicamentos não prescritos por médicos ou utilizados em quantidades fora do prescrito",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Só para experimentar (1-3 vezes na vida)"
+      ],
+      [
+        "2",
+        "Ocasionalmente (menos de 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso mensal (em média 1 vez por mês)"
+      ],
+      [
+        "4",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "5",
+        "Uso quase diário ou diário"
+      ],
+      [
+        "6",
+        "Uso diário ou quase diário e várias vezes ao dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "mental_diagnosis",
+    "label": "Teve ou tem algum problema de saúde mental diagnosticado por um profissional de saúde como psiquiatra, psicólogo ou neurologista?",
+    "type": "radio",
+    "section": "Saúde Mental",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Não, nunca tive"
+      ],
+      [
+        "2",
+        "Sim, durante o último ano"
+      ],
+      [
+        "3",
+        "Sim, há mais de um ano"
+      ]
+    ]
+  },
+  {
+    "id": "mental_treatment",
+    "label": "À data de hoje, encontra-se em tratamento ou a ser seguido por algum profissional de saúde mental? Selecione todas as opções que se apliquem.",
+    "type": "checkbox",
+    "section": "Saúde Mental",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Não"
+      ],
+      [
+        "2",
+        "Sim, por um psicólogo"
+      ],
+      [
+        "3",
+        "Sim, por um psiquiatra"
+      ],
+      [
+        "4",
+        "Sim, com recurso a medicação psiquiátrica"
+      ],
+      [
+        "5",
+        "Sim, sendo que por vezes existe necessidade de hospitalização/internamento por agravamento do estado de saúde mental"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "mental_med",
+    "label": "Por favor, especifique qual a medicação e dosagem.",
+    "type": "text",
+    "section": "Saúde Mental",
+    "required": true,
+    "show_if_question": "mental_treatment",
+    "show_if_values": [
+      "4"
+    ]
+  },
+  {
+    "id": "treatment_access",
+    "label": "De uma forma geral, conseguiu (ou conseguiria) aceder a cuidados de saúde mental (consulta no psicólogo ou psiquiatra, tratamentos, medicação)?",
+    "type": "radio",
+    "section": "Saúde Mental",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sim"
+      ],
+      [
+        "2",
+        "Sim, mas com algumas dificuldades"
+      ],
+      [
+        "3",
+        "Não, apesar de ter tentado"
+      ],
+      [
+        "44",
+        "Não procurei ajuda, apesar de ter precisado"
+      ],
+      [
+        "55",
+        "Não procurei ajuda porque não precisei"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "insurance",
+    "label": "Tem algum seguro de saúde (por exemplo, ADSE, Multicare, Medis, Tranquilidade, Allians, SAMS)?",
+    "type": "radio",
+    "section": "Saúde Mental",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Não tenho seguro de saúde"
+      ],
+      [
+        "2",
+        "Tenho seguro de saúde, mas não cobre despesas relacionadas com saúde mental"
+      ],
+      [
+        "3",
+        "Tenho seguro de saúde que cobre despesas relacionadas com saúde mental"
+      ],
+      [
+        "0",
+        "Não tenho a certeza"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "absenteeism",
+    "label": "No último ano, faltou ao trabalho ou escola/faculdade devido a problemas de saúde mental?",
+    "type": "radio",
+    "section": "Saúde Mental",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Não"
+      ],
+      [
+        "2",
+        "Sim, 1-5 dias"
+      ],
+      [
+        "3",
+        "Sim, 6-15 dias"
+      ],
+      [
+        "4",
+        "Sim, mais de 15 dias"
+      ],
+      [
+        "0",
+        "Não aplicável (não trabalho e não estudo)"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "presenteeism",
+    "label": "No último ano, trabalhou ou estudou apesar de se sentir psicologicamente mal, com impacto no seu desempenho?",
+    "type": "radio",
+    "section": "Saúde Mental",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Não, nunca ou raramente."
+      ],
+      [
+        "2",
+        "Por vezes"
+      ],
+      [
+        "3",
+        "Bastantes vezes"
+      ],
+      [
+        "4",
+        "Frequentemente ou Sempre"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "life_events",
+    "label": "No último ano, experienciou alguma destas situações? Assinale todas as que se aplicam.",
+    "type": "checkbox",
+    "section": "Saúde Mental",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Dificuldades económicas recorrentes para pagar despesas essenciais (contas de luz, água, aquecimento, alimentação, etc)"
+      ],
+      [
+        "2",
+        "Insegurança habitacional (atraso no pagamento de renda ou conta, risco de perda, sobrelotação, ou outros)"
+      ],
+      [
+        "3",
+        "Insegurança laboral (salários em atraso, contratos precários ou temporários, sem proteção social em caso de despedimento, ou outros)"
+      ],
+      [
+        "4",
+        "Insegurança física (nos trajetos do dia-a-dia e locais que costuma frequentar)"
+      ],
+      [
+        "5",
+        "Desemprego"
+      ],
+      [
+        "6",
+        "Sobrecarga de cuidados a crianças, idosos ou pessoas dependentes"
+      ],
+      [
+        "7",
+        "Conflitos familiares ou relacionais persistentes"
+      ],
+      [
+        "8",
+        "Deficiência física, doença crónica ou problema de saúde grave (do próprio ou de pessoa próxima) com impacto na vida diária"
+      ],
+      [
+        "10",
+        "Luto"
+      ],
+      [
+        "11",
+        "Separação/divórcio"
+      ],
+      [
+        "12",
+        "Migração ou mudança de residência forçada"
+      ],
+      [
+        "13",
+        "Estigmatização (raça, género, idade, orientação sexual, condição social ou outra característica pessoal)"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ],
+      [
+        "0",
+        "Não experienciei nenhuma destas situações"
+      ]
+    ]
+  },
+  {
+    "id": "social_support",
+    "label": "Quantas pessoas considera fazerem parte da sua rede de apoio próxima - e que o poderiam ajudar - se tivesse um problema em que precisasse de ajuda urgente?",
+    "type": "radio",
+    "section": "Saúde Mental",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nenhuma"
+      ],
+      [
+        "1",
+        "1 pessoa"
+      ],
+      [
+        "2",
+        "2-4 pessoas"
+      ],
+      [
+        "3",
+        "5 ou mais pessoas"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "Health",
+    "label": "Ao nível físico, possui alguma condição de saúde diagnosticada (por exemplo, problemas cardíacos ou respiratórios; doenças musculoesqueléticas; doenças endócrinas e/ou metabólicas; doenças autoimunes; ou doença oncológica)?",
+    "type": "radio",
+    "section": "Saúde física",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sim"
+      ],
+      [
+        "2",
+        "Sim, mais do que uma condição diagnosticada"
+      ],
+      [
+        "3",
+        "Não"
+      ]
+    ]
+  },
+  {
+    "id": "Diagnosis",
+    "label": "O seu diagnóstico (ao nível da saúde física) é de carácter:",
+    "type": "radio",
+    "section": "Saúde física",
+    "required": true,
+    "show_if_question": "Health",
+    "show_if_values": [
+      "1",
+      "2"
+    ],
+    "choices": [
+      [
+        "1",
+        "Agudo (i.e., o quadro clínico finda aquando do término do tratamento)"
+      ],
+      [
+        "2",
+        "Crónico (i.e., realiza um tratamento contínuo para gerir o quadro clínico)"
+      ],
+      [
+        "3",
+        "Outro"
+      ]
+    ]
+  },
+  {
+    "id": "Diagnosis_descript",
+    "label": "Por favor, especifique o(s) seu(s) diagnóstico(s).",
+    "type": "text",
+    "section": "Saúde física",
+    "required": true,
+    "show_if_question": "Health",
+    "show_if_values": [
+      "1",
+      "2"
+    ]
+  },
+  {
+    "id": "Diagnosis_onset",
+    "label": "Há quanto tempo foi diagnosticado/a com a sua condição de saúde?",
+    "type": "radio",
+    "section": "Saúde física",
+    "required": true,
+    "show_if_question": "Health",
+    "show_if_values": [
+      "1",
+      "2"
+    ],
+    "choices": [
+      [
+        "1",
+        "Menos de 3 meses"
+      ],
+      [
+        "2",
+        "Há cerca de 6 meses"
+      ],
+      [
+        "3",
+        "Há cerca de 9 meses"
+      ],
+      [
+        "4",
+        "Há cerca de 1 ano"
+      ],
+      [
+        "5",
+        "Há cerca de 3 anos"
+      ],
+      [
+        "6",
+        "Há cerca de 5 anos"
+      ],
+      [
+        "7",
+        "Há mais de 5 anos"
+      ]
+    ]
+  },
+  {
+    "id": "Diagnosis_med",
+    "label": "Toma alguma medicação ou realiza tratamentos para a sua condição de saúde física?",
+    "type": "radio",
+    "section": "Saúde física",
+    "required": true,
+    "show_if_question": "Health",
+    "show_if_values": [
+      "1",
+      "2"
+    ],
+    "choices": [
+      [
+        "1",
+        "Sim"
+      ],
+      [
+        "2",
+        "Não"
+      ]
+    ]
+  },
+  {
+    "id": "Diagnosis_med_name",
+    "label": "Por favor, especifique qual(quais) medicamento(s)/tratamento(s) prescritos para a sua condição de saúde física e, sempre que possível, especifique a dosagem.",
+    "type": "text",
+    "section": "Saúde física",
+    "required": true,
+    "show_if_question": "Diagnosis_med",
+    "show_if_values": [
+      "1"
+    ]
+  },
+  {
+    "id": "Diagnosis_med_freq",
+    "label": "Com que frequência toma alguma medicação ou realiza um tratamento para a sua condição de saúde física?",
+    "type": "radio",
+    "section": "Saúde física",
+    "required": true,
+    "show_if_question": "Diagnosis_med",
+    "show_if_values": [
+      "1"
+    ],
+    "choices": [
+      [
+        "1",
+        "Várias vezes ao dia"
+      ],
+      [
+        "2",
+        "Todos os dias"
+      ],
+      [
+        "3",
+        "Várias vezes por semana"
+      ],
+      [
+        "4",
+        "Uma vez por semana"
+      ],
+      [
+        "5",
+        "Várias vezes por mês"
+      ],
+      [
+        "6",
+        "Uma vez por mês"
+      ],
+      [
+        "7",
+        "De 3 em 3 meses"
+      ],
+      [
+        "8",
+        "De 6 em 6 meses"
+      ],
+      [
+        "9",
+        "Uma vez ao ano"
+      ],
+      [
+        "10",
+        "Outra"
+      ]
+    ]
+  },
+  {
+    "id": "Diagnosis_med_freq_other",
+    "label": "Indique a frequência do tratamento",
+    "type": "text",
+    "section": "Saúde física",
+    "required": true,
+    "show_if_question": "Diagnosis_med_freq",
+    "show_if_values": [
+      "10"
+    ]
+  },
+  {
+    "id": "Medication_regular",
+    "label": "Além da medicação que descreveu previamente, toma regularmente outro tipo de medicação e/ou suplementação (melatonina, valdispert, teanina, etc)? Descreva brevemente os outros tipos de medicação e/ou suplementação que toma regularmente. Deverá referir qual a substância ou medicação que utiliza, a dosagem e com que frequência utiliza (exemplo: Terazosina 100 mg, 1x por dia).",
+    "type": "text",
+    "section": "Saúde física",
+    "required": false
+  },
+  {
+    "id": "SF_Q1",
+    "label": "Em geral, diria que a sua saúde é:",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Ótima"
+      ],
+      [
+        "2",
+        "Muito boa"
+      ],
+      [
+        "3",
+        "Boa"
+      ],
+      [
+        "4",
+        "Razoável"
+      ],
+      [
+        "5",
+        "Fraca"
+      ]
+    ],
+    "description": "As questões que se seguem pedem-lhe opinião sobre a sua saúde, a forma como se sente e sobre a sua capacidade de desempenhar as atividades habituais. Pedimos que leia com atenção cada pergunta e que responda o mais honestamente possível. Se não tiver a certeza sobre a resposta a dar, dê-nos a que achar mais apropriada."
+  },
+  {
+    "id": "SF_Q2",
+    "label": "Comparando com o que acontecia há um ano, como descreve o seu estado geral atual:",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Muito melhor"
+      ],
+      [
+        "2",
+        "Com algumas melhoras"
+      ],
+      [
+        "3",
+        "Aproximadamente igual"
+      ],
+      [
+        "4",
+        "Um pouco pior"
+      ],
+      [
+        "5",
+        "Muito pior"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q3_1",
+    "label": "Atividades violentas, tais como correr, levantar pesos, participar em desportos extenuantes.",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sim, muito limitado/a"
+      ],
+      [
+        "2",
+        "Sim, um pouco limitado/a"
+      ],
+      [
+        "3",
+        "Não, nada limitado/a"
+      ]
+    ],
+    "description": "As perguntas que se seguem são sobre atividades que executa no seu dia-a-dia. Será que a sua saúde o/a limita nestas atividades? Se sim, quanto?"
+  },
+  {
+    "id": "SF_Q3_2",
+    "label": "Atividades moderadas, tais como deslocar uma mesa ou aspirar a casa",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sim, muito limitado/a"
+      ],
+      [
+        "2",
+        "Sim, um pouco limitado/a"
+      ],
+      [
+        "3",
+        "Não, nada limitado/a"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q3_3",
+    "label": "Levantar ou pegar nas compras da mercearia.",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sim, muito limitado/a"
+      ],
+      [
+        "2",
+        "Sim, um pouco limitado/a"
+      ],
+      [
+        "3",
+        "Não, nada limitado/a"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q3_4",
+    "label": "Subir vários lanços de escada.",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sim, muito limitado/a"
+      ],
+      [
+        "2",
+        "Sim, um pouco limitado/a"
+      ],
+      [
+        "3",
+        "Não, nada limitado/a"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q3_5",
+    "label": "Subir um lanço de escadas.",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sim, muito limitado/a"
+      ],
+      [
+        "2",
+        "Sim, um pouco limitado/a"
+      ],
+      [
+        "3",
+        "Não, nada limitado/a"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q3_6",
+    "label": "Inclinar-se, ajoelhar-se ou baixar-se.",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sim, muito limitado/a"
+      ],
+      [
+        "2",
+        "Sim, um pouco limitado/a"
+      ],
+      [
+        "3",
+        "Não, nada limitado/a"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q3_7",
+    "label": "Andar mais de 1 km.",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sim, muito limitado/a"
+      ],
+      [
+        "2",
+        "Sim, um pouco limitado/a"
+      ],
+      [
+        "3",
+        "Não, nada limitado/a"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q3_8",
+    "label": "Andar várias centenas de metros.",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sim, muito limitado/a"
+      ],
+      [
+        "2",
+        "Sim, um pouco limitado/a"
+      ],
+      [
+        "3",
+        "Não, nada limitado/a"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q3_9",
+    "label": "Andar uma centena de metros.",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sim, muito limitado/a"
+      ],
+      [
+        "2",
+        "Sim, um pouco limitado/a"
+      ],
+      [
+        "3",
+        "Não, nada limitado/a"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q3_10",
+    "label": "Tomar banho ou vestir-se sozinho/a.",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sim, muito limitado/a"
+      ],
+      [
+        "2",
+        "Sim, um pouco limitado/a"
+      ],
+      [
+        "3",
+        "Não, nada limitado/a"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q4_1",
+    "label": "Diminuiu o tempo gasto a trabalhar ou noutras atividades?",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "4",
+        "Sempre"
+      ],
+      [
+        "3",
+        "A maior parte do tempo"
+      ],
+      [
+        "2",
+        "Algum tempo"
+      ],
+      [
+        "1",
+        "Pouco tempo"
+      ],
+      [
+        "0",
+        "Nunca"
+      ]
+    ],
+    "description": "Durante as últimas 4 semanas teve, no seu trabalho ou atividades diárias, algum dos problemas apresentados a seguir como consequência do seu estado de saúde físico?"
+  },
+  {
+    "id": "SF_Q4_2",
+    "label": "Fez menos do que queria?",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "4",
+        "Sempre"
+      ],
+      [
+        "3",
+        "A maior parte do tempo"
+      ],
+      [
+        "2",
+        "Algum tempo"
+      ],
+      [
+        "1",
+        "Pouco tempo"
+      ],
+      [
+        "0",
+        "Nunca"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q4_3",
+    "label": "Sentiu-se limitado/a no tipo de trabalho ou outras atividades?",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "4",
+        "Sempre"
+      ],
+      [
+        "3",
+        "A maior parte do tempo"
+      ],
+      [
+        "2",
+        "Algum tempo"
+      ],
+      [
+        "1",
+        "Pouco tempo"
+      ],
+      [
+        "0",
+        "Nunca"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q4_4",
+    "label": "Teve dificuldades em executar o seu trabalho ou outras atividades (por exemplo, foi preciso mais esforço).",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "4",
+        "Sempre"
+      ],
+      [
+        "3",
+        "A maior parte do tempo"
+      ],
+      [
+        "2",
+        "Algum tempo"
+      ],
+      [
+        "1",
+        "Pouco tempo"
+      ],
+      [
+        "0",
+        "Nunca"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q5_1",
+    "label": "Diminuiu o tempo gasto a trabalhar ou noutras atividades?",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "4",
+        "Sempre"
+      ],
+      [
+        "3",
+        "A maior parte do tempo"
+      ],
+      [
+        "2",
+        "Algum tempo"
+      ],
+      [
+        "1",
+        "Pouco tempo"
+      ],
+      [
+        "0",
+        "Nunca"
+      ]
+    ],
+    "description": "Durante as últimas 4 semanas, teve com o seu trabalho ou com as suas atividades diárias, algum dos problemas apresentados a seguir devido a quaisquer problemas emocionais (tal como sentir-se deprimido/a ou ansioso/a)?"
+  },
+  {
+    "id": "SF_Q5_2",
+    "label": "Fez menos do que queria?",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "4",
+        "Sempre"
+      ],
+      [
+        "3",
+        "A maior parte do tempo"
+      ],
+      [
+        "2",
+        "Algum tempo"
+      ],
+      [
+        "1",
+        "Pouco tempo"
+      ],
+      [
+        "0",
+        "Nunca"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q5_3",
+    "label": "Executou o seu trabalho ou outras atividades menos cuidadosamente do que era costume.",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "4",
+        "Sempre"
+      ],
+      [
+        "3",
+        "A maior parte do tempo"
+      ],
+      [
+        "2",
+        "Algum tempo"
+      ],
+      [
+        "1",
+        "Pouco tempo"
+      ],
+      [
+        "0",
+        "Nunca"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q6",
+    "label": "Durante as últimas 4 semanas, em que medida é que a sua saúde física ou problemas emocionais interferiram no seu relacionamento social normal com a família, amigos, vizinhos ou outras pessoas?",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Absolutamente Nada"
+      ],
+      [
+        "2",
+        "Pouco"
+      ],
+      [
+        "3",
+        "Moderadamente"
+      ],
+      [
+        "4",
+        "Bastante"
+      ],
+      [
+        "5",
+        "Imenso"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q7_1",
+    "label": "Se sentiu cheio/a de vitalidade?",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sempre"
+      ],
+      [
+        "2",
+        "A maior parte do tempo"
+      ],
+      [
+        "3",
+        "Algum tempo"
+      ],
+      [
+        "4",
+        "Pouco tempo"
+      ],
+      [
+        "5",
+        "Nunca"
+      ]
+    ],
+    "description": "As perguntas que se seguem pretendem avaliar a forma como se sentiu e como lhe correram as coisas nas últimas quatro semanas. Para cada pergunta, selecione por favor o número que melhor descreve a forma como se sentiu."
+  },
+  {
+    "id": "SF_Q7_2",
+    "label": "Se sentiu muito nervoso/a?",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sempre"
+      ],
+      [
+        "2",
+        "A maior parte do tempo"
+      ],
+      [
+        "3",
+        "Algum tempo"
+      ],
+      [
+        "4",
+        "Pouco tempo"
+      ],
+      [
+        "5",
+        "Nunca"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q7_3",
+    "label": "Se sentiu tão deprimido/a que nada o/a animava?",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sempre"
+      ],
+      [
+        "2",
+        "A maior parte do tempo"
+      ],
+      [
+        "3",
+        "Algum tempo"
+      ],
+      [
+        "4",
+        "Pouco tempo"
+      ],
+      [
+        "5",
+        "Nunca"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q7_4",
+    "label": "Se sentiu calmo/a e tranquilo/a?",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sempre"
+      ],
+      [
+        "2",
+        "A maior parte do tempo"
+      ],
+      [
+        "3",
+        "Algum tempo"
+      ],
+      [
+        "4",
+        "Pouco tempo"
+      ],
+      [
+        "5",
+        "Nunca"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q7_5",
+    "label": "Se sentiu com muita energia?",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sempre"
+      ],
+      [
+        "2",
+        "A maior parte do tempo"
+      ],
+      [
+        "3",
+        "Algum tempo"
+      ],
+      [
+        "4",
+        "Pouco tempo"
+      ],
+      [
+        "5",
+        "Nunca"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q7_6",
+    "label": "Se sentiu deprimido/a?",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sempre"
+      ],
+      [
+        "2",
+        "A maior parte do tempo"
+      ],
+      [
+        "3",
+        "Algum tempo"
+      ],
+      [
+        "4",
+        "Pouco tempo"
+      ],
+      [
+        "5",
+        "Nunca"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q7_7",
+    "label": "Se sentiu estafado/a?",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sempre"
+      ],
+      [
+        "2",
+        "A maior parte do tempo"
+      ],
+      [
+        "3",
+        "Algum tempo"
+      ],
+      [
+        "4",
+        "Pouco tempo"
+      ],
+      [
+        "5",
+        "Nunca"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q7_8",
+    "label": "Se sentiu feliz?",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sempre"
+      ],
+      [
+        "2",
+        "A maior parte do tempo"
+      ],
+      [
+        "3",
+        "Algum tempo"
+      ],
+      [
+        "4",
+        "Pouco tempo"
+      ],
+      [
+        "5",
+        "Nunca"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q7_9",
+    "label": "Se sentiu cansado/a?",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sempre"
+      ],
+      [
+        "2",
+        "A maior parte do tempo"
+      ],
+      [
+        "3",
+        "Algum tempo"
+      ],
+      [
+        "4",
+        "Pouco tempo"
+      ],
+      [
+        "5",
+        "Nunca"
+      ]
+    ]
+  },
+  {
+    "id": "SF_Q8",
+    "label": "Durante as últimas quatro semanas, até que ponto é que a sua saúde física ou problemas emocionais limitaram a sua atividade social (tal como visitar amigos ou familiares próximos)?",
+    "type": "radio",
+    "section": "SF-36v2",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Pouco tempo"
+      ],
+      [
+        "2",
+        "Algum tempo"
+      ],
+      [
+        "3",
+        "A maior parte do tempo"
+      ],
+      [
+        "4",
+        "Sempre"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_1",
+    "label": "Consigo sempre perceber com precisão quando o meu coração está a bater rápido.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ],
+    "description": "Abaixo estão várias afirmações relativas à precisão com que você consegue perceber as suas sensações corporais. Por favor, utilize a escala fornecida para classificar o quão bem você acredita que consegue perceber de forma precisa cada sensação específica. Por exemplo, se frequentemente sente que precisa de urinar e não confirma essa necessidade quando vai à casa de banho, deveria classificar como baixa a precisão com que percebe esta sensação corporal. Por favor, classifique apenas a precisão com que percebe estas sensações sem utilizar pistas externas. Por exemplo, se consegue perceber o quão rápido o seu coração está a bater apenas quando mede a pulsação, não deve analisar isto como uma perceção interna precisa."
+  },
+  {
+    "id": "IAS_2",
+    "label": "Consigo sempre perceber com precisão quando estou com fome.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_3",
+    "label": "Consigo sempre perceber com precisão quando estou a respirar rápido.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_4",
+    "label": "Consigo sempre perceber com precisão quando estou com sede.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_5",
+    "label": "Consigo sempre perceber com precisão quando preciso de urinar.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_6",
+    "label": "Consigo sempre perceber com precisão quando preciso de defecar.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_7",
+    "label": "Consigo sempre perceber com precisão quando me deparo com diferentes sabores.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_8",
+    "label": "Consigo sempre perceber com precisão quando vou vomitar.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_9",
+    "label": "Consigo sempre perceber com precisão quando vou espirrar.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_10",
+    "label": "Consigo sempre perceber com precisão quando vou tossir.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_11",
+    "label": "Consigo perceber com precisão quando estou com calor/frio.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_12",
+    "label": "Consigo sempre perceber com precisão quando estou excitada(o) sexualmente.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_13",
+    "label": "Consigo sempre perceber com precisão quando vou soltar gases.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_14",
+    "label": "Consigo sempre perceber com precisão quando vou arrotar.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_15",
+    "label": "Consigo sempre perceber com precisão quando os meus músculos estão cansados/doridos.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_16",
+    "label": "Consigo sempre perceber com precisão quando vou ficar com uma nódoa negra.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_17",
+    "label": "Consigo sempre perceber com precisão quando estou com dor.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_18",
+    "label": "Consigo sempre perceber com precisão quando o meu nível de açucar no sangue está baixo.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_19",
+    "label": "Consigo sempre perceber com precisão quando alguém me está a tocar de forma afetuosa em vez de não afetuosa.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_20",
+    "label": "Consigo sempre perceber com precisão quando algo me vai fazer cócegas.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_21",
+    "label": "Consigo sempre perceber com precisão quando algo me vai fazer comichão.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IAS_interp",
+    "label": "Neste questionário pedimos-lhe para nos dizer com que precisão você consegue perceber certas sensações corporais específicas. Enquanto respondeu a este questionário, o que pensou que significava a palavra “precisão” neste contexto? Por favor, escolha a opção que melhor descreve a sua interpretação deste questionário.",
+    "type": "radio",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Quanta atenção você presta a estas sensações (por exemplo, o quanto elas ocupam os seus pensamentos/mente, o quanto você pensa sobre estas sensações, o quanto monitoriza se estas sensações estão a ocorrer ou não – independentemente do quão bem você consegue percebê-las ou da frequência com que elas ocorrem)."
+      ],
+      [
+        "2",
+        "O quão preciso você é a perceber estas sensações (por exemplo, o quão bom você é a senti-las/detéta-las quando elas ocorrem, o quão bem consegue distingui-las de outras sensações quando elas ocorrem, o quão preciso é a senti-las – independentemente do quanto você monitoriza ou do quão bem você consegue percebê-las)."
+      ],
+      [
+        "3",
+        "Nenhuma das anteriores."
+      ]
+    ]
+  },
+  {
+    "id": "IAS_interp_other",
+    "label": "Dado que selecionou a opção “Nenhuma das anteriores”, descreva por palavras suas de que forma interpretou este último questionário que preencheu.",
+    "type": "text",
+    "section": "Precisão interocetiva",
+    "required": true,
+    "show_if_question": "IAS_interp",
+    "show_if_values": [
+      "3"
+    ]
+  },
+  {
+    "id": "IATS_1",
+    "label": "Durante a maior parte do tempo a minha atenção está focada em perceber se o meu coração está a bater rápido.",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ],
+    "description": "Abaixo estão várias afirmações relativas ao nível de atenção que você presta às suas sensações corporais. Por favor, utilize a escala fornecida para classificar o nível de atenção que você acha que presta a cada sensação específica. Pense em como se sente durante a maior parte das situações da sua vida quotidiana em vez de pensar num momento específico. Por exemplo, se pensa frequentemente sobre o seu batimento cardíaco, a sua sensação de fome ou a sua necessidade de ir à casa de banho, então deveria classificar o seu nível de atenção a estas sensações como alto. Em contraste, se não pensa frequentemente no seu batimento cardíaco, na sua sensação de fome ou na sua necessidade de ir à casa de banho, então deveria classificar o seu nível de atenção para estas sensações como baixo. Por favor, classifique apenas o nível de atenção que presta a estas sensações, independentemente do quão bem você acha que consegue percebê-las. Por exemplo, se sente frequentemente necessidade de ir à casa de banho, mas quando vai à casa de banho apercebe-se que não precisava de ir, deverá na mesma classificar o seu nível de atenção a esta sensação como alto. Não se preocupe com o quão frequentemente você pensa que a sensação está verdadeiramente a acontecer dentro do seu corpo – nós gostaríamos apenas de saber a quantidade de tempo em que você presta atenção a estas sensações. As questões apresentadas referem-se à sua atenção a sensações vindas do interior do seu corpo. Por exemplo, se a questão for sobre temperatura refere-se a sensações de temperatura percebidas internamente, sem utilizar a sua mão para sentir o quão quente está a sua pele. Se a questão for sobre o seu batimento cardíaco refere-se a sensações percebidas internamente, sem que seja necessário medir a sua pulsação."
+  },
+  {
+    "id": "IATS_2",
+    "label": "Durante a maior parte do tempo a minha atenção está focada em perceber se estou com fome.",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IATS_3",
+    "label": "Durante a maior parte do tempo a minha atenção está focada em perceber se estou a respirar rápido.",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IATS_4",
+    "label": "Durante a maior parte do tempo a minha atenção está focada em perceber se estou com sede ou desidratado(a).",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IATS_5",
+    "label": "Durante a maior parte do tempo a minha atenção está focada em perceber se preciso de urinar.",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IATS_6",
+    "label": "Durante a maior parte do tempo a minha atenção está focada em perceber se preciso de defecar.",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IATS_7",
+    "label": "Quando estou a comer, durante a maior parte do tempo a minha atenção está focada nos diferentes sabores.",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IATS_8",
+    "label": "Durante a maior parte do tempo a minha atenção está focada em perceber se estou com náuseas ou se preciso de vomitar.",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IATS_9",
+    "label": "Durante a maior parte do tempo a minha atenção está focada em perceber se preciso de espirrar.",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IATS_10",
+    "label": "Durante a maior parte do tempo a minha atenção está focada em perceber se preciso de tossir.",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IATS_11",
+    "label": "Durante a maior parte do tempo a minha atenção está focada na temperatura do meu corpo (se sinto calor ou frio).",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IATS_12",
+    "label": "Durante a maior parte do tempo a minha atenção está focada em perceber se estou excitado(a) sexualmente.",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IATS_13",
+    "label": "Durante a maior parte do tempo a minha atenção está focada em perceber se preciso de soltar gases.",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IATS_14",
+    "label": "Durante a maior parte do tempo a minha atenção está focada em perceber se preciso de arrotar.",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IATS_15",
+    "label": "Durante a maior parte do tempo a minha atenção está focada em perceber se os meus músculos estão cansados ou doridos.",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IATS_16",
+    "label": "Depois de me ter magoado ou ferido, durante a maior parte do tempo a minha atenção está focada em perceber se estou com dores.",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IATS_17",
+    "label": "Durante a maior parte do tempo a minha atenção está focada em perceber se estou com dores (não causadas por uma lesão).",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IATS_18",
+    "label": "Durante a maior parte do tempo a minha atenção está focada em perceber se o meu nível de açucar no sangue está baixo.",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IATS_19",
+    "label": "Quando alguém me está a tocar, durante a maior parte do tempo a minha atenção está focada em perceber se o toque é agradável/afetuoso.",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IATS_20",
+    "label": "Durante a maior parte do tempo a minha atenção está focada em perceber se o toque ou certos materiais me fazem cócegas no corpo.",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IATS_21",
+    "label": "Durante a maior parte do tempo a minha atenção está focada em perceber se sinto comichão no corpo.",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Concordo totalmente"
+      ],
+      [
+        "4",
+        "Concordo"
+      ],
+      [
+        "3",
+        "Não concordo nem discordo"
+      ],
+      [
+        "2",
+        "Discordo"
+      ],
+      [
+        "1",
+        "Discordo totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "IATS_interp",
+    "label": "Neste questionário pedimos-lhe para nos dizer o nível de atenção que você presta a certas sensações corporais específicas. Enquanto respondeu a este questionário, o que pensou que significava a palavra “atenção” neste contexto? Por favor, escolha a opção que melhor descreve a sua interpretação deste questionário.",
+    "type": "radio",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Quanta atenção você presta a estas sensações (por exemplo, o quanto elas ocupam os seus pensamentos/mente, o quanto você pensa sobre estas sensações, o quanto monitoriza se estas sensações estão a ocorrer ou não – independentemente do quão bem você consegue percebê-las ou da frequência com que elas ocorrem)."
+      ],
+      [
+        "2",
+        "O quão preciso você é a perceber estas sensações (por exemplo, o quão bom você é a senti-las/detéta-las quando elas ocorrem, o quão bem consegue distingui-las de outras sensações quando elas ocorrem, o quão preciso é a senti-las – independentemente do quanto você monitoriza ou do quão bem você consegue percebê-las)."
+      ],
+      [
+        "3",
+        "Com que frequência ou com que intensidade estas sensações realmente ocorrem no seu corpo (por exemplo, com que frequência o seu corpo está objetivamente frio, com que frequência os seus músculos estão objetivamente cansados – independentemente do quanto você monitoriza estas sensações ou do quão bem você consegue percebê-las)."
+      ],
+      [
+        "4",
+        "Nenhuma das anteriores."
+      ]
+    ]
+  },
+  {
+    "id": "IATS_interp_other",
+    "label": "Dado que selecionou a opção “Nenhuma das anteriores”, descreva por palavras suas de que forma interpretou este último questionário que preencheu.",
+    "type": "text",
+    "section": "Atenção interocetiva",
+    "required": true,
+    "show_if_question": "IATS_interp",
+    "show_if_values": [
+      "4"
+    ]
+  },
+  {
+    "id": "OMS_1",
+    "label": "Senti-me alegre e bem disposto/a",
+    "type": "radio",
+    "section": "OMS-5",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Todo o tempo"
+      ],
+      [
+        "4",
+        "A maior parte do tempo"
+      ],
+      [
+        "3",
+        "Mais de metade do tempo"
+      ],
+      [
+        "2",
+        "Menos de metade do tempo"
+      ],
+      [
+        "1",
+        "Algumas vezes"
+      ],
+      [
+        "0",
+        "Nunca"
+      ]
+    ],
+    "description": "Indique, por favor, para cada uma das cinco afirmações, a que se aproxima mais do modo como se tem sentido nas últimas duas semanas. Note que os números maiores indicam maior bem-estar. Exemplo: Se ao longo das últimas semanas se sentiu alegre e bem disposto/a durante mais de metade do tempo, selecione a opção com o número 3."
+  },
+  {
+    "id": "OMS_2",
+    "label": "Senti-me calmo/a e tranquilo/a",
+    "type": "radio",
+    "section": "OMS-5",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Todo o tempo"
+      ],
+      [
+        "4",
+        "A maior parte do tempo"
+      ],
+      [
+        "3",
+        "Mais de metade do tempo"
+      ],
+      [
+        "2",
+        "Menos de metade do tempo"
+      ],
+      [
+        "1",
+        "Algumas vezes"
+      ],
+      [
+        "0",
+        "Nunca"
+      ]
+    ]
+  },
+  {
+    "id": "OMS_3",
+    "label": "Senti-me ativo/a e energético/a",
+    "type": "radio",
+    "section": "OMS-5",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Todo o tempo"
+      ],
+      [
+        "4",
+        "A maior parte do tempo"
+      ],
+      [
+        "3",
+        "Mais de metade do tempo"
+      ],
+      [
+        "2",
+        "Menos de metade do tempo"
+      ],
+      [
+        "1",
+        "Algumas vezes"
+      ],
+      [
+        "0",
+        "Nunca"
+      ]
+    ]
+  },
+  {
+    "id": "OMS_4",
+    "label": "Acordei a sentir-me fresco/a e repousado/a",
+    "type": "radio",
+    "section": "OMS-5",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Todo o tempo"
+      ],
+      [
+        "4",
+        "A maior parte do tempo"
+      ],
+      [
+        "3",
+        "Mais de metade do tempo"
+      ],
+      [
+        "2",
+        "Menos de metade do tempo"
+      ],
+      [
+        "1",
+        "Algumas vezes"
+      ],
+      [
+        "0",
+        "Nunca"
+      ]
+    ]
+  },
+  {
+    "id": "OMS_5",
+    "label": "O meu dia-a-dia tem sido preenchido com coisas que me interessam",
+    "type": "radio",
+    "section": "OMS-5",
+    "required": true,
+    "choices": [
+      [
+        "5",
+        "Todo o tempo"
+      ],
+      [
+        "4",
+        "A maior parte do tempo"
+      ],
+      [
+        "3",
+        "Mais de metade do tempo"
+      ],
+      [
+        "2",
+        "Menos de metade do tempo"
+      ],
+      [
+        "1",
+        "Algumas vezes"
+      ],
+      [
+        "0",
+        "Nunca"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_1",
+    "label": "Às vezes tenho dificuldade em ver as coisas do ponto de vista de outra pessoa.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ],
+    "description": "Por favor, indique até que ponto cada uma destas afirmações se aplica a si."
+  },
+  {
+    "id": "EAC_2",
+    "label": "Quando vejo um filme ou uma peça de teatro, normalmente sou objetivo(a) e não costumo envolver-me totalmente.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_3",
+    "label": "Numa situação de desacordo, tento ver o lado de toda a gente antes de tomar uma decisão.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_4",
+    "label": "Às vezes tento compreender melhor os meus amigos imaginando como são as coisas a partir da perspetiva deles.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_5",
+    "label": "Normalmente, quando estou chateado(a) com alguém, tento por momentos pôr-me na pele dessa pessoa.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_6",
+    "label": "Antes de criticar alguém, tento imaginar como me sentiria se estivesse no seu lugar.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_7",
+    "label": "É frequente ficar emocionalmente envolvido(a) com os problemas dos meus amigos.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_8",
+    "label": "Tenho tendência a ficar nervoso(a) quando os outros à minha volta parecem estar nervosos.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_9",
+    "label": "As pessoas com quem estou têm uma grande influência no meu humor.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_10",
+    "label": "Afeta-me muito quando um dos meus amigos parece estar chateado.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_11",
+    "label": "Frequentemente fico profundamente envolvido com os sentimentos duma personagem dum filme, peça de teatro ou livro.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_12",
+    "label": "Fico muito perturbado(a) quando vejo alguém a chorar.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_13",
+    "label": "Fico alegre quando estou com um grupo de pessoas bem-dispostas e fico triste quando os outros estão em baixo.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_14",
+    "label": "Preocupa-me quando os outros estão preocupados e nervosos.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_15",
+    "label": "Consigo perceber facilmente quando alguém quer entrar numa conversa.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_16",
+    "label": "Consigo perceber rapidamente quando alguém diz uma coisa mas quer dizer outra.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_17",
+    "label": "É fácil para mim pôr-me na pele de outra pessoa.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_18",
+    "label": "Sou bom (boa) a prever como é que alguém se irá sentir.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_19",
+    "label": "Sou rápido(a) a identificar quando, num grupo, alguém se está a sentir constrangido ou desconfortável.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_20",
+    "label": "As outras pessoas dizem-me que sou bom (boa) a compreender como elas se estão a sentir e o que estão a pensar.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_21",
+    "label": "Percebo facilmente se alguém está interessado ou entediado com o que estou a dizer.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_22",
+    "label": "Os meus amigos conversam comigo sobre os seus problemas porque dizem que sou muito compreensivo(a).",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_23",
+    "label": "Consigo sentir se estou a ser intrusivo(a), mesmo que a outra pessoa não mo diga.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_24",
+    "label": "Consigo perceber facilmente aquilo de que a outra pessoa quer falar.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_25",
+    "label": "Consigo perceber quando alguém está a esconder as suas verdadeiras emoções.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_26",
+    "label": "Sou bom (boa) a prever o que é que alguém irá fazer.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_27",
+    "label": "Normalmente, consigo compreender o ponto de vista de outra pessoa mesmo que não concorde com ela.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_28",
+    "label": "Normalmente, mantenho-me emocionalmente desligado(a) quando estou a ver um filme.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_29",
+    "label": "Tento sempre considerar os sentimentos da outra pessoa antes de fazer alguma coisa.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "EAC_30",
+    "label": "Antes de fazer alguma coisa, tento ter em consideração como é que os meus amigos vão reagir.",
+    "type": "radio",
+    "section": "Empatia afetiva e cognitiva",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Fortemente"
+      ],
+      [
+        "2",
+        "Discordo Ligeiramente"
+      ],
+      [
+        "3",
+        "Concordo Ligeiramente"
+      ],
+      [
+        "4",
+        "Concordo Fortemente"
+      ]
+    ]
+  },
+  {
+    "id": "Alexitimia_1",
+    "label": "Fico muitas vezes confuso(a) sobre qual a emoção que estou a sentir.",
+    "type": "radio",
+    "section": "Alexitimia",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Totalmente"
+      ],
+      [
+        "2",
+        "Discordo em parte"
+      ],
+      [
+        "3",
+        "Nem concordo nem discordo"
+      ],
+      [
+        "4",
+        "Concordo em parte"
+      ],
+      [
+        "5",
+        "Concordo Totalmente"
+      ]
+    ],
+    "description": "Usando a escala fornecida como guia, indique o seu grau de concordância com cada uma das seguintes afirmações fazendo um circulo à volta do número correspondente. Dê só uma resposta por cada afirmação."
+  },
+  {
+    "id": "Alexitimia_2",
+    "label": "Tenho dificuldade em encontrar as palavras certas para descrever os meus sentimentos.",
+    "type": "radio",
+    "section": "Alexitimia",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Totalmente"
+      ],
+      [
+        "2",
+        "Discordo em parte"
+      ],
+      [
+        "3",
+        "Nem concordo nem discordo"
+      ],
+      [
+        "4",
+        "Concordo em parte"
+      ],
+      [
+        "5",
+        "Concordo Totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "Alexitimia_3",
+    "label": "Tenho sensações físicas que nem os médicos entendem.",
+    "type": "radio",
+    "section": "Alexitimia",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Totalmente"
+      ],
+      [
+        "2",
+        "Discordo em parte"
+      ],
+      [
+        "3",
+        "Nem concordo nem discordo"
+      ],
+      [
+        "4",
+        "Concordo em parte"
+      ],
+      [
+        "5",
+        "Concordo Totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "Alexitimia_4",
+    "label": "Sou capaz de descrever facilmente os meus sentimentos.",
+    "type": "radio",
+    "section": "Alexitimia",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Totalmente"
+      ],
+      [
+        "2",
+        "Discordo em parte"
+      ],
+      [
+        "3",
+        "Nem concordo nem discordo"
+      ],
+      [
+        "4",
+        "Concordo em parte"
+      ],
+      [
+        "5",
+        "Concordo Totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "Alexitimia_5",
+    "label": "Prefiro analisar os problemas a descrevê-los apenas.",
+    "type": "radio",
+    "section": "Alexitimia",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Totalmente"
+      ],
+      [
+        "2",
+        "Discordo em parte"
+      ],
+      [
+        "3",
+        "Nem concordo nem discordo"
+      ],
+      [
+        "4",
+        "Concordo em parte"
+      ],
+      [
+        "5",
+        "Concordo Totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "Alexitimia_6",
+    "label": "Quando estou aborrecido(a), não sei se me sinto triste, se assustado(a), ou zangado(a).",
+    "type": "radio",
+    "section": "Alexitimia",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Totalmente"
+      ],
+      [
+        "2",
+        "Discordo em parte"
+      ],
+      [
+        "3",
+        "Nem concordo nem discordo"
+      ],
+      [
+        "4",
+        "Concordo em parte"
+      ],
+      [
+        "5",
+        "Concordo Totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "Alexitimia_7",
+    "label": "Fico muitas vezes intrigado(a) com sensações no meu corpo.",
+    "type": "radio",
+    "section": "Alexitimia",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Totalmente"
+      ],
+      [
+        "2",
+        "Discordo em parte"
+      ],
+      [
+        "3",
+        "Nem concordo nem discordo"
+      ],
+      [
+        "4",
+        "Concordo em parte"
+      ],
+      [
+        "5",
+        "Concordo Totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "Alexitimia_8",
+    "label": "Prefiro simplesmente deixar as coisas acontecer a compreender por que aconteceram assim.",
+    "type": "radio",
+    "section": "Alexitimia",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Totalmente"
+      ],
+      [
+        "2",
+        "Discordo em parte"
+      ],
+      [
+        "3",
+        "Nem concordo nem discordo"
+      ],
+      [
+        "4",
+        "Concordo em parte"
+      ],
+      [
+        "5",
+        "Concordo Totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "Alexitimia_9",
+    "label": "Tenho sentimentos que não consigo identificar bem.",
+    "type": "radio",
+    "section": "Alexitimia",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Totalmente"
+      ],
+      [
+        "2",
+        "Discordo em parte"
+      ],
+      [
+        "3",
+        "Nem concordo nem discordo"
+      ],
+      [
+        "4",
+        "Concordo em parte"
+      ],
+      [
+        "5",
+        "Concordo Totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "Alexitimia_10",
+    "label": "É essencial estar em contacto com as emoções.",
+    "type": "radio",
+    "section": "Alexitimia",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Totalmente"
+      ],
+      [
+        "2",
+        "Discordo em parte"
+      ],
+      [
+        "3",
+        "Nem concordo nem discordo"
+      ],
+      [
+        "4",
+        "Concordo em parte"
+      ],
+      [
+        "5",
+        "Concordo Totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "Alexitimia_11",
+    "label": "Acho difícil descrever o que sinto em relação às pessoas.",
+    "type": "radio",
+    "section": "Alexitimia",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Totalmente"
+      ],
+      [
+        "2",
+        "Discordo em parte"
+      ],
+      [
+        "3",
+        "Nem concordo nem discordo"
+      ],
+      [
+        "4",
+        "Concordo em parte"
+      ],
+      [
+        "5",
+        "Concordo Totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "Alexitimia_12",
+    "label": "As pessoas dizem-me para falar mais dos meus sentimentos.",
+    "type": "radio",
+    "section": "Alexitimia",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Totalmente"
+      ],
+      [
+        "2",
+        "Discordo em parte"
+      ],
+      [
+        "3",
+        "Nem concordo nem discordo"
+      ],
+      [
+        "4",
+        "Concordo em parte"
+      ],
+      [
+        "5",
+        "Concordo Totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "Alexitimia_13",
+    "label": "Não sei o que se passa dentro de mim.",
+    "type": "radio",
+    "section": "Alexitimia",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Totalmente"
+      ],
+      [
+        "2",
+        "Discordo em parte"
+      ],
+      [
+        "3",
+        "Nem concordo nem discordo"
+      ],
+      [
+        "4",
+        "Concordo em parte"
+      ],
+      [
+        "5",
+        "Concordo Totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "Alexitimia_14",
+    "label": "Muitas vezes não sei porque estou zangado(a).",
+    "type": "radio",
+    "section": "Alexitimia",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Totalmente"
+      ],
+      [
+        "2",
+        "Discordo em parte"
+      ],
+      [
+        "3",
+        "Nem concordo nem discordo"
+      ],
+      [
+        "4",
+        "Concordo em parte"
+      ],
+      [
+        "5",
+        "Concordo Totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "Alexitimia_15",
+    "label": "Prefiro conversar com as pessoas sobre as suas actividades diárias do que sobre os seus sentimentos.",
+    "type": "radio",
+    "section": "Alexitimia",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Totalmente"
+      ],
+      [
+        "2",
+        "Discordo em parte"
+      ],
+      [
+        "3",
+        "Nem concordo nem discordo"
+      ],
+      [
+        "4",
+        "Concordo em parte"
+      ],
+      [
+        "5",
+        "Concordo Totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "Alexitimia_16",
+    "label": "Prefiro assistir a espectáculos ligeiros do que dramas psicológicos.",
+    "type": "radio",
+    "section": "Alexitimia",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Totalmente"
+      ],
+      [
+        "2",
+        "Discordo em parte"
+      ],
+      [
+        "3",
+        "Nem concordo nem discordo"
+      ],
+      [
+        "4",
+        "Concordo em parte"
+      ],
+      [
+        "5",
+        "Concordo Totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "Alexitimia_17",
+    "label": "É-me difícil revelar os meus sentimentos mais íntimos mesmo a amigos próximos.",
+    "type": "radio",
+    "section": "Alexitimia",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Totalmente"
+      ],
+      [
+        "2",
+        "Discordo em parte"
+      ],
+      [
+        "3",
+        "Nem concordo nem discordo"
+      ],
+      [
+        "4",
+        "Concordo em parte"
+      ],
+      [
+        "5",
+        "Concordo Totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "Alexitimia_18",
+    "label": "Posso sentir-me próximo(a) de uma pessoa, mesmo em momentos de silêncio.",
+    "type": "radio",
+    "section": "Alexitimia",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Totalmente"
+      ],
+      [
+        "2",
+        "Discordo em parte"
+      ],
+      [
+        "3",
+        "Nem concordo nem discordo"
+      ],
+      [
+        "4",
+        "Concordo em parte"
+      ],
+      [
+        "5",
+        "Concordo Totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "Alexitimia_19",
+    "label": "Considero o exame dos meus sentimentos útil na resolução de problemas pessoais.",
+    "type": "radio",
+    "section": "Alexitimia",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Totalmente"
+      ],
+      [
+        "2",
+        "Discordo em parte"
+      ],
+      [
+        "3",
+        "Nem concordo nem discordo"
+      ],
+      [
+        "4",
+        "Concordo em parte"
+      ],
+      [
+        "5",
+        "Concordo Totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "Alexitimia_20",
+    "label": "Procurar significados ocultos nos filmes e peças de teatro distrai do prazer que proporcionam.",
+    "type": "radio",
+    "section": "Alexitimia",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Discordo Totalmente"
+      ],
+      [
+        "2",
+        "Discordo em parte"
+      ],
+      [
+        "3",
+        "Nem concordo nem discordo"
+      ],
+      [
+        "4",
+        "Concordo em parte"
+      ],
+      [
+        "5",
+        "Concordo Totalmente"
+      ]
+    ]
+  },
+  {
+    "id": "Answer_validation",
+    "label": "Por fim, é de extrema importância para a nossa investigação incluir apenas respostas de pessoas que dedicaram esforço e atenção ao preenchimento do questionário. Caso contrário, anos de esforço, dos investigadores e outros participantes, podem ser desperdiçados ou devolver dados incorretos na área de investigação da saúde mental. Na sua opinião, devemos incluir as suas respostas neste estudo porque as mesmas foram honestas? Não há qualquer consequência se considerar que não o devemos fazer. Agradecemos a sua honestidade.",
+    "type": "radio",
+    "section": "Validação das respostas",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sim"
+      ],
+      [
+        "0",
+        "Não"
+      ]
+    ]
+  }
+]
