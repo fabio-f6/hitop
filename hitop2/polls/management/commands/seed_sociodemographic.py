@@ -28,6 +28,7 @@ class Command(BaseCommand):
                     "required": q.get("required", True),
                     "order": index,
                     "description": q.get("description", ""),
+                    "group_intro": q.get("group_intro", ""),
                     "section": q["section"],
                     "show_if_question": q.get("show_if_question", ""),
                     "show_if_values": q.get("show_if_values", []),

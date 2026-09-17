@@ -88,6 +88,7 @@ class QuestionnaireSubmission(models.Model):
     )
 
     sociodemographic_completed = models.BooleanField(default=False)
+    sociodemographic_step = models.PositiveIntegerField(default=0)
 
     started_at = models.DateTimeField(
         auto_now_add=True
@@ -187,6 +188,8 @@ class DynamicQuestion(models.Model):
         blank=True,
         null=True
     )
+
+    group_intro = models.TextField(blank=True)
 
     section = models.CharField(max_length=100, blank=True)
     show_if_question = models.CharField(max_length=100, blank=True)

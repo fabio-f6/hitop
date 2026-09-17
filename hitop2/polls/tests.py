@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.urls import reverse
@@ -67,6 +67,10 @@ class PatientQuestionnaireFlowTests(TestCase):
         self.assertEqual(DynamicQuestion.objects.count(), len(SOCIO_QUESTIONS))
         self.assertEqual(question.label, "Que sexo lhe foi atribuído à nascença?")
         self.assertEqual(question.choices.count(), 3)
+        intro = DynamicQuestion.objects.get(question_id="subs_use_lastyear_alc")
+        next_question = DynamicQuestion.objects.get(question_id="subs_use_lastyear_can")
+        self.assertIn("No último ano", intro.group_intro)
+        self.assertEqual(next_question.group_intro, "")
 
     def test_uuid_flow_resumes_and_new_submission_asks_again(self):
         first = self.make_submission()
@@ -135,6 +139,7 @@ class PatientQuestionnaireFlowTests(TestCase):
             submission=submission, question__question_id="Diagnosis"
         ).exists())
 
+    @override_settings(SOCIODEMOGRAPHIC_REQUIRE_ANSWERS=True)
     def test_conditional_text_is_required_when_parent_option_is_selected(self):
         submission = self.make_submission()
         self.open_link(submission)
@@ -162,3 +167,53 @@ class PatientQuestionnaireFlowTests(TestCase):
         self.assertFalse(DynamicAnswer.objects.filter(
             submission=submission, question=medication,
         ).exists())
+
+    @override_settings(SOCIODEMOGRAPHIC_REQUIRE_ANSWERS=False)
+    def test_blank_sections_can_advance_and_resume(self):
+        submission = self.make_submission()
+        self.open_link(submission)
+        sections = list(dict.fromkeys(
+            DynamicQuestion.objects.order_by("order").values_list("section", flat=True)
+        ))
+
+        first_response = self.client.post(
+            reverse("polls:sociodemographic") + "?section=0", {},
+        )
+        self.assertRedirects(
+            first_response,
+            reverse("polls:sociodemographic") + "?section=1",
+            fetch_redirect_response=False,
+        )
+        response = self.open_link(submission)
+        self.assertContains(response, "Consumo de substâncias")
+        intro = DynamicQuestion.objects.get(question_id="subs_use_lastyear_alc").group_intro
+        html = response.content.decode()
+        self.assertEqual(html.count(intro), 1)
+        self.assertLess(html.index(intro), html.index("Álcool (etanol)"))
+        self.assertFalse(response.context["require_answers"])
+        self.assertNotIn('aria-hidden="true">*</span>', html)
+
+        for index in range(1, len(sections)):
+            response = self.client.post(
+                reverse("polls:sociodemographic") + f"?section={index}", {},
+            )
+            self.assertEqual(response.status_code, 302)
+
+        submission.refresh_from_db()
+        self.assertTrue(submission.sociodemographic_completed)
+        self.assertEqual(submission.sociodemographic_step, len(sections))
+        self.assertFalse(DynamicAnswer.objects.filter(submission=submission).exists())
+
+    @override_settings(SOCIODEMOGRAPHIC_REQUIRE_ANSWERS=True)
+    def test_required_mode_blocks_blank_section(self):
+        submission = self.make_submission()
+        self.open_link(submission)
+
+        response = self.client.post(
+            reverse("polls:sociodemographic") + "?section=0", {},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Revise as respostas obrigatórias")
+        submission.refresh_from_db()
+        self.assertEqual(submission.sociodemographic_step, 0)

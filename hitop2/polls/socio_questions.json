@@ -562,7 +562,7 @@
         "Prefiro não responder"
       ]
     ],
-    "description": "No último ano, selecione a frequência com que consumiu as seguintes substâncias. Por favor, considere apenas substâncias que NÃO lhe foram prescritas por um profissional de saúde OU que utilizou de uma forma DIFERENTE da prescrita."
+    "group_intro": "No último ano, selecione a frequência com que consumiu as seguintes substâncias. Por favor, considere apenas substâncias que NÃO lhe foram prescritas por um profissional de saúde OU que utilizou de uma forma DIFERENTE da prescrita."
   },
   {
     "id": "subs_use_lastyear_can",
@@ -863,7 +863,7 @@
         "Prefiro não responder"
       ]
     ],
-    "description": "Ao longo de toda a sua vida, que frequência descreve melhor o seu consumo das seguintes substâncias?"
+    "group_intro": "Ao longo de toda a sua vida, que frequência descreve melhor o seu consumo das seguintes substâncias?"
   },
   {
     "id": "subs_use_life_24",
@@ -1545,7 +1545,7 @@
         "Fraca"
       ]
     ],
-    "description": "As questões que se seguem pedem-lhe opinião sobre a sua saúde, a forma como se sente e sobre a sua capacidade de desempenhar as atividades habituais. Pedimos que leia com atenção cada pergunta e que responda o mais honestamente possível. Se não tiver a certeza sobre a resposta a dar, dê-nos a que achar mais apropriada."
+    "group_intro": "As questões que se seguem pedem-lhe opinião sobre a sua saúde, a forma como se sente e sobre a sua capacidade de desempenhar as atividades habituais. Pedimos que leia com atenção cada pergunta e que responda o mais honestamente possível. Se não tiver a certeza sobre a resposta a dar, dê-nos a que achar mais apropriada."
   },
   {
     "id": "SF_Q2",
@@ -1596,7 +1596,7 @@
         "Não, nada limitado/a"
       ]
     ],
-    "description": "As perguntas que se seguem são sobre atividades que executa no seu dia-a-dia. Será que a sua saúde o/a limita nestas atividades? Se sim, quanto?"
+    "group_intro": "As perguntas que se seguem são sobre atividades que executa no seu dia-a-dia. Será que a sua saúde o/a limita nestas atividades? Se sim, quanto?"
   },
   {
     "id": "SF_Q3_2",
@@ -1815,7 +1815,7 @@
         "Nunca"
       ]
     ],
-    "description": "Durante as últimas 4 semanas teve, no seu trabalho ou atividades diárias, algum dos problemas apresentados a seguir como consequência do seu estado de saúde físico?"
+    "group_intro": "Durante as últimas 4 semanas teve, no seu trabalho ou atividades diárias, algum dos problemas apresentados a seguir como consequência do seu estado de saúde físico?"
   },
   {
     "id": "SF_Q4_2",
@@ -1932,7 +1932,7 @@
         "Nunca"
       ]
     ],
-    "description": "Durante as últimas 4 semanas, teve com o seu trabalho ou com as suas atividades diárias, algum dos problemas apresentados a seguir devido a quaisquer problemas emocionais (tal como sentir-se deprimido/a ou ansioso/a)?"
+    "group_intro": "Durante as últimas 4 semanas, teve com o seu trabalho ou com as suas atividades diárias, algum dos problemas apresentados a seguir devido a quaisquer problemas emocionais (tal como sentir-se deprimido/a ou ansioso/a)?"
   },
   {
     "id": "SF_Q5_2",
@@ -2049,7 +2049,7 @@
         "Nunca"
       ]
     ],
-    "description": "As perguntas que se seguem pretendem avaliar a forma como se sentiu e como lhe correram as coisas nas últimas quatro semanas. Para cada pergunta, selecione por favor o número que melhor descreve a forma como se sentiu."
+    "group_intro": "As perguntas que se seguem pretendem avaliar a forma como se sentiu e como lhe correram as coisas nas últimas quatro semanas. Para cada pergunta, selecione por favor o número que melhor descreve a forma como se sentiu."
   },
   {
     "id": "SF_Q7_2",
@@ -2340,7 +2340,7 @@
         "Discordo totalmente"
       ]
     ],
-    "description": "Abaixo estão várias afirmações relativas à precisão com que você consegue perceber as suas sensações corporais. Por favor, utilize a escala fornecida para classificar o quão bem você acredita que consegue perceber de forma precisa cada sensação específica. Por exemplo, se frequentemente sente que precisa de urinar e não confirma essa necessidade quando vai à casa de banho, deveria classificar como baixa a precisão com que percebe esta sensação corporal. Por favor, classifique apenas a precisão com que percebe estas sensações sem utilizar pistas externas. Por exemplo, se consegue perceber o quão rápido o seu coração está a bater apenas quando mede a pulsação, não deve analisar isto como uma perceção interna precisa."
+    "group_intro": "Abaixo estão várias afirmações relativas à precisão com que você consegue perceber as suas sensações corporais. Por favor, utilize a escala fornecida para classificar o quão bem você acredita que consegue perceber de forma precisa cada sensação específica. Por exemplo, se frequentemente sente que precisa de urinar e não confirma essa necessidade quando vai à casa de banho, deveria classificar como baixa a precisão com que percebe esta sensação corporal. Por favor, classifique apenas a precisão com que percebe estas sensações sem utilizar pistas externas. Por exemplo, se consegue perceber o quão rápido o seu coração está a bater apenas quando mede a pulsação, não deve analisar isto como uma perceção interna precisa."
   },
   {
     "id": "IAS_2",
@@ -2982,7 +2982,7 @@
         "Discordo totalmente"
       ]
     ],
-    "description": "Abaixo estão várias afirmações relativas ao nível de atenção que você presta às suas sensações corporais. Por favor, utilize a escala fornecida para classificar o nível de atenção que você acha que presta a cada sensação específica. Pense em como se sente durante a maior parte das situações da sua vida quotidiana em vez de pensar num momento específico. Por exemplo, se pensa frequentemente sobre o seu batimento cardíaco, a sua sensação de fome ou a sua necessidade de ir à casa de banho, então deveria classificar o seu nível de atenção a estas sensações como alto. Em contraste, se não pensa frequentemente no seu batimento cardíaco, na sua sensação de fome ou na sua necessidade de ir à casa de banho, então deveria classificar o seu nível de atenção para estas sensações como baixo. Por favor, classifique apenas o nível de atenção que presta a estas sensações, independentemente do quão bem você acha que consegue percebê-las. Por exemplo, se sente frequentemente necessidade de ir à casa de banho, mas quando vai à casa de banho apercebe-se que não precisava de ir, deverá na mesma classificar o seu nível de atenção a esta sensação como alto. Não se preocupe com o quão frequentemente você pensa que a sensação está verdadeiramente a acontecer dentro do seu corpo – nós gostaríamos apenas de saber a quantidade de tempo em que você presta atenção a estas sensações. As questões apresentadas referem-se à sua atenção a sensações vindas do interior do seu corpo. Por exemplo, se a questão for sobre temperatura refere-se a sensações de temperatura percebidas internamente, sem utilizar a sua mão para sentir o quão quente está a sua pele. Se a questão for sobre o seu batimento cardíaco refere-se a sensações percebidas internamente, sem que seja necessário medir a sua pulsação."
+    "group_intro": "Abaixo estão várias afirmações relativas ao nível de atenção que você presta às suas sensações corporais. Por favor, utilize a escala fornecida para classificar o nível de atenção que você acha que presta a cada sensação específica. Pense em como se sente durante a maior parte das situações da sua vida quotidiana em vez de pensar num momento específico. Por exemplo, se pensa frequentemente sobre o seu batimento cardíaco, a sua sensação de fome ou a sua necessidade de ir à casa de banho, então deveria classificar o seu nível de atenção a estas sensações como alto. Em contraste, se não pensa frequentemente no seu batimento cardíaco, na sua sensação de fome ou na sua necessidade de ir à casa de banho, então deveria classificar o seu nível de atenção para estas sensações como baixo. Por favor, classifique apenas o nível de atenção que presta a estas sensações, independentemente do quão bem você acha que consegue percebê-las. Por exemplo, se sente frequentemente necessidade de ir à casa de banho, mas quando vai à casa de banho apercebe-se que não precisava de ir, deverá na mesma classificar o seu nível de atenção a esta sensação como alto. Não se preocupe com o quão frequentemente você pensa que a sensação está verdadeiramente a acontecer dentro do seu corpo – nós gostaríamos apenas de saber a quantidade de tempo em que você presta atenção a estas sensações. As questões apresentadas referem-se à sua atenção a sensações vindas do interior do seu corpo. Por exemplo, se a questão for sobre temperatura refere-se a sensações de temperatura percebidas internamente, sem utilizar a sua mão para sentir o quão quente está a sua pele. Se a questão for sobre o seu batimento cardíaco refere-se a sensações percebidas internamente, sem que seja necessário medir a sua pulsação."
   },
   {
     "id": "IATS_2",
@@ -3632,7 +3632,7 @@
         "Nunca"
       ]
     ],
-    "description": "Indique, por favor, para cada uma das cinco afirmações, a que se aproxima mais do modo como se tem sentido nas últimas duas semanas. Note que os números maiores indicam maior bem-estar. Exemplo: Se ao longo das últimas semanas se sentiu alegre e bem disposto/a durante mais de metade do tempo, selecione a opção com o número 3."
+    "group_intro": "Indique, por favor, para cada uma das cinco afirmações, a que se aproxima mais do modo como se tem sentido nas últimas duas semanas. Note que os números maiores indicam maior bem-estar. Exemplo: Se ao longo das últimas semanas se sentiu alegre e bem disposto/a durante mais de metade do tempo, selecione a opção com o número 3."
   },
   {
     "id": "OMS_2",
@@ -3790,7 +3790,7 @@
         "Concordo Fortemente"
       ]
     ],
-    "description": "Por favor, indique até que ponto cada uma destas afirmações se aplica a si."
+    "group_intro": "Por favor, indique até que ponto cada uma destas afirmações se aplica a si."
   },
   {
     "id": "EAC_2",
@@ -4545,7 +4545,7 @@
         "Concordo Totalmente"
       ]
     ],
-    "description": "Usando a escala fornecida como guia, indique o seu grau de concordância com cada uma das seguintes afirmações fazendo um circulo à volta do número correspondente. Dê só uma resposta por cada afirmação."
+    "group_intro": "Usando a escala fornecida como guia, indique o seu grau de concordância com cada uma das seguintes afirmações fazendo um circulo à volta do número correspondente. Dê só uma resposta por cada afirmação."
   },
   {
     "id": "Alexitimia_2",

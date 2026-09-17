@@ -22,13 +22,21 @@
 
         {% for question in questions %}
 
+            {% if question.group_intro %}
+                <div class="mb-4 pt-3 border-top border-2">
+                    <p class="mb-0" style="font-size: 1.05rem; font-weight: 600; line-height: 1.55;">
+                        {{ question.group_intro }}
+                    </p>
+                </div>
+            {% endif %}
+
             <div class="mb-4" data-question-id="{{ question.question_id }}"
                  data-show-if="{{ question.show_if_question }}"
                  data-show-values="{{ question.show_if_values|join:',' }}">
 
                 <label class="form-label">
                     <strong>{{ question.label }}</strong>
-                    {% if question.required %}<span aria-hidden="true">*</span>{% endif %}
+                    {% if require_answers and question.required %}<span aria-hidden="true">*</span>{% endif %}
                 </label>
 
                 {% if question.description %}
@@ -42,7 +50,7 @@
                         name="question_{{ question.id }}"
                         class="form-control"
                         rows="2"
-                        {% if question.required and not question.show_if_question %}required{% endif %}
+                        {% if require_answers and question.required and not question.show_if_question %}required{% endif %}
                     >{{ answers|get_item:question.id|default:'' }}</textarea>
 
                 <!-- NUMBER -->
@@ -53,7 +61,7 @@
                         name="question_{{ question.id }}"
                         class="form-control"
                         value="{{ answers|get_item:question.id|default:'' }}"
-                        {% if question.required and not question.show_if_question %}required{% endif %}
+                        {% if require_answers and question.required and not question.show_if_question %}required{% endif %}
                     >
 
                 <!-- RADIO -->
@@ -70,7 +78,7 @@
                                 value="{{ choice.value }}"
                                 class="form-check-input"
                                 {% if answers|get_item:question.id == choice.value %}checked{% endif %}
-                                {% if question.required and not question.show_if_question %}required{% endif %}
+                                {% if require_answers and question.required and not question.show_if_question %}required{% endif %}
                             >
 
                             <label class="form-check-label" for="question_{{ question.id }}_{{ forloop.counter }}">

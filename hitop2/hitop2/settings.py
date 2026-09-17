@@ -25,6 +25,9 @@ SECRET_KEY = 'django-insecure-&o%!wndjnpyq#ro*orinx5^xre$^p7i&#asn2imbu5t@r*d$v5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# Temporarily allow advancing through the patient questionnaire without answers.
+SOCIODEMOGRAPHIC_REQUIRE_ANSWERS = False
+
 ALLOWED_HOSTS = []
 
 

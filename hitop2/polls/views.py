@@ -3,6 +3,7 @@ import math
 import random
 
 from django.http import HttpResponse
+from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
@@ -359,6 +360,9 @@ def _dynamic_questionnaire_response(
     for question in questions:
         sections.setdefault(question.section or category.name, []).append(question)
     section_names = list(sections)
+    require_answers = (
+        not submission or settings.SOCIODEMOGRAPHIC_REQUIRE_ANSWERS
+    )
 
     previous_answers = DynamicAnswer.objects.filter(
         user=user, submission=submission, question__category=category,
@@ -368,11 +372,11 @@ def _dynamic_questionnaire_response(
         for answer in previous_answers
     }
 
-    first_incomplete = (
-        len(section_names) - 1
-        if submission and not submission.sociodemographic_completed else 0
-    )
-    if submission and not submission.sociodemographic_completed:
+    first_incomplete = 0
+    if submission and not submission.sociodemographic_completed and not require_answers:
+        first_incomplete = min(submission.sociodemographic_step, len(section_names) - 1)
+    elif submission and not submission.sociodemographic_completed:
+        first_incomplete = len(section_names) - 1
         for index, section_name in enumerate(section_names):
             if any(
                 question.required
@@ -411,9 +415,9 @@ def _dynamic_questionnaire_response(
                 continue
 
             value = submitted[question.question_id]
-            if question.required and not value:
+            if require_answers and question.required and not value:
                 error = True
-            if question.question_type in ("radio", "checkbox"):
+            if value and question.question_type in ("radio", "checkbox"):
                 selected = value if isinstance(value, list) else [value]
                 valid = {choice.value for choice in question.choices.all()}
                 if any(option not in valid for option in selected):
@@ -444,9 +448,15 @@ def _dynamic_questionnaire_response(
                                 if isinstance(value, list) else value
                             ),
                         )
-                if submission and section_index == len(section_names) - 1:
-                    submission.sociodemographic_completed = True
-                    submission.save(update_fields=["sociodemographic_completed"])
+                if submission:
+                    submission.sociodemographic_step = max(
+                        submission.sociodemographic_step, section_index + 1
+                    )
+                    if section_index == len(section_names) - 1:
+                        submission.sociodemographic_completed = True
+                    submission.save(update_fields=[
+                        "sociodemographic_step", "sociodemographic_completed"
+                    ])
 
             if section_index == len(section_names) - 1:
                 return redirect(success_redirect)
@@ -464,6 +474,7 @@ def _dynamic_questionnaire_response(
         "section_index": section_index,
         "section_total": len(section_names),
         "previous_index": section_index - 1,
+        "require_answers": require_answers,
         "submit_label": (
             "Concluir" if section_index == len(section_names) - 1
             else "Guardar e continuar"
