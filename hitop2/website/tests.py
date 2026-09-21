@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.test import TestCase, override_settings
 
 from django.contrib.auth.models import User
@@ -7,9 +9,14 @@ from polls.models import (
     DynamicAnswer,
     DynamicChoice,
     DynamicQuestion,
+    Question,
     QuestionCategory,
     QuestionnaireSubmission,
+    Scale,
     SociodemographicAnswer,
+    Spectra,
+    Subfactor,
+    UserAnswer,
 )
 
 from .models import UserProfile
@@ -240,3 +247,66 @@ class ReportSociodemographicsTests(TestCase):
         )
 
         self.assertEqual(_report_sociodemographics(submission)["sex"], "Feminino")
+
+
+class ReportPreviewSpectrumTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.professional = User.objects.create_user(username="report-professional")
+        professional_profile = cls.professional.userprofile
+        professional_profile.user_type = "professional"
+        professional_profile.is_verified = True
+        professional_profile.save()
+
+        cls.patient = User.objects.create_user(username="report-spectrum-patient")
+        patient_profile = cls.patient.userprofile
+        patient_profile.user_type = "patient"
+        patient_profile.professional = cls.professional
+        patient_profile.save()
+
+        cls.submission = QuestionnaireSubmission.objects.create(user=cls.patient)
+
+        for spectrum_name, scale_name in (
+            ("Internalizing", "Distress scale"),
+            ("Somatoform", "Somatoform scale"),
+        ):
+            spectrum = Spectra.objects.create(name=spectrum_name)
+            subfactor = Subfactor.objects.create(
+                name=f"{spectrum_name} subfactor",
+                spectra=spectrum,
+            )
+            scale = Scale.objects.create(name=scale_name, subfactor=subfactor)
+            question = Question.objects.create(
+                scale=scale,
+                item_code=f"{spectrum_name}-1",
+                question_text=f"Question for {spectrum_name}",
+            )
+            UserAnswer.objects.create(
+                user=cls.patient,
+                submission=cls.submission,
+                question=question,
+                answer="2",
+            )
+
+        cls.submission.spectra.add(Spectra.objects.get(name="Internalizing"))
+
+    @patch("website.views.calculate_percentile", return_value=50)
+    @patch("website.views.calculate_spectrum_percentile", return_value=50)
+    def test_detailed_profile_only_contains_submission_spectra(
+        self,
+        _spectrum_percentile,
+        _scale_percentile,
+    ):
+        self.client.force_login(self.professional)
+
+        response = self.client.get(
+            reverse("website:report_preview", args=[self.submission.id]),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [section["key"] for section in response.context["detailed_sections"]],
+            ["internalizing"],
+        )
+        self.assertContains(response, "Internalização")
+        self.assertNotContains(response, "Somatização")

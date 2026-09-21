@@ -495,11 +495,14 @@ def report_preview(request, submission_id):
 
     patient = submission.user
 
+    selected_spectra = submission.spectra.all()
+
     answers = UserAnswer.objects.filter(
-        submission=submission
+        submission=submission,
+        question__scale__subfactor__spectra__in=selected_spectra,
     ).select_related(
-        "question__scale"
-    )
+        "question__scale__subfactor__spectra"
+    ).distinct()
 
     scale_scores = calculate_scale_scores_from_answers(answers)
 
@@ -793,6 +796,25 @@ def report_preview(request, submission_id):
             items
         )
 
+    detailed_section_titles = {
+        "externalizing": "Externalização",
+        "internalizing": "Internalização",
+        "detachment": "Desafiliação",
+        "somatization": "Somatização",
+        "thought_disorder": "Alterações de pensamento",
+    }
+
+    detailed_sections = [
+        {
+            "key": key,
+            "title": title,
+            "chart": grouped_chart_data[key],
+            "analysis": analysis[key],
+        }
+        for key, title in detailed_section_titles.items()
+        if key in grouped_chart_data
+    ]
+
     return render(
         request,
         "website/report_preview.html",
@@ -803,6 +825,7 @@ def report_preview(request, submission_id):
             "grouped_scores": grouped_scores,
             "grouped_chart_data": grouped_chart_data,
             "analysis": analysis,
+            "detailed_sections": detailed_sections,
             "spectrum_results": spectrum_results,
             "global_chart_data": global_chart_data,
             "global_analysis": global_analysis,
