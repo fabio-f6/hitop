@@ -56,6 +56,11 @@ class Question(models.Model):
 
 class QuestionnaireSubmission(models.Model):
 
+    class NormativeStatus(models.TextChoices):
+        PENDING = "pending", "Pendente"
+        INELIGIBLE = "ineligible", "Não elegível"
+        EXPORTED = "exported", "Exportada"
+
     SIMULATION_MODES = [
         ("normal", "Aplicação normal"),
         ("simulated", "Simular respostas"),
@@ -97,6 +102,17 @@ class QuestionnaireSubmission(models.Model):
     completed_at = models.DateTimeField(
         null=True,
         blank=True
+    )
+
+    normative_status = models.CharField(
+        max_length=10,
+        choices=NormativeStatus.choices,
+        default=NormativeStatus.PENDING,
+    )
+
+    normative_exported_at = models.DateTimeField(
+        null=True,
+        blank=True,
     )
 
     is_open = models.BooleanField(

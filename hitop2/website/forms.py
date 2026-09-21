@@ -106,7 +106,7 @@ class CreatePatientForm(UserCreationForm):
         label="Descrição da aplicação",
         max_length=255,
         required=True,
-        initial="Ex: Avaliação Inicial",
+        initial="Avaliação Inicial",
         widget=forms.TextInput(attrs={
             "class": "form-control"
         })

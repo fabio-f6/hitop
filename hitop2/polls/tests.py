@@ -1,7 +1,9 @@
 from django.test import TestCase, override_settings
 from django.contrib.auth.models import User
+from django.contrib import admin
 from django.core.management import call_command
 from django.urls import reverse
+from django.utils import timezone
 
 from .models import (
     DynamicAnswer,
@@ -10,6 +12,43 @@ from .models import (
     SociodemographicAnswer,
 )
 from .socio_config import SOCIO_QUESTIONS
+
+
+class QuestionnaireSubmissionNormativeStatusTests(TestCase):
+    def setUp(self):
+        self.patient = User.objects.create_user(username="normative-status-patient")
+
+    def test_new_submission_defaults_to_pending_without_export_timestamp(self):
+        submission = QuestionnaireSubmission.objects.create(user=self.patient)
+
+        self.assertEqual(
+            submission.normative_status,
+            QuestionnaireSubmission.NormativeStatus.PENDING,
+        )
+        self.assertIsNone(submission.normative_exported_at)
+
+    def test_all_normative_statuses_can_be_persisted(self):
+        submission = QuestionnaireSubmission.objects.create(user=self.patient)
+
+        for status in QuestionnaireSubmission.NormativeStatus.values:
+            submission.normative_status = status
+            submission.save(update_fields=["normative_status"])
+            submission.refresh_from_db()
+            self.assertEqual(submission.normative_status, status)
+
+        exported_at = timezone.now()
+        submission.normative_status = QuestionnaireSubmission.NormativeStatus.EXPORTED
+        submission.normative_exported_at = exported_at
+        submission.save(update_fields=["normative_status", "normative_exported_at"])
+        submission.refresh_from_db()
+        self.assertEqual(submission.normative_exported_at, exported_at)
+
+    def test_admin_lists_and_filters_by_normative_status(self):
+        model_admin = admin.site._registry[QuestionnaireSubmission]
+
+        self.assertIn("normative_status", model_admin.list_display)
+        self.assertIn("normative_exported_at", model_admin.list_display)
+        self.assertIn("normative_status", model_admin.list_filter)
 
 
 class QuestionnaireLinkTests(TestCase):
