@@ -21,6 +21,8 @@ class UserProfile(models.Model):
         on_delete=models.SET_NULL,
         related_name="patients"
     )
+
+    archived_at = models.DateTimeField(null=True, blank=True)
     
     area_formacao = models.CharField(max_length=50, choices=[
         ('Psicologia', 'Psicologia'),

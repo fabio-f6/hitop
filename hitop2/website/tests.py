@@ -6,6 +6,7 @@ from django.test import TestCase, override_settings
 
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.utils import timezone
 
 from polls.models import (
     DynamicAnswer,
@@ -196,6 +197,143 @@ class ProfessionalVerificationTests(TestCase):
         )
 
 # Create your tests here.
+
+
+class PatientArchivingTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.professional = User.objects.create_user(
+            username="professional-archive",
+            password="test-password",
+        )
+        cls.professional.userprofile.user_type = "professional"
+        cls.professional.userprofile.is_verified = True
+        cls.professional.userprofile.save()
+
+        cls.other_professional = User.objects.create_user(
+            username="other-professional",
+            password="test-password",
+        )
+        cls.other_professional.userprofile.user_type = "professional"
+        cls.other_professional.userprofile.is_verified = True
+        cls.other_professional.userprofile.save()
+
+        cls.patient = User.objects.create_user(username="patient-to-archive")
+        cls.patient.userprofile.user_type = "patient"
+        cls.patient.userprofile.professional = cls.professional
+        cls.patient.userprofile.save()
+
+    def setUp(self):
+        self.client.force_login(self.professional)
+
+    def test_archive_patient_hides_it_from_dashboard_and_lists_it_as_archived(self):
+        response = self.client.post(
+            reverse("website:archive_patient", args=[self.patient.userprofile.id]),
+        )
+
+        self.assertRedirects(response, reverse("website:dashboard"))
+        self.patient.userprofile.refresh_from_db()
+        self.assertIsNotNone(self.patient.userprofile.archived_at)
+
+        dashboard = self.client.get(reverse("website:dashboard"))
+        self.assertNotContains(dashboard, self.patient.username)
+        self.assertContains(dashboard, "Pacientes arquivados [1]")
+
+        archived = self.client.get(reverse("website:archived_patients"))
+        self.assertContains(archived, self.patient.username)
+
+    def test_restore_patient_returns_it_to_dashboard(self):
+        self.patient.userprofile.archived_at = timezone.now()
+        self.patient.userprofile.save(update_fields=["archived_at"])
+
+        response = self.client.post(
+            reverse("website:restore_patient", args=[self.patient.userprofile.id]),
+        )
+
+        self.assertRedirects(response, reverse("website:archived_patients"))
+        self.patient.userprofile.refresh_from_db()
+        self.assertIsNone(self.patient.userprofile.archived_at)
+        self.assertContains(
+            self.client.get(reverse("website:dashboard")),
+            self.patient.username,
+        )
+        self.assertNotContains(
+            self.client.get(reverse("website:archived_patients")),
+            self.patient.username,
+        )
+
+    def test_professional_cannot_archive_or_restore_another_professionals_patient(self):
+        self.client.force_login(self.other_professional)
+        profile = self.patient.userprofile
+
+        archive_response = self.client.post(
+            reverse("website:archive_patient", args=[profile.id]),
+        )
+        self.assertEqual(archive_response.status_code, 404)
+        profile.refresh_from_db()
+        self.assertIsNone(profile.archived_at)
+
+        profile.archived_at = timezone.now()
+        profile.save(update_fields=["archived_at"])
+        restore_response = self.client.post(
+            reverse("website:restore_patient", args=[profile.id]),
+        )
+        self.assertEqual(restore_response.status_code, 404)
+        profile.refresh_from_db()
+        self.assertIsNotNone(profile.archived_at)
+
+    def test_archive_and_restore_only_accept_post(self):
+        archive_response = self.client.get(
+            reverse("website:archive_patient", args=[self.patient.userprofile.id]),
+        )
+        restore_response = self.client.get(
+            reverse("website:restore_patient", args=[self.patient.userprofile.id]),
+        )
+
+        self.assertEqual(archive_response.status_code, 405)
+        self.assertEqual(restore_response.status_code, 405)
+
+    def test_archiving_does_not_delete_submissions_or_answers(self):
+        submission = QuestionnaireSubmission.objects.create(user=self.patient)
+        answer = SociodemographicAnswer.objects.create(
+            user=self.patient,
+            question_id="age",
+            answer_value="35",
+            answer_label="35",
+        )
+
+        self.client.post(
+            reverse("website:archive_patient", args=[self.patient.userprofile.id]),
+        )
+
+        self.assertTrue(
+            QuestionnaireSubmission.objects.filter(id=submission.id).exists(),
+        )
+        self.assertTrue(
+            SociodemographicAnswer.objects.filter(id=answer.id).exists(),
+        )
+
+    def test_active_and_archived_patient_lists_are_paginated(self):
+        for index in range(11):
+            patient = User.objects.create_user(username=f"active-{index:02d}")
+            patient.userprofile.user_type = "patient"
+            patient.userprofile.professional = self.professional
+            patient.userprofile.save()
+
+        for index in range(11):
+            patient = User.objects.create_user(username=f"archived-{index:02d}")
+            patient.userprofile.user_type = "patient"
+            patient.userprofile.professional = self.professional
+            patient.userprofile.archived_at = timezone.now()
+            patient.userprofile.save()
+
+        dashboard = self.client.get(reverse("website:dashboard"))
+        archived = self.client.get(reverse("website:archived_patients"))
+
+        self.assertEqual(dashboard.context["patient_page"].paginator.per_page, 10)
+        self.assertEqual(archived.context["patient_page"].paginator.per_page, 10)
+        self.assertContains(dashboard, "Página 1 de 2")
+        self.assertContains(archived, "Página 1 de 2")
 
 
 class ReportSociodemographicsTests(TestCase):

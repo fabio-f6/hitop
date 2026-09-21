@@ -38,6 +38,21 @@ urlpatterns = [
         name="create_patient",
     ),
     path(
+        "patients/archived/",
+        views.archived_patients,
+        name="archived_patients",
+    ),
+    path(
+        "patients/<int:patient_id>/archive/",
+        views.archive_patient,
+        name="archive_patient",
+    ),
+    path(
+        "patients/<int:patient_id>/restore/",
+        views.restore_patient,
+        name="restore_patient",
+    ),
+    path(
         "patients/<int:patient_id>/edit/",
         views.edit_patient,
         name="edit_patient",

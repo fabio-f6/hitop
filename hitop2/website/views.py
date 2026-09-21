@@ -3,8 +3,11 @@ from collections import defaultdict
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.http import HttpResponse
+from django.views.decorators.http import require_POST
+from django.utils import timezone
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
@@ -328,11 +331,16 @@ def dashboard(request):
         messages.error(request, "Acesso negado.")
         return redirect("website:home")
 
-    patients = request.user.patients.all()
+    patients = request.user.patients.filter(
+        user_type="patient",
+        archived_at__isnull=True,
+    ).select_related("user").order_by("user__username", "id")
+
+    patient_page = Paginator(patients, 10).get_page(request.GET.get("page"))
 
     patient_cards = []
 
-    for patient in patients:
+    for patient in patient_page:
 
         submissions = QuestionnaireSubmission.objects.filter(
             user=patient.user
@@ -348,7 +356,12 @@ def dashboard(request):
             "spectra": last_submission.spectra.all() if last_submission else [],
         })
 
-    total_patients = len(patient_cards)
+    total_patients = patients.count()
+
+    archived_patient_count = request.user.patients.filter(
+        user_type="patient",
+        archived_at__isnull=False,
+    ).count()
 
     total_submissions = QuestionnaireSubmission.objects.filter(
         user__userprofile__professional=request.user
@@ -364,11 +377,61 @@ def dashboard(request):
         "website/dashboard.html",
         {
             "patients": patient_cards,
+            "patient_page": patient_page,
             "total_patients": total_patients,
+            "archived_patient_count": archived_patient_count,
             "total_submissions": total_submissions,
             "open_submissions": open_submissions,
         },
     )
+
+
+@verified_professional_required
+def archived_patients(request):
+    patients = request.user.patients.filter(
+        user_type="patient",
+        archived_at__isnull=False,
+    ).select_related("user").order_by("-archived_at", "user__username", "id")
+    patient_page = Paginator(patients, 10).get_page(request.GET.get("page"))
+
+    return render(
+        request,
+        "website/archived_patients.html",
+        {
+            "patients": patient_page,
+            "patient_page": patient_page,
+        },
+    )
+
+
+@require_POST
+@verified_professional_required
+def archive_patient(request, patient_id):
+    patient = get_object_or_404(
+        UserProfile,
+        id=patient_id,
+        user_type="patient",
+        professional=request.user,
+    )
+    patient.archived_at = timezone.now()
+    patient.save(update_fields=["archived_at"])
+    messages.success(request, "Paciente arquivado com sucesso.")
+    return redirect("website:dashboard")
+
+
+@require_POST
+@verified_professional_required
+def restore_patient(request, patient_id):
+    patient = get_object_or_404(
+        UserProfile,
+        id=patient_id,
+        user_type="patient",
+        professional=request.user,
+    )
+    patient.archived_at = None
+    patient.save(update_fields=["archived_at"])
+    messages.success(request, "Paciente restaurado com sucesso.")
+    return redirect("website:archived_patients")
 
 @verified_professional_required
 def patient_answers(request, submission_id):
