@@ -1,80 +1,56 @@
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
+from django.db.models import Q
 
-from polls.models import (
-    NormativeAnswer,
-    NormativeParticipant,
-    NormativeScaleScore,
-    NormativeSpectrumScore,
-)
-from polls.scoring import (
-    calculate_scale_scores_from_answers,
-)
-from polls.spectrum_scores import (
-    calculate_spectrum_scores,
+from polls.models import NormativeDatasetVersion
+from polls.normative_versions import (
+    NormativeVersionError,
+    prepare_normative_version,
 )
 
 
 class Command(BaseCommand):
 
-    help = "Calcula os valores brutos da base normativa."
+    help = "Calcula os valores brutos de uma versão normativa draft."
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "version",
+            nargs="?",
+            help="ID ou nome da versão draft (por omissão, o draft mais recente).",
+        )
 
     def handle(self, *args, **options):
 
-        NormativeScaleScore.objects.all().delete()
-        NormativeSpectrumScore.objects.all().delete()
-
-        participants = NormativeParticipant.objects.all()
+        identifier = options.get("version")
+        drafts = NormativeDatasetVersion.objects.filter(
+            status=NormativeDatasetVersion.Status.DRAFT,
+        )
+        if identifier:
+            lookup = Q(name=identifier)
+            if identifier.isdigit():
+                lookup |= Q(pk=int(identifier))
+            try:
+                version = drafts.get(lookup)
+            except NormativeDatasetVersion.DoesNotExist as exc:
+                raise CommandError("Versão normativa draft não encontrada.") from exc
+            except NormativeDatasetVersion.MultipleObjectsReturned as exc:
+                raise CommandError("O identificador da versão é ambíguo.") from exc
+        else:
+            version = drafts.order_by("-created_at", "-pk").first()
+            if version is None:
+                raise CommandError("Não existe uma versão normativa draft para preparar.")
 
         self.stdout.write(
-            f"A calcular {participants.count()} participantes..."
+            f"A calcular {version.participant_count} participantes de {version.name}..."
         )
-
-        for participant in participants:
-
-            answers = (
-                NormativeAnswer.objects
-                .filter(participant=participant)
-                .select_related("question__scale")
-            )
-
-            scale_scores = calculate_scale_scores_from_answers(
-                answers
-            )
-
-            spectrum_scores = calculate_spectrum_scores(
-                scale_scores
-            )
-
-            for scale, scale_data in scale_scores.items():
-
-                raw_score = scale_data["score"]
-
-                if raw_score is None:
-                    continue
-
-                NormativeScaleScore.objects.create(
-                    participant=participant,
-                    scale=scale,
-                    raw_score=raw_score,
-                )
-
-            for spectrum, spectrum_data in spectrum_scores.items():
-
-                raw_score = spectrum_data["score"]
-
-                if raw_score is None:
-                    continue
-
-                NormativeSpectrumScore.objects.create(
-                    participant=participant,
-                    spectrum=spectrum,
-                    raw_score=raw_score,
-                )
+        try:
+            result = prepare_normative_version(version)
+        except NormativeVersionError as exc:
+            raise CommandError(str(exc)) from exc
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Foram calculados "
-                f"{NormativeScaleScore.objects.count()} valores de escalas e "
-                f"{NormativeSpectrumScore.objects.count()} valores de espectros."
+                f"Foram calculados {result.scale_score_count} valores de escalas e "
+                f"{result.spectrum_score_count} valores de espectros para {version.name}."
             )
         )

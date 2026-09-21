@@ -21,6 +21,11 @@ from .models import (
     Subfactor,
     UserAnswer,
 )
+from .normative_versions import (
+    activate_normative_version,
+    create_normative_version,
+    prepare_normative_version,
+)
 from .normative_export import (
     SubmissionAlreadyExported,
     evaluate_normative_eligibility,
@@ -101,7 +106,7 @@ class NormativeExportTests(TestCase):
             )
         return submission
 
-    def test_submission_is_exported_once_with_existing_scoring_pipeline(self):
+    def test_submission_is_exported_without_changing_a_normative_version(self):
         submission = self.make_submission()
 
         participant = export_submission_to_normative(submission)
@@ -112,8 +117,9 @@ class NormativeExportTests(TestCase):
         self.assertEqual(participant.age, 34)
         self.assertEqual(participant.sex, "Feminino")
         self.assertEqual(participant.answers.get().answer, "3")
-        self.assertEqual(participant.scale_scores.get().raw_score, 3.0)
-        self.assertEqual(participant.spectrum_scores.get().raw_score, 3.0)
+        self.assertFalse(participant.dataset_versions.exists())
+        self.assertFalse(participant.scale_scores.exists())
+        self.assertFalse(participant.spectrum_scores.exists())
 
     def test_second_export_is_rejected_without_creating_data(self):
         submission = self.make_submission()
@@ -129,7 +135,7 @@ class NormativeExportTests(TestCase):
         submission = self.make_submission()
 
         with patch.object(
-            NormativeScaleScore.objects,
+            NormativeAnswer.objects,
             "bulk_create",
             side_effect=RuntimeError("forced failure"),
         ):
@@ -167,6 +173,9 @@ class NormativeExportTests(TestCase):
     def test_normative_data_survives_deletion_of_clinical_data(self):
         submission = self.make_submission()
         participant = export_submission_to_normative(submission)
+        version = create_normative_version("test-v1")
+        prepare_normative_version(version)
+        activate_normative_version(version)
 
         self.patient.delete()
 

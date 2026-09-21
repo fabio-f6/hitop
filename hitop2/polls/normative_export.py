@@ -5,13 +5,9 @@ from .models import (
     DynamicAnswer,
     NormativeAnswer,
     NormativeParticipant,
-    NormativeScaleScore,
-    NormativeSpectrumScore,
     QuestionnaireSubmission,
     UserAnswer,
 )
-from .scoring import calculate_scale_scores_from_answers
-from .spectrum_scores import calculate_spectrum_scores
 
 
 class NormativeExportError(Exception):
@@ -159,28 +155,6 @@ def export_submission_to_normative(submission):
         for answer in clinical_answers
     ]
     NormativeAnswer.objects.bulk_create(normative_answers)
-
-    scale_scores = calculate_scale_scores_from_answers(normative_answers)
-    spectrum_scores = calculate_spectrum_scores(scale_scores)
-
-    NormativeScaleScore.objects.bulk_create([
-        NormativeScaleScore(
-            participant=participant,
-            scale=scale,
-            raw_score=data["score"],
-        )
-        for scale, data in scale_scores.items()
-        if data["score"] is not None
-    ])
-    NormativeSpectrumScore.objects.bulk_create([
-        NormativeSpectrumScore(
-            participant=participant,
-            spectrum=spectrum,
-            raw_score=data["score"],
-        )
-        for spectrum, data in spectrum_scores.items()
-        if data["score"] is not None
-    ])
 
     locked_submission.normative_status = QuestionnaireSubmission.NormativeStatus.EXPORTED
     locked_submission.normative_exported_at = timezone.now()

@@ -13,6 +13,8 @@ from polls.models import (
     DynamicChoice,
     DynamicQuestion,
     NormativeAnswer,
+    NormativeDatasetMembership,
+    NormativeDatasetVersion,
     NormativeParticipant,
     NormativeScaleScore,
     NormativeSpectrumScore,
@@ -503,11 +505,22 @@ class PermanentPatientDeletionTests(TestCase):
         answer = NormativeAnswer.objects.create(
             participant=participant, question=self.question, answer="1",
         )
+        version = NormativeDatasetVersion.objects.create(name="deletion-test-v1")
+        NormativeDatasetMembership.objects.create(
+            version=version,
+            participant=participant,
+        )
         scale_score = NormativeScaleScore.objects.create(
-            participant=participant, scale=self.scale, raw_score=1,
+            version=version,
+            participant=participant,
+            scale=self.scale,
+            raw_score=1,
         )
         spectrum_score = NormativeSpectrumScore.objects.create(
-            participant=participant, spectrum=self.spectrum, raw_score=1,
+            version=version,
+            participant=participant,
+            spectrum=self.spectrum,
+            raw_score=1,
         )
 
         self.client.post(self.delete_url(patient))

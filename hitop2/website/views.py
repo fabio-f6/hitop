@@ -23,6 +23,7 @@ from polls.percentiles import (
     calculate_percentile,
     calculate_spectrum_percentile,
 )
+from polls.normative_versions import get_or_assign_report_normative_version
 from polls.report_constants import SPECTRUM_KEYS
 from polls.report_interpretation import build_report_analysis
 from polls.scoring import calculate_scale_scores, calculate_scale_scores_from_answers
@@ -602,6 +603,7 @@ def _report_sociodemographics(submission):
 
 def _build_report_context(submission):
     patient = submission.user
+    normative_version = get_or_assign_report_normative_version(submission)
 
     selected_spectra = submission.spectra.all()
 
@@ -633,6 +635,7 @@ def _build_report_context(submission):
                 calculate_spectrum_percentile(
                     spectrum,
                     spectrum_data["score"],
+                    version=normative_version,
                 ) if spectrum_data["is_valid"] else None,
 
             "missing_answers":
@@ -676,6 +679,7 @@ def _build_report_context(submission):
                 calculate_percentile(
                     scale,
                     scale_data["score"],
+                    version=normative_version,
                 ) if scale_data["is_valid"] else None,
 
             "missing_answers":
@@ -925,6 +929,7 @@ def _build_report_context(submission):
 
     return {
             "submission": submission,
+            "normative_version": normative_version,
             "report": report_data,
             "scale_scores": scale_scores,
             "attention_checks": attention_checks,

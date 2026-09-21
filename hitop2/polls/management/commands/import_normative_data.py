@@ -1,7 +1,12 @@
 import csv
 
-from django.core.management.base import BaseCommand
-from polls.models import NormativeParticipant, Question, NormativeAnswer
+from django.core.management.base import BaseCommand, CommandError
+from polls.models import (
+    NormativeAnswer,
+    NormativeDatasetVersion,
+    NormativeParticipant,
+    Question,
+)
 
 class Command(BaseCommand):
 
@@ -18,6 +23,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         csv_file = options["csv_file"]
+
+        if NormativeDatasetVersion.objects.exists():
+            raise CommandError(
+                "A importação destrutiva foi recusada porque já existem versões "
+                "normativas. Importe apenas numa base ainda sem histórico."
+            )
 
         NormativeAnswer.objects.all().delete()
         NormativeParticipant.objects.all().delete()
