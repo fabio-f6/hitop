@@ -56,6 +56,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'hitop2.urls'
 
+# Keep framework errors inside the visual language of the application.
+CSRF_FAILURE_VIEW = "website.error_views.csrf_failure"
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

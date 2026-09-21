@@ -128,7 +128,11 @@ def questionnaire(request):
     # ----------------------------
     # PAGINAÇÃO
     # ----------------------------
-    page_number = int(request.GET.get('page', 1))
+    try:
+        page_number = int(request.GET.get('page', 1))
+    except (TypeError, ValueError):
+        page_number = 1
+    page_number = max(1, page_number)
     per_page = math.ceil(len(questions) / 6)
     paginator = Paginator(questions, per_page)
     num_pages = paginator.num_pages
@@ -238,7 +242,7 @@ def thank_you(request):
     )
 
 def export_patient_pdf(request, user_id):
-    user = User.objects.get(id=user_id)
+    user = get_object_or_404(User, id=user_id)
     answers = UserAnswer.objects.filter(user=user).select_related('question')
 
     try:
@@ -506,5 +510,6 @@ def invalid_questionnaire_link(request, token):
 
     return render(
         request,
-        "polls/invalid_link.html"
+        "polls/invalid_link.html",
+        status=404,
     )

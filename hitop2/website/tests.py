@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from django.contrib.auth.models import User
 from django.urls import reverse
@@ -14,6 +14,30 @@ from polls.models import (
 
 from .models import UserProfile
 from .views import _report_sociodemographics
+
+
+@override_settings(DEBUG=False)
+class ErrorPageTests(TestCase):
+    def test_unknown_route_uses_branded_404_page(self):
+        response = self.client.get("/pagina-que-nao-existe/")
+
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, "Página não encontrada", status_code=404)
+        self.assertContains(response, "Ir para o início", status_code=404)
+
+    def test_missing_resource_uses_same_404_page(self):
+        professional = User.objects.create_user(username="professional")
+        professional.userprofile.user_type = "professional"
+        professional.userprofile.is_verified = True
+        professional.userprofile.save()
+        self.client.force_login(professional)
+
+        response = self.client.get(
+            reverse("website:patient_answers", args=[999999]),
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, "Página não encontrada", status_code=404)
 
 
 class ProfessionalVerificationTests(TestCase):

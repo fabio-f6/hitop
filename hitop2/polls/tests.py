@@ -21,10 +21,17 @@ class QuestionnaireLinkTests(TestCase):
 
         response = self.client.get("/polls/access/not-a-valid-uuid/")
 
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Link inválido")
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, "Link inválido", status_code=404)
         self.assertNotIn("submission_id", self.client.session)
         self.assertNotIn("anonymous_questionnaire", self.client.session)
+
+    def test_missing_pdf_user_returns_not_found(self):
+        response = self.client.get(
+            reverse("polls:export_patient_pdf", args=[999999]),
+        )
+
+        self.assertEqual(response.status_code, 404)
 
 
 class PatientQuestionnaireFlowTests(TestCase):
