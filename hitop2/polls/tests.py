@@ -4,12 +4,26 @@ from django.contrib import admin
 from django.core.management import call_command
 from django.urls import reverse
 from django.utils import timezone
+from unittest.mock import patch
 
 from .models import (
     DynamicAnswer,
     DynamicQuestion,
+    NormativeAnswer,
+    NormativeParticipant,
+    NormativeScaleScore,
+    NormativeSpectrumScore,
+    Question,
     QuestionnaireSubmission,
+    Scale,
     SociodemographicAnswer,
+    Spectra,
+    Subfactor,
+    UserAnswer,
+)
+from .normative_export import (
+    SubmissionAlreadyExported,
+    export_submission_to_normative,
 )
 from .socio_config import SOCIO_QUESTIONS
 
@@ -49,6 +63,115 @@ class QuestionnaireSubmissionNormativeStatusTests(TestCase):
         self.assertIn("normative_status", model_admin.list_display)
         self.assertIn("normative_exported_at", model_admin.list_display)
         self.assertIn("normative_status", model_admin.list_filter)
+
+
+class NormativeExportTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_sociodemographic", verbosity=0)
+        cls.patient = User.objects.create_user(username="normative-export-patient")
+        spectrum = Spectra.objects.create(name="Spectrum")
+        subfactor = Subfactor.objects.create(name="Subfactor", spectra=spectrum)
+        cls.scale = Scale.objects.create(name="Scale", subfactor=subfactor)
+        cls.question = Question.objects.create(
+            scale=cls.scale,
+            item_code="export-1",
+            question_text="Export test",
+        )
+
+    def make_submission(self):
+        submission = QuestionnaireSubmission.objects.create(
+            user=self.patient,
+            completed=True,
+        )
+        UserAnswer.objects.create(
+            user=self.patient,
+            submission=submission,
+            question=self.question,
+            answer="3",
+        )
+        for question_id, value in (("age", "34"), ("sex", "1")):
+            DynamicAnswer.objects.create(
+                user=self.patient,
+                submission=submission,
+                question=DynamicQuestion.objects.get(question_id=question_id),
+                answer_value=value,
+            )
+        return submission
+
+    def test_submission_is_exported_once_with_existing_scoring_pipeline(self):
+        submission = self.make_submission()
+
+        participant = export_submission_to_normative(submission)
+
+        submission.refresh_from_db()
+        self.assertEqual(submission.normative_status, "exported")
+        self.assertIsNotNone(submission.normative_exported_at)
+        self.assertEqual(participant.age, 34)
+        self.assertEqual(participant.sex, "Feminino")
+        self.assertEqual(participant.answers.get().answer, "3")
+        self.assertEqual(participant.scale_scores.get().raw_score, 3.0)
+        self.assertEqual(participant.spectrum_scores.get().raw_score, 3.0)
+
+    def test_second_export_is_rejected_without_creating_data(self):
+        submission = self.make_submission()
+        export_submission_to_normative(submission)
+
+        with self.assertRaises(SubmissionAlreadyExported):
+            export_submission_to_normative(submission)
+
+        self.assertEqual(NormativeParticipant.objects.count(), 1)
+        self.assertEqual(NormativeAnswer.objects.count(), 1)
+
+    def test_failure_rolls_back_all_normative_data_and_status(self):
+        submission = self.make_submission()
+
+        with patch.object(
+            NormativeScaleScore.objects,
+            "bulk_create",
+            side_effect=RuntimeError("forced failure"),
+        ):
+            with self.assertRaises(RuntimeError):
+                export_submission_to_normative(submission)
+
+        submission.refresh_from_db()
+        self.assertEqual(submission.normative_status, "pending")
+        self.assertIsNone(submission.normative_exported_at)
+        self.assertFalse(NormativeParticipant.objects.exists())
+        self.assertFalse(NormativeAnswer.objects.exists())
+        self.assertFalse(NormativeScaleScore.objects.exists())
+        self.assertFalse(NormativeSpectrumScore.objects.exists())
+
+    def test_normative_models_have_no_foreign_keys_to_clinical_models(self):
+        clinical_models = {
+            QuestionnaireSubmission,
+            UserAnswer,
+            DynamicAnswer,
+            User,
+        }
+        for model in (
+            NormativeParticipant,
+            NormativeAnswer,
+            NormativeScaleScore,
+            NormativeSpectrumScore,
+        ):
+            related_models = {
+                field.related_model
+                for field in model._meta.fields
+                if field.many_to_one
+            }
+            self.assertTrue(related_models.isdisjoint(clinical_models))
+
+    def test_normative_data_survives_deletion_of_clinical_data(self):
+        submission = self.make_submission()
+        participant = export_submission_to_normative(submission)
+
+        self.patient.delete()
+
+        participant.refresh_from_db()
+        self.assertEqual(participant.answers.count(), 1)
+        self.assertEqual(participant.scale_scores.count(), 1)
+        self.assertEqual(participant.spectrum_scores.count(), 1)
 
 
 class QuestionnaireLinkTests(TestCase):
@@ -127,6 +250,15 @@ class PatientQuestionnaireFlowTests(TestCase):
         )
         self.assertEqual(question.label, "Que sexo lhe foi atribuído à nascença?")
         self.assertEqual(question.choices.count(), 3)
+        diagnosis = DynamicQuestion.objects.get(question_id="mental_diagnosis")
+        self.assertEqual(
+            list(diagnosis.choices.order_by("order").values_list("value", "label")),
+            [
+                ("1", "Não, nunca tive"),
+                ("2", "Sim, durante o último ano"),
+                ("3", "Sim, há mais de um ano"),
+            ],
+        )
         self.assertFalse(DynamicQuestion.objects.get(
             question_id="obsolete_question"
         ).is_active)

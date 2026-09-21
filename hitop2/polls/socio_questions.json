@@ -525,5 +525,26 @@
         "Prefiro não responder"
       ]
     ]
+  },
+  {
+    "id": "mental_diagnosis",
+    "label": "Teve ou tem algum problema de saúde mental diagnosticado por um profissional de saúde como psiquiatra, psicólogo ou neurologista?",
+    "type": "radio",
+    "section": "Dados Sociodemográficos",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Não, nunca tive"
+      ],
+      [
+        "2",
+        "Sim, durante o último ano"
+      ],
+      [
+        "3",
+        "Sim, há mais de um ano"
+      ]
+    ]
   }
 ]
