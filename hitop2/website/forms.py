@@ -103,26 +103,30 @@ class CreatePatientForm(UserCreationForm):
     )
 
     title = forms.CharField(
-        label="Nome da aplicação",
+        label="Descrição da aplicação",
         max_length=255,
         required=True,
-        initial="Avaliação Inicial",
+        initial="Ex: Avaliação Inicial",
         widget=forms.TextInput(attrs={
             "class": "form-control"
         })
     )
 
     simulation_mode = forms.TypedChoiceField(
-        label="Modo da aplicação",
+        label="Modo da aplicação:",
         choices=QuestionnaireSubmission.SIMULATION_MODES,
         initial="normal",
-        widget=forms.RadioSelect,
+        widget=forms.RadioSelect(attrs={
+            "class": "form-check-input",
+        }),
         coerce=str,
     )
 
     spectra = forms.ModelMultipleChoiceField(
         queryset=Spectra.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
+        widget=forms.CheckboxSelectMultiple(attrs={
+            "class": "form-check-input",
+        }),
         required=True,
     )
 

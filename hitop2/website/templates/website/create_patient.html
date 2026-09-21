@@ -1,11 +1,10 @@
 {% extends 'base.html' %}
+{% load custom_tags %}
 {% block content %}
 
-<div class="col-md-6 offset-md-3">
+<div>
 
     <h2>Novo paciente e aplicação HiTOP</h2>
-
-    <br>
 
     <form method="POST">
 
@@ -19,6 +18,16 @@
         <div class="mb-3">
             {{ form.title.label_tag }}
             {{ form.title }}
+
+            <div
+                style="
+                    color:#666;
+                    font-size:.9rem;
+                    margin-top:8px;
+                "
+            >
+                Por motivos de privacidade, não inclua na descrição da aplicação quaisquer dados que permitam identificar o paciente.
+            </div>
         </div>
 
         <div class="mb-4">
@@ -33,7 +42,17 @@
                 {{ form.simulation_mode.label }}
             </label>
 
-            {{ form.simulation_mode }}
+            {% for radio in form.simulation_mode %}
+                <div class="form-check">
+                    {{ radio.tag }}
+                    <label
+                        class="form-check-label"
+                        for="{{ radio.id_for_label }}"
+                    >
+                        {{ radio.choice_label }}
+                    </label>
+                </div>
+            {% endfor %}
 
             <div
                 style="
@@ -47,21 +66,29 @@
 
         </div>
 
-        <div class="mb-3">
+        <div class="mb-4">
 
-            <label>
-                Spectras incluídos
+            <label class="form-label">
+                Módulos a incluir:
             </label>
 
-            {{ form.spectra }}
+            {% for checkbox in form.spectra %}
+                <div class="form-check">
+                    {{ checkbox.tag }}
+                    <label
+                        class="form-check-label"
+                        for="{{ checkbox.id_for_label }}"
+                    >
+                        {{ checkbox.choice_label|translate_spectrum }}
+                    </label>
+                </div>
+            {% endfor %}
 
         </div>
 
-        <br>
-
         <button
             type="submit"
-            class="btn btn-sm rounded-0"
+            class="btn rounded-0"
             style="
                 background-color:#e2f0ff;
                 color:#000;

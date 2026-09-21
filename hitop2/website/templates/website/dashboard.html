@@ -1,8 +1,9 @@
 {% extends "base.html" %}
+{% load custom_tags %}
 
 {% block content %}
 
-<div class="container">
+<div>
 
     <!-- CABEÇALHO -->
 
@@ -148,7 +149,7 @@
                 padding:10px 18px;
             "
         >
-            + Criar Paciente
+            + Criar paciente
         </a>
 
     </div>
@@ -234,47 +235,7 @@
                 "
             >
 
-            <div
-                style="
-                    margin-bottom:22px;
-                "
-            >
 
-                <strong
-                    style="
-                        display:block;
-                        margin-bottom:10px;
-                    "
-                >
-                    Módulos incluídos
-                </strong>
-
-                <div
-                    style="
-                        display:flex;
-                        flex-wrap:wrap;
-                        gap:8px;
-                    "
-                >
-
-                    {% for spectrum in patient.spectra %}
-
-                        <span
-                            style="
-                                background:#eef6ff;
-                                border:1px solid #bfdcff;
-                                padding:5px 10px;
-                                font-size:.85rem;
-                            "
-                        >
-                            {{ spectrum.name }}
-                        </span>
-
-                    {% endfor %}
-
-                </div>
-
-            </div>
 
             {% endif %}
 

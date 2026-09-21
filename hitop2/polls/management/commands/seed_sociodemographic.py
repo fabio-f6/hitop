@@ -18,6 +18,11 @@ class Command(BaseCommand):
             name="Dados Sociodemográficos"
         )
 
+        configured_ids = [question["id"] for question in SOCIO_QUESTIONS]
+        category.questions.exclude(question_id__in=configured_ids).update(
+            is_active=False
+        )
+
         for index, q in enumerate(SOCIO_QUESTIONS):
             question, _ = DynamicQuestion.objects.update_or_create(
                 question_id=q["id"],
@@ -26,6 +31,7 @@ class Command(BaseCommand):
                     "label": q["label"],
                     "question_type": q["type"],
                     "required": q.get("required", True),
+                    "is_active": True,
                     "order": index,
                     "description": q.get("description", ""),
                     "group_intro": q.get("group_intro", ""),

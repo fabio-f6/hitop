@@ -1,8 +1,9 @@
 {% extends "base.html" %}
+{% load custom_tags %}
 
 {% block content %}
 
-<div class="container mt-4">
+<div>
 
     <h2>Nova Aplicação HiTOP</h2>
 
@@ -18,7 +19,7 @@
         <div class="mb-3">
 
             <label class="form-label">
-                Nome da aplicação
+                Descrição da aplicação
             </label>
 
             <input
@@ -27,6 +28,16 @@
                 class="form-control"
                 placeholder="Ex: Avaliação após 3 meses de terapia"
             >
+
+            <div
+                style="
+                    color:#666;
+                    font-size:.9rem;
+                    margin-top:8px;
+                "
+            >
+                Por motivos de privacidade, não inclua na descrição da aplicação quaisquer dados que permitam identificar o paciente.
+            </div>
 
         </div>
 
@@ -39,7 +50,7 @@
                     margin-bottom:10px;
                 "
             >
-                Modo da aplicação
+                Modo da aplicação:
             </label>
 
             <div class="form-check">
@@ -115,7 +126,7 @@
         <div class="mb-4">
 
             <label class="form-label">
-                Spectras incluídos
+                Módulos a incluir:
             </label>
 
             {% for spectrum in spectra %}
@@ -130,7 +141,7 @@
                     >
 
                     <label class="form-check-label">
-                        {{ spectrum.name }}
+                        {{ spectrum.name|translate_spectrum }}
                     </label>
 
                 </div>

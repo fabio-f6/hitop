@@ -1,6 +1,22 @@
 {% extends "base.html" %}
+{% load custom_tags %}
 
 {% block content %}
+
+<div class="mb-3">
+    <a
+        href="{% url 'website:dashboard' %}"
+        class="btn rounded-0"
+        style="
+            background:#e2f0ff;
+            border:1px solid #9ec9ff;
+            color:black;
+            padding:10px 18px;
+        "
+    >
+        Voltar
+    </a>
+</div>
 
 <!-- CABEÇALHO -->
 
@@ -44,23 +60,6 @@
     >
         Submissões
     </h3>
-
-    {% if not has_open_submission %}
-
-    <a
-        href="{% url 'website:new_questionnaire' patient.userprofile.id %}"
-        class="btn rounded-0"
-        style="
-            background:#e2f0ff;
-            border:1px solid #9ec9ff;
-            color:black;
-            padding:10px 18px;
-        "
-    >
-        + Nova aplicação
-    </a>
-
-    {% endif %}
 
 </div>
 
@@ -198,7 +197,7 @@
                             font-size:.85rem;
                         "
                     >
-                        {{ spectrum.name }}
+                        {{ spectrum.name|translate_spectrum }}
                     </span>
 
                 {% endfor %}
@@ -221,6 +220,8 @@
         <div
             class="d-flex flex-wrap gap-2"
         >
+
+            {% if s.completed %}
 
             <a
                 href="{% url 'website:report_preview' s.id %}"
@@ -246,6 +247,8 @@
             >
                 Respostas
             </a>
+
+            {% endif %}
 
             <input
                 type="hidden"

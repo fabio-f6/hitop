@@ -182,6 +182,8 @@ class DynamicQuestion(models.Model):
 
     required = models.BooleanField(default=True)
 
+    is_active = models.BooleanField(default=True)
+
     order = models.PositiveIntegerField(default=0)
 
     description = models.TextField(

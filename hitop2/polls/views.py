@@ -307,7 +307,7 @@ def sociodemographic_form(request):
         is_open=True,
     )
     category = _get_sociodemographic_category()
-    if not category or not category.questions.exists():
+    if not category or not category.questions.filter(is_active=True).exists():
         messages.error(request, "As perguntas ainda não foram configuradas.")
         return redirect("polls:thank_you")
 
@@ -354,7 +354,9 @@ def _dynamic_questionnaire_response(
     request, category, user, submission=None, success_redirect="polls:index",
 ):
     questions = list(
-        category.questions.all().prefetch_related("choices").order_by("order", "id")
+        category.questions.filter(is_active=True)
+        .prefetch_related("choices")
+        .order_by("order", "id")
     )
     if not questions:
         messages.error(request, "Este questionário não tem perguntas.")
