@@ -53,6 +53,11 @@ urlpatterns = [
         name="restore_patient",
     ),
     path(
+        "patients/<int:patient_id>/delete-permanently/",
+        views.permanently_delete_patient_view,
+        name="permanently_delete_patient",
+    ),
+    path(
         "patients/<int:patient_id>/edit/",
         views.edit_patient,
         name="edit_patient",

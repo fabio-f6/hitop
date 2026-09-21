@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width:720px; margin:0 auto;">
+    <h1 style="font-size:2rem; font-weight:500; color:#222;">Eliminar permanentemente</h1>
+    <div style="border:1px solid #dc3545; padding:24px; margin:24px 0; background:#fff;">
+        <p><strong>Paciente:</strong> {{ patient.user.username }}</p>
+        <p><strong>Aplicações clínicas:</strong> {{ submission_count }}</p>
+        <p style="margin-bottom:0;">
+            Esta ação eliminará permanentemente os dados clínicos deste paciente e não pode ser revertida.
+        </p>
+    </div>
+
+    {% if has_pending_submissions %}
+        <div class="alert alert-danger" role="alert">
+            A eliminação está bloqueada: existem aplicações cujo estado relativamente à base normativa ainda não foi determinado.
+        </div>
+    {% else %}
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger rounded-0">
+                Confirmar eliminação permanente
+            </button>
+        </form>
+    {% endif %}
+
+    <a href="{% url 'website:archived_patients' %}" class="btn rounded-0 mt-3" style="border:1px solid #9ec9ff;">
+        Cancelar
+    </a>
+</div>
+{% endblock %}

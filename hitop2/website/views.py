@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.http import HttpResponse
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods, require_POST
 from django.utils import timezone
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -37,6 +37,11 @@ from polls.translations import (
 
 from .forms import CreatePatientForm, EditPatientForm, SignUpForm
 from .models import UserProfile
+from .patient_deletion import (
+    ActivePatientDeletionBlocked,
+    PendingNormativeStatusBlocked,
+    permanently_delete_patient,
+)
 from .decorators import (
     PENDING_VERIFICATION_MESSAGE,
     is_unverified_professional,
@@ -432,6 +437,56 @@ def restore_patient(request, patient_id):
     patient.save(update_fields=["archived_at"])
     messages.success(request, "Paciente restaurado com sucesso.")
     return redirect("website:archived_patients")
+
+
+@require_http_methods(["GET", "POST"])
+@verified_professional_required
+def permanently_delete_patient_view(request, patient_id):
+    patient = get_object_or_404(
+        UserProfile.objects.select_related("user"),
+        id=patient_id,
+        user_type="patient",
+        professional=request.user,
+        archived_at__isnull=False,
+    )
+
+    submissions = QuestionnaireSubmission.objects.filter(user=patient.user)
+    has_pending_submissions = submissions.filter(
+        normative_status=QuestionnaireSubmission.NormativeStatus.PENDING,
+    ).exists()
+
+    if request.method == "POST":
+        try:
+            permanently_delete_patient(
+                patient_id=patient.id,
+                professional=request.user,
+            )
+        except ActivePatientDeletionBlocked:
+            messages.error(
+                request,
+                "Apenas pacientes arquivados podem ser eliminados permanentemente.",
+            )
+            return redirect("website:dashboard")
+        except PendingNormativeStatusBlocked:
+            messages.error(
+                request,
+                "A eliminação foi bloqueada: existem aplicações cujo estado "
+                "relativamente à base normativa ainda não foi determinado.",
+            )
+            return redirect("website:archived_patients")
+
+        messages.success(request, "Paciente e dados clínicos eliminados permanentemente.")
+        return redirect("website:archived_patients")
+
+    return render(
+        request,
+        "website/confirm_permanent_patient_deletion.html",
+        {
+            "patient": patient,
+            "submission_count": submissions.count(),
+            "has_pending_submissions": has_pending_submissions,
+        },
+    )
 
 @verified_professional_required
 def patient_answers(request, submission_id):

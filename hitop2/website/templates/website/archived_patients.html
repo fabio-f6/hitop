@@ -53,6 +53,12 @@
                         Restaurar
                     </button>
                 </form>
+                <a
+                    href="{% url 'website:permanently_delete_patient' patient.id %}"
+                    class="btn btn-danger rounded-0"
+                >
+                    Eliminar permanentemente
+                </a>
             </div>
         </div>
         {% empty %}

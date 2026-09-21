@@ -12,6 +12,10 @@ from polls.models import (
     DynamicAnswer,
     DynamicChoice,
     DynamicQuestion,
+    NormativeAnswer,
+    NormativeParticipant,
+    NormativeScaleScore,
+    NormativeSpectrumScore,
     Question,
     QuestionCategory,
     QuestionnaireSubmission,
@@ -23,6 +27,7 @@ from polls.models import (
 )
 
 from .models import UserProfile
+from .patient_deletion import permanently_delete_patient
 from .docx_report import _split_chart
 from .views import _report_sociodemographics
 
@@ -334,6 +339,203 @@ class PatientArchivingTests(TestCase):
         self.assertEqual(archived.context["patient_page"].paginator.per_page, 10)
         self.assertContains(dashboard, "Página 1 de 2")
         self.assertContains(archived, "Página 1 de 2")
+
+
+class PermanentPatientDeletionTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.professional = User.objects.create_user(username="deletion-professional")
+        cls.professional.userprofile.user_type = "professional"
+        cls.professional.userprofile.is_verified = True
+        cls.professional.userprofile.save()
+
+        cls.other_professional = User.objects.create_user(username="deletion-other")
+        cls.other_professional.userprofile.user_type = "professional"
+        cls.other_professional.userprofile.is_verified = True
+        cls.other_professional.userprofile.save()
+
+        cls.spectrum = Spectra.objects.create(name="Deletion spectrum")
+        cls.subfactor = Subfactor.objects.create(name="Deletion subfactor", spectra=cls.spectrum)
+        cls.scale = Scale.objects.create(name="Deletion scale", subfactor=cls.subfactor)
+        cls.question = Question.objects.create(
+            scale=cls.scale,
+            item_code="DELETE-1",
+            question_text="Deletion question",
+        )
+        cls.category = QuestionCategory.objects.create(name="Deletion demographics")
+        cls.dynamic_question = DynamicQuestion.objects.create(
+            category=cls.category,
+            question_id="deletion_age",
+            label="Age",
+            question_type="number",
+        )
+
+    def setUp(self):
+        self.client.force_login(self.professional)
+
+    def make_patient(self, username, *, archived=True, professional=None):
+        patient = User.objects.create_user(username=username)
+        profile = patient.userprofile
+        profile.user_type = "patient"
+        profile.professional = professional or self.professional
+        profile.archived_at = timezone.now() if archived else None
+        profile.save()
+        return patient
+
+    def make_submission(self, patient, status):
+        return QuestionnaireSubmission.objects.create(
+            user=patient,
+            normative_status=status,
+        )
+
+    def delete_url(self, patient):
+        return reverse(
+            "website:permanently_delete_patient",
+            args=[patient.userprofile.id],
+        )
+
+    def test_active_patient_cannot_be_deleted(self):
+        patient = self.make_patient("active-delete", archived=False)
+        url = self.delete_url(patient)
+
+        self.assertEqual(self.client.get(url).status_code, 404)
+        self.assertEqual(self.client.post(url).status_code, 404)
+        self.assertTrue(User.objects.filter(pk=patient.pk).exists())
+
+    def test_confirmation_is_explicit_and_only_post_deletes(self):
+        patient = self.make_patient("confirmation-delete")
+        self.make_submission(patient, QuestionnaireSubmission.NormativeStatus.INELIGIBLE)
+
+        response = self.client.get(self.delete_url(patient))
+
+        self.assertContains(
+            response,
+            "Esta ação eliminará permanentemente os dados clínicos deste paciente e não pode ser revertida.",
+        )
+        self.assertTrue(User.objects.filter(pk=patient.pk).exists())
+
+    def test_archived_patient_with_only_ineligible_submissions_can_be_deleted(self):
+        patient = self.make_patient("ineligible-delete")
+        self.make_submission(patient, QuestionnaireSubmission.NormativeStatus.INELIGIBLE)
+
+        self.client.post(self.delete_url(patient))
+
+        self.assertFalse(User.objects.filter(pk=patient.pk).exists())
+
+    def test_archived_patient_with_only_exported_submissions_can_be_deleted(self):
+        patient = self.make_patient("exported-delete")
+        self.make_submission(patient, QuestionnaireSubmission.NormativeStatus.EXPORTED)
+
+        self.client.post(self.delete_url(patient))
+
+        self.assertFalse(User.objects.filter(pk=patient.pk).exists())
+
+    def test_exported_and_ineligible_mix_can_be_deleted(self):
+        patient = self.make_patient("mixed-delete")
+        self.make_submission(patient, QuestionnaireSubmission.NormativeStatus.EXPORTED)
+        self.make_submission(patient, QuestionnaireSubmission.NormativeStatus.INELIGIBLE)
+
+        self.client.post(self.delete_url(patient))
+
+        self.assertFalse(User.objects.filter(pk=patient.pk).exists())
+
+    def test_one_pending_submission_blocks_the_whole_deletion(self):
+        patient = self.make_patient("pending-delete")
+        exported = self.make_submission(
+            patient, QuestionnaireSubmission.NormativeStatus.EXPORTED,
+        )
+        pending = self.make_submission(
+            patient, QuestionnaireSubmission.NormativeStatus.PENDING,
+        )
+
+        response = self.client.post(self.delete_url(patient), follow=True)
+
+        self.assertContains(
+            response,
+            "existem aplicações cujo estado relativamente à base normativa ainda não foi determinado",
+        )
+        self.assertTrue(User.objects.filter(pk=patient.pk).exists())
+        self.assertTrue(QuestionnaireSubmission.objects.filter(pk=exported.pk).exists())
+        self.assertTrue(QuestionnaireSubmission.objects.filter(pk=pending.pk).exists())
+
+    def test_professional_cannot_delete_another_professionals_patient(self):
+        patient = self.make_patient(
+            "other-owned-delete", professional=self.other_professional,
+        )
+
+        response = self.client.post(self.delete_url(patient))
+
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(User.objects.filter(pk=patient.pk).exists())
+
+    def test_clinical_answers_and_sociodemographics_are_deleted(self):
+        patient = self.make_patient("clinical-data-delete")
+        submission = self.make_submission(
+            patient, QuestionnaireSubmission.NormativeStatus.INELIGIBLE,
+        )
+        user_answer = UserAnswer.objects.create(
+            user=patient, submission=submission, question=self.question, answer="1",
+        )
+        dynamic_answer = DynamicAnswer.objects.create(
+            user=patient,
+            submission=submission,
+            question=self.dynamic_question,
+            answer_value="42",
+        )
+        legacy_socio = SociodemographicAnswer.objects.create(
+            user=patient,
+            question_id="age",
+            answer_value="42",
+            answer_label="42",
+        )
+
+        self.client.post(self.delete_url(patient))
+
+        self.assertFalse(QuestionnaireSubmission.objects.filter(pk=submission.pk).exists())
+        self.assertFalse(UserAnswer.objects.filter(pk=user_answer.pk).exists())
+        self.assertFalse(DynamicAnswer.objects.filter(pk=dynamic_answer.pk).exists())
+        self.assertFalse(SociodemographicAnswer.objects.filter(pk=legacy_socio.pk).exists())
+
+    def test_exported_normative_data_remains_after_clinical_deletion(self):
+        patient = self.make_patient("normative-preserved-delete")
+        self.make_submission(patient, QuestionnaireSubmission.NormativeStatus.EXPORTED)
+        participant = NormativeParticipant.objects.create(age=42, sex="Feminino")
+        answer = NormativeAnswer.objects.create(
+            participant=participant, question=self.question, answer="1",
+        )
+        scale_score = NormativeScaleScore.objects.create(
+            participant=participant, scale=self.scale, raw_score=1,
+        )
+        spectrum_score = NormativeSpectrumScore.objects.create(
+            participant=participant, spectrum=self.spectrum, raw_score=1,
+        )
+
+        self.client.post(self.delete_url(patient))
+
+        self.assertTrue(NormativeParticipant.objects.filter(pk=participant.pk).exists())
+        self.assertTrue(NormativeAnswer.objects.filter(pk=answer.pk).exists())
+        self.assertTrue(NormativeScaleScore.objects.filter(pk=scale_score.pk).exists())
+        self.assertTrue(NormativeSpectrumScore.objects.filter(pk=spectrum_score.pk).exists())
+
+    def test_failure_rolls_back_all_clinical_deletions(self):
+        patient = self.make_patient("rollback-delete")
+        submission = self.make_submission(
+            patient, QuestionnaireSubmission.NormativeStatus.INELIGIBLE,
+        )
+        answer = UserAnswer.objects.create(
+            user=patient, submission=submission, question=self.question, answer="1",
+        )
+
+        with patch.object(User, "delete", side_effect=RuntimeError("forced failure")):
+            with self.assertRaises(RuntimeError):
+                permanently_delete_patient(
+                    patient_id=patient.userprofile.id,
+                    professional=self.professional,
+                )
+
+        self.assertTrue(User.objects.filter(pk=patient.pk).exists())
+        self.assertTrue(QuestionnaireSubmission.objects.filter(pk=submission.pk).exists())
+        self.assertTrue(UserAnswer.objects.filter(pk=answer.pk).exists())
 
 
 class ReportSociodemographicsTests(TestCase):
