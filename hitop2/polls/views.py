@@ -14,6 +14,7 @@ from django.core.paginator import Paginator
 from django.db import transaction
 
 from .questions import get_questions_for_submission
+from .normative_export import process_normative_eligibility
 
 from .models import Question, QuestionCategory, DynamicAnswer, UserAnswer, QuestionnaireSubmission
 
@@ -190,6 +191,8 @@ def questionnaire(request):
             submission.completed_at = timezone.now()
             submission.is_open = False
             submission.save()
+
+            process_normative_eligibility(submission)
 
             return redirect("polls:thank_you")
 
@@ -463,6 +466,8 @@ def _dynamic_questionnaire_response(
                     submission.save(update_fields=[
                         "sociodemographic_step", "sociodemographic_completed"
                     ])
+
+                    process_normative_eligibility(submission)
 
             if section_index == len(section_names) - 1:
                 return redirect(success_redirect)

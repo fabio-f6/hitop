@@ -23,7 +23,9 @@ from .models import (
 )
 from .normative_export import (
     SubmissionAlreadyExported,
+    evaluate_normative_eligibility,
     export_submission_to_normative,
+    process_normative_eligibility,
 )
 from .socio_config import SOCIO_QUESTIONS
 
@@ -172,6 +174,99 @@ class NormativeExportTests(TestCase):
         self.assertEqual(participant.answers.count(), 1)
         self.assertEqual(participant.scale_scores.count(), 1)
         self.assertEqual(participant.spectrum_scores.count(), 1)
+
+
+class NormativeEligibilityTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_sociodemographic", verbosity=0)
+        cls.patient = User.objects.create_user(username="eligibility-patient")
+        spectrum = Spectra.objects.create(name="Eligibility spectrum")
+        subfactor = Subfactor.objects.create(name="Eligibility subfactor", spectra=spectrum)
+        cls.scale = Scale.objects.create(name="Eligibility scale", subfactor=subfactor)
+        cls.clinical_question = Question.objects.create(
+            scale=cls.scale, item_code="elig-1", question_text="Eligibility test",
+        )
+
+    def make_submission(self, completed=True, pt="2", mental="1"):
+        submission = QuestionnaireSubmission.objects.create(
+            user=self.patient, completed=completed,
+        )
+        UserAnswer.objects.create(
+            user=self.patient, submission=submission,
+            question=self.clinical_question, answer="3",
+        )
+        for question_id, value in (("PT_lang", pt), ("mental_diagnosis", mental)):
+            if value is not None:
+                DynamicAnswer.objects.create(
+                    user=self.patient, submission=submission,
+                    question=DynamicQuestion.objects.get(question_id=question_id),
+                    answer_value=value,
+                )
+        return submission
+
+    def test_both_criteria_met_is_eligible(self):
+        result = evaluate_normative_eligibility(self.make_submission())
+        self.assertIs(result["eligible"], True)
+
+    def test_portuguese_criterion_failed_is_ineligible(self):
+        result = evaluate_normative_eligibility(self.make_submission(pt="1"))
+        self.assertIs(result["eligible"], False)
+
+    def test_mental_health_criterion_failed_is_ineligible(self):
+        result = evaluate_normative_eligibility(self.make_submission(mental="2"))
+        self.assertIs(result["eligible"], False)
+
+    def test_both_criteria_failed_is_ineligible(self):
+        result = evaluate_normative_eligibility(self.make_submission(pt="1", mental="3"))
+        self.assertIs(result["eligible"], False)
+
+    def test_missing_portuguese_answer_stays_pending_without_export(self):
+        submission = self.make_submission(pt=None)
+        result = process_normative_eligibility(submission)
+        submission.refresh_from_db()
+        self.assertIsNone(result["eligible"])
+        self.assertEqual(submission.normative_status, "pending")
+        self.assertFalse(NormativeParticipant.objects.exists())
+
+    def test_missing_mental_health_answer_stays_pending_without_export(self):
+        submission = self.make_submission(mental=None)
+        result = process_normative_eligibility(submission)
+        submission.refresh_from_db()
+        self.assertIsNone(result["eligible"])
+        self.assertEqual(submission.normative_status, "pending")
+        self.assertFalse(NormativeParticipant.objects.exists())
+
+    def test_incomplete_submission_is_not_exported(self):
+        submission = self.make_submission(completed=False)
+        result = process_normative_eligibility(submission)
+        self.assertIsNone(result["eligible"])
+        self.assertFalse(NormativeParticipant.objects.exists())
+
+    def test_completed_eligible_submission_is_exported_once(self):
+        submission = self.make_submission()
+        process_normative_eligibility(submission)
+        process_normative_eligibility(submission)
+        submission.refresh_from_db()
+        self.assertEqual(submission.normative_status, "exported")
+        self.assertEqual(NormativeParticipant.objects.count(), 1)
+        self.assertEqual(NormativeAnswer.objects.count(), 1)
+
+    def test_evaluating_exported_submission_does_not_duplicate_data(self):
+        submission = self.make_submission()
+        process_normative_eligibility(submission)
+        evaluate_normative_eligibility(submission)
+        process_normative_eligibility(submission)
+        self.assertEqual(NormativeParticipant.objects.count(), 1)
+        self.assertEqual(NormativeAnswer.objects.count(), 1)
+
+    def test_ineligible_submission_creates_no_normative_data(self):
+        submission = self.make_submission(pt="1")
+        process_normative_eligibility(submission)
+        submission.refresh_from_db()
+        self.assertEqual(submission.normative_status, "ineligible")
+        self.assertFalse(NormativeParticipant.objects.exists())
+        self.assertFalse(NormativeAnswer.objects.exists())
 
 
 class QuestionnaireLinkTests(TestCase):
