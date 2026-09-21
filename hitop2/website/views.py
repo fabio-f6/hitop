@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.db import IntegrityError
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
@@ -481,18 +482,7 @@ def _report_sociodemographics(submission):
     return socio
 
 
-@verified_professional_required
-def report_preview(request, submission_id):
-
-    submission = get_object_or_404(
-        QuestionnaireSubmission,
-        id=submission_id
-    )
-
-    if submission.user.userprofile.professional != request.user:
-        messages.error(request, "Acesso negado.")
-        return redirect("website:dashboard")
-
+def _build_report_context(submission):
     patient = submission.user
 
     selected_spectra = submission.spectra.all()
@@ -815,10 +805,8 @@ def report_preview(request, submission_id):
         if key in grouped_chart_data
     ]
 
-    return render(
-        request,
-        "website/report_preview.html",
-        {
+    return {
+            "submission": submission,
             "report": report_data,
             "scale_scores": scale_scores,
             "attention_checks": attention_checks,
@@ -834,4 +822,47 @@ def report_preview(request, submission_id):
             "graph_right": GRAPH_RIGHT,
             "graph_width": GRAPH_WIDTH,
         }
+
+
+def _professional_submission_or_redirect(request, submission_id):
+    submission = get_object_or_404(QuestionnaireSubmission, id=submission_id)
+
+    if submission.user.userprofile.professional != request.user:
+        messages.error(request, "Acesso negado.")
+        return None
+
+    return submission
+
+
+@verified_professional_required
+def report_preview(request, submission_id):
+    submission = _professional_submission_or_redirect(request, submission_id)
+    if submission is None:
+        return redirect("website:dashboard")
+
+    return render(
+        request,
+        "website/report_preview.html",
+        _build_report_context(submission),
     )
+
+
+@verified_professional_required
+def export_report_docx(request, submission_id):
+    submission = _professional_submission_or_redirect(request, submission_id)
+    if submission is None:
+        return redirect("website:dashboard")
+
+    from .docx_report import build_report_docx
+
+    document = build_report_docx(_build_report_context(submission))
+    filename = f"relatorio-hitop-{submission.id}.docx"
+    response = HttpResponse(
+        document.getvalue(),
+        content_type=(
+            "application/vnd.openxmlformats-officedocument."
+            "wordprocessingml.document"
+        ),
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response

@@ -66,4 +66,9 @@ urlpatterns = [
         views.report_preview,
         name="report_preview",
     ),
+    path(
+        "reports/<int:submission_id>/export/docx/",
+        views.export_report_docx,
+        name="export_report_docx",
+    ),
 ]

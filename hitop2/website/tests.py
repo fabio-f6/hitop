@@ -1,4 +1,6 @@
 from unittest.mock import patch
+from io import BytesIO
+from zipfile import ZipFile
 
 from django.test import TestCase, override_settings
 
@@ -20,6 +22,7 @@ from polls.models import (
 )
 
 from .models import UserProfile
+from .docx_report import _split_chart
 from .views import _report_sociodemographics
 
 
@@ -310,3 +313,71 @@ class ReportPreviewSpectrumTests(TestCase):
         )
         self.assertContains(response, "Internalização")
         self.assertNotContains(response, "Somatização")
+        self.assertContains(
+            response,
+            reverse("website:export_report_docx", args=[self.submission.id]),
+        )
+
+    @patch("website.views.calculate_percentile", return_value=50)
+    @patch("website.views.calculate_spectrum_percentile", return_value=50)
+    def test_docx_export_contains_report_and_editable_fields(
+        self,
+        _spectrum_percentile,
+        _scale_percentile,
+    ):
+        self.client.force_login(self.professional)
+
+        response = self.client.get(
+            reverse("website:export_report_docx", args=[self.submission.id]),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response["Content-Type"],
+            "application/vnd.openxmlformats-officedocument."
+            "wordprocessingml.document",
+        )
+        self.assertIn("attachment;", response["Content-Disposition"])
+
+        with ZipFile(BytesIO(response.content)) as archive:
+            document_xml = archive.read("word/document.xml").decode()
+            report_images = [
+                name for name in archive.namelist()
+                if name.startswith("word/media/")
+            ]
+
+        self.assertIn("Internalização", document_xml)
+        self.assertNotIn("Somatização", document_xml)
+        self.assertIn("Motivo da Avaliação / Encaminhamento", document_xml)
+        self.assertIn("Clique aqui e escreva", document_xml)
+        self.assertNotIn("POSIÇÃO PERCENTÍLICA", document_xml)
+        self.assertGreaterEqual(len(report_images), 3)
+
+
+class ReportDocxLayoutTests(TestCase):
+    def test_long_charts_are_split_only_between_complete_rows(self):
+        chart = {
+            "height": 55 + 19 * 28,
+            "items": [
+                {"name": f"Scale {index}", "y": 55 + index * 28}
+                for index in range(19)
+            ],
+        }
+
+        fragments = _split_chart(chart)
+
+        self.assertEqual([len(fragment["items"]) for fragment in fragments], [8, 8, 3])
+        self.assertEqual(
+            [fragment["show_header"] for fragment in fragments],
+            [True, False, False],
+        )
+        for fragment_index, fragment in enumerate(fragments):
+            first_row_y = 55 if fragment_index == 0 else 22
+            self.assertEqual(
+                [item["y"] for item in fragment["items"]],
+                [first_row_y + index * 28 for index in range(len(fragment["items"]))],
+            )
+            self.assertEqual(
+                fragment["height"],
+                first_row_y + len(fragment["items"]) * 28,
+            )

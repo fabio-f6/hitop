@@ -25,6 +25,15 @@
 
 <div class="container mt-4">
 
+    <div class="d-flex justify-content-end mb-3">
+        <a
+            class="btn btn-primary"
+            href="{% url 'website:export_report_docx' submission.id %}"
+        >
+            Exportar relatório
+        </a>
+    </div>
+
     <div
         style="
             max-width: 1200px;
