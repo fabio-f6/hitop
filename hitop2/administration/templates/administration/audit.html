@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-3">
+    <div class="mb-4">
+        <a
+            href="{% url 'administration:dashboard' %}"
+            class="btn rounded-0"
+            style="background:#e2f0ff; border:1px solid #9ec9ff; color:black; padding:8px 16px;"
+        >
+            ← Administração
+        </a>
+        <h1 class="h2 fw-bold mt-4 mb-2">Auditoria</h1>
+        <p class="text-secondary mb-0">
+            Histórico imutável das ações administrativas concluídas.
+        </p>
+    </div>
+
+    <form method="get" class="p-3 mb-4" style="border:1px solid #dddddd; background:#fafafa;">
+        <div class="row g-3 align-items-end">
+            <div class="col-lg-3 col-md-6">
+                <label for="audit-action" class="form-label fw-semibold">Tipo de ação</label>
+                <select id="audit-action" name="action" class="form-select rounded-0">
+                    <option value="">Todas as ações</option>
+                    {% for value, label in action_choices %}
+                        <option value="{{ value }}" {% if selected_action == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <label for="audit-actor" class="form-label fw-semibold">Administrador</label>
+                <select id="audit-actor" name="actor" class="form-select rounded-0">
+                    <option value="">Todos os administradores</option>
+                    {% for actor in actor_options %}
+                        <option value="{{ actor.pk }}" {% if selected_actor == actor.pk %}selected{% endif %}>
+                            {{ actor.get_full_name|default:actor.username }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-lg-2 col-md-6">
+                <label for="audit-period" class="form-label fw-semibold">Período</label>
+                <select id="audit-period" name="period" class="form-select rounded-0">
+                    {% for value, label in period_choices %}
+                        <option value="{{ value }}" {% if selected_period == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <label for="audit-search" class="form-label fw-semibold">Objeto afetado</label>
+                <div class="d-flex gap-2">
+                    <input
+                        id="audit-search"
+                        name="q"
+                        type="search"
+                        value="{{ search_query }}"
+                        class="form-control rounded-0"
+                        placeholder="Pesquisar descrição"
+                    >
+                    <button
+                        type="submit"
+                        class="btn rounded-0"
+                        style="background:#e2f0ff; border:1px solid #9ec9ff; color:black;"
+                    >
+                        Filtrar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {% if selected_action or selected_actor or selected_period or search_query %}
+            <div class="mt-3">
+                <a
+                    href="{% url 'administration:audit' %}"
+                    class="btn btn-sm rounded-0"
+                    style="border:1px solid #bbb; color:#444;"
+                >
+                    Limpar filtros
+                </a>
+            </div>
+        {% endif %}
+    </form>
+
+    <div class="table-responsive border bg-white">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col" class="ps-3">Data e hora</th>
+                    <th scope="col">Administrador</th>
+                    <th scope="col">Ação</th>
+                    <th scope="col">Objeto afetado</th>
+                    <th scope="col" class="pe-3">Resultado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in audit_logs %}
+                    <tr>
+                        <td class="ps-3 text-nowrap">{{ log.created_at|date:"d/m/Y H:i:s" }}</td>
+                        <td>
+                            {% if log.actor %}
+                                {{ log.actor.get_full_name|default:log.actor.username }}
+                            {% else %}
+                                <span class="text-secondary">Conta removida</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span
+                                style="display:inline-block; {% if log.object_type == 'professional' %}background:#fff8e1; border:1px solid #e7cf85; color:#5d4c13;{% else %}background:#e2f0ff; border:1px solid #9ec9ff; color:#222;{% endif %} padding:4px 9px;"
+                            >
+                                {{ log.get_action_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <strong>{{ log.object_label }}</strong>
+                            <small class="d-block text-secondary">
+                                {{ log.get_object_type_display }} · ID {{ log.object_id }}
+                            </small>
+                        </td>
+                        <td class="pe-3">
+                            <span style="display:inline-block; background:#eef4fb; border:1px solid #9ec9ff; color:#222; padding:4px 9px;">
+                                {{ log.get_result_display }}
+                            </span>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-secondary py-5">
+                            Não existem ações administrativas com estes critérios.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+        <nav class="mt-4" aria-label="Paginação da auditoria">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link text-dark rounded-0" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">
+                            Anterior
+                        </a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-link rounded-0">
+                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link text-dark rounded-0" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}">
+                            Seguinte
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</section>
+{% endblock %}

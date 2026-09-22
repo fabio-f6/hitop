@@ -1,12 +1,15 @@
 import re
+from datetime import timedelta
 
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST, require_http_methods
 
 from polls.models import NormativeDatasetVersion
@@ -24,7 +27,9 @@ from polls.normative_versions import (
 )
 from website.models import UserProfile
 
+from .audit import record_admin_action
 from .forms import NormativeVersionCreateForm
+from .models import AdministrativeAuditLog
 from .permissions import administrator_required
 from .services import (
     ProfessionalStateError,
@@ -35,12 +40,27 @@ from .services import (
 
 PROFESSIONALS_PER_PAGE = 10
 NORMATIVE_VERSIONS_PER_PAGE = 10
+AUDIT_LOGS_PER_PAGE = 20
+AUDIT_PERIOD_CHOICES = (
+    ("", "Qualquer data"),
+    ("7", "Últimos 7 dias"),
+    ("30", "Últimos 30 dias"),
+    ("90", "Últimos 90 dias"),
+)
 
 
 def _professional_queryset():
     return UserProfile.objects.filter(
         user_type="professional",
     ).select_related("user")
+
+
+def _professional_audit_label(professional):
+    return (
+        professional.user.get_full_name().strip()
+        or professional.user.email
+        or professional.user.username
+    )
 
 
 def _normative_version_or_404(version_id):
@@ -187,7 +207,20 @@ def professional_detail(request, professional_id):
 @require_POST
 def approve_professional(request, professional_id):
     try:
-        professional, changed = approve_professional_service(professional_id)
+        with transaction.atomic():
+            professional, changed = approve_professional_service(professional_id)
+            if changed:
+                record_admin_action(
+                    actor=request.user,
+                    action=AdministrativeAuditLog.Action.PROFESSIONAL_APPROVED,
+                    object_type=AdministrativeAuditLog.ObjectType.PROFESSIONAL,
+                    object_id=professional.pk,
+                    object_label=_professional_audit_label(professional),
+                    metadata={
+                        "previous_is_verified": False,
+                        "new_is_verified": True,
+                    },
+                )
     except UserProfile.DoesNotExist as exception:
         raise Http404 from exception
     except ProfessionalStateError as exception:
@@ -235,7 +268,24 @@ def deactivate_professional(request, professional_id):
 
     if request.method == "POST":
         try:
-            professional, changed = withdraw_professional_access(professional.pk)
+            with transaction.atomic():
+                professional, changed = withdraw_professional_access(professional.pk)
+                if changed:
+                    record_admin_action(
+                        actor=request.user,
+                        action=(
+                            AdministrativeAuditLog.Action.PROFESSIONAL_ACCESS_REVOKED
+                        ),
+                        object_type=(
+                            AdministrativeAuditLog.ObjectType.PROFESSIONAL
+                        ),
+                        object_id=professional.pk,
+                        object_label=_professional_audit_label(professional),
+                        metadata={
+                            "previous_is_active": True,
+                            "new_is_active": False,
+                        },
+                    )
         except UserProfile.DoesNotExist as exception:
             raise Http404 from exception
         except ProfessionalStateError as exception:
@@ -321,9 +371,25 @@ def create_normative_version(request):
         form = NormativeVersionCreateForm(request.POST)
         if form.is_valid():
             try:
-                version = create_normative_version_service(
-                    form.cleaned_data["name"]
-                )
+                with transaction.atomic():
+                    version = create_normative_version_service(
+                        form.cleaned_data["name"]
+                    )
+                    record_admin_action(
+                        actor=request.user,
+                        action=(
+                            AdministrativeAuditLog.Action.NORMATIVE_VERSION_CREATED
+                        ),
+                        object_type=(
+                            AdministrativeAuditLog.ObjectType.NORMATIVE_VERSION
+                        ),
+                        object_id=version.pk,
+                        object_label=version.name,
+                        metadata={
+                            "new_status": version.status,
+                            "participant_count": version.participant_count,
+                        },
+                    )
             except ValidationError as exception:
                 form.add_error(
                     "name",
@@ -363,7 +429,28 @@ def prepare_normative_version(request, version_id):
 
     if request.method == "POST":
         try:
-            result = prepare_normative_version_service(version)
+            with transaction.atomic():
+                previously_prepared = version.prepared_at is not None
+                result = prepare_normative_version_service(version)
+                version.refresh_from_db(fields=["status", "prepared_at"])
+                record_admin_action(
+                    actor=request.user,
+                    action=(
+                        AdministrativeAuditLog.Action.NORMATIVE_VERSION_PREPARED
+                    ),
+                    object_type=(
+                        AdministrativeAuditLog.ObjectType.NORMATIVE_VERSION
+                    ),
+                    object_id=version.pk,
+                    object_label=version.name,
+                    metadata={
+                        "previously_prepared": previously_prepared,
+                        "new_status": version.status,
+                        "participant_count": result.participant_count,
+                        "scale_score_count": result.scale_score_count,
+                        "spectrum_score_count": result.spectrum_score_count,
+                    },
+                )
         except ValidationError as exception:
             messages.error(request, _validation_error_message(exception))
         else:
@@ -403,7 +490,39 @@ def activate_normative_version(request, version_id):
 
     if request.method == "POST":
         try:
-            activated_version = activate_normative_version_service(version)
+            with transaction.atomic():
+                previous_status = version.status
+                previous_active_version = get_active_normative_version()
+                activated_version = activate_normative_version_service(version)
+                if previous_status != NormativeDatasetVersion.Status.ACTIVE:
+                    record_admin_action(
+                        actor=request.user,
+                        action=(
+                            AdministrativeAuditLog.Action.NORMATIVE_VERSION_ACTIVATED
+                        ),
+                        object_type=(
+                            AdministrativeAuditLog.ObjectType.NORMATIVE_VERSION
+                        ),
+                        object_id=activated_version.pk,
+                        object_label=activated_version.name,
+                        metadata={
+                            "previous_status": previous_status,
+                            "new_status": activated_version.status,
+                            "participant_count": (
+                                activated_version.participant_count
+                            ),
+                            "previous_active_version_id": (
+                                previous_active_version.pk
+                                if previous_active_version is not None
+                                else None
+                            ),
+                            "previous_active_version_label": (
+                                previous_active_version.name
+                                if previous_active_version is not None
+                                else None
+                            ),
+                        },
+                    )
         except ValidationError as exception:
             messages.error(request, _validation_error_message(exception))
         else:
@@ -436,5 +555,68 @@ def activate_normative_version(request, version_id):
         {
             "version": version,
             "active_version": get_active_normative_version(),
+        },
+    )
+
+
+@administrator_required
+@require_http_methods(["GET"])
+def audit(request):
+    logs = AdministrativeAuditLog.objects.select_related("actor")
+    selected_action = request.GET.get("action", "").strip()
+    selected_actor = request.GET.get("actor", "").strip()
+    selected_period = request.GET.get("period", "").strip()
+    search_query = request.GET.get("q", "").strip()
+
+    if selected_action in AdministrativeAuditLog.Action.values:
+        logs = logs.filter(action=selected_action)
+    else:
+        selected_action = ""
+
+    if selected_actor.isdigit():
+        selected_actor = int(selected_actor)
+        logs = logs.filter(actor_id=selected_actor)
+    else:
+        selected_actor = ""
+
+    valid_periods = {value for value, _label in AUDIT_PERIOD_CHOICES if value}
+    if selected_period in valid_periods:
+        logs = logs.filter(
+            created_at__gte=timezone.now() - timedelta(days=int(selected_period))
+        )
+    else:
+        selected_period = ""
+
+    if search_query:
+        logs = logs.filter(object_label__icontains=search_query)
+
+    logs = logs.order_by("-created_at", "-id")
+    page_obj = Paginator(logs, AUDIT_LOGS_PER_PAGE).get_page(
+        request.GET.get("page")
+    )
+    query_parameters = request.GET.copy()
+    query_parameters.pop("page", None)
+
+    actor_options = (
+        get_user_model()
+        .objects.filter(administrative_audit_logs__isnull=False)
+        .distinct()
+        .order_by("first_name", "last_name", "username")
+    )
+
+    return render(
+        request,
+        "administration/audit.html",
+        {
+            "page_obj": page_obj,
+            "audit_logs": page_obj,
+            "action_choices": AdministrativeAuditLog.Action.choices,
+            "actor_options": actor_options,
+            "period_choices": AUDIT_PERIOD_CHOICES,
+            "selected_action": selected_action,
+            "selected_actor": selected_actor,
+            "selected_period": selected_period,
+            "search_query": search_query,
+            "pagination_query": query_parameters.urlencode(),
         },
     )

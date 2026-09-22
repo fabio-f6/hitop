@@ -93,6 +93,25 @@
                 </div>
             </article>
         </div>
+
+        <div class="col-lg-6">
+            <article class="border bg-white h-100 p-4 d-flex flex-column">
+                <h2 class="h4 fw-bold mb-3">Auditoria</h2>
+                <p class="text-secondary mb-0">
+                    Consulte o histórico das ações administrativas concluídas na plataforma.
+                </p>
+
+                <div class="mt-auto pt-4">
+                    <a
+                        href="{% url 'administration:audit' %}"
+                        class="btn rounded-0"
+                        style="background:#e2f0ff; border:1px solid #9ec9ff; color:black;"
+                    >
+                        Consultar auditoria
+                    </a>
+                </div>
+            </article>
+        </div>
     </div>
 </section>
 {% endblock %}
