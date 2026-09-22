@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.http import HttpResponse
 from django.views.decorators.http import require_http_methods, require_POST
 from django.utils import timezone
@@ -27,7 +27,7 @@ from polls.normative_versions import get_or_assign_report_normative_version
 from polls.report_constants import SPECTRUM_KEYS
 from polls.report_interpretation import build_report_analysis
 from polls.scoring import calculate_scale_scores, calculate_scale_scores_from_answers
-from polls.simulation import simulate_submission
+from polls.simulation import SimulationConfigurationError, simulate_submission
 from polls.spectrum_scores import calculate_spectrum_scores
 from polls.translations import (
     SCALE_TRANSLATIONS,
@@ -36,7 +36,12 @@ from polls.translations import (
     translate_subfactor,
 )
 
-from .forms import CreatePatientForm, EditPatientForm, SignUpForm
+from .forms import (
+    CreatePatientForm,
+    EditPatientForm,
+    NewQuestionnaireForm,
+    SignUpForm,
+)
 from .models import UserProfile
 from .patient_deletion import (
     ActivePatientDeletionBlocked,
@@ -196,35 +201,39 @@ def create_patient(request):
             form.generated_password = temp_credentials['password']
 
         if form.is_valid():
-            user = form.save()
+            try:
+                with transaction.atomic():
+                    user = form.save()
 
-            profile = user.userprofile
-            profile.user_type = 'patient'
-            profile.professional = request.user
-            profile.save()
+                    profile = user.userprofile
+                    profile.user_type = 'patient'
+                    profile.professional = request.user
+                    profile.save()
 
-            submission = QuestionnaireSubmission.objects.create(
-                user=user,
-                questionnaire_type="hitop",
-                title=form.cleaned_data["title"],
-                completed=False,
-                is_open=True,
-                simulation_mode=form.cleaned_data["simulation_mode"],
-            )
+                    submission = QuestionnaireSubmission.objects.create(
+                        user=user,
+                        questionnaire_type="hitop",
+                        title=form.cleaned_data["title"],
+                        completed=False,
+                        is_open=True,
+                        **form.simulation_configuration(),
+                    )
 
-            submission.spectra.set(
-                form.cleaned_data["spectra"]
-            )
+                    submission.spectra.set(
+                        form.cleaned_data["spectra"]
+                    )
 
-            if submission.simulation_mode != "normal":
-                simulate_submission(submission)
+                    if submission.simulation_mode != "normal":
+                        simulate_submission(submission)
+            except SimulationConfigurationError as error:
+                form.add_error(None, str(error))
+            else:
+                request.session.pop('temp_credentials', None)
 
-            request.session.pop('temp_credentials', None)
-
-            return redirect(
-                'website:patient_submissions',
-                patient_id=user.id
-                )
+                return redirect(
+                    'website:patient_submissions',
+                    patient_id=user.id
+                    )
 
     else:
         form = CreatePatientForm()
@@ -271,62 +280,42 @@ def new_questionnaire(request, patient_id):
         messages.error(request, "Sem permissão.")
         return redirect("website:dashboard")
 
-    spectra = Spectra.objects.all()
-
     if request.method == "POST":
+        form = NewQuestionnaireForm(request.POST)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    submission = QuestionnaireSubmission.objects.create(
+                        user=patient_profile.user,
+                        questionnaire_type="hitop",
+                        title=form.cleaned_data["title"],
+                        completed=False,
+                        is_open=True,
+                        **form.simulation_configuration(),
+                    )
 
-        title = request.POST.get("title")
-        selected_spectra_ids = request.POST.getlist("spectra")
+                    submission.spectra.set(form.cleaned_data["spectra"])
 
-        title = title.strip()
+                    if submission.simulation_mode != "normal":
+                        simulate_submission(submission)
+            except SimulationConfigurationError as error:
+                form.add_error(None, str(error))
+            else:
+                messages.success(
+                    request,
+                    "Novo questionário criado com sucesso."
+                )
 
-        if not title:
-            messages.error(
-                request,
-                "O nome da submissão é obrigatório."
-            )
-            return redirect(
-                "website:new_questionnaire",
-                patient_id=patient_id
-            )
-
-        if not selected_spectra_ids:
-            messages.error(
-                request,
-                "Selecione pelo menos um spectra."
-            )
-            return redirect(
-                "website:new_questionnaire",
-                patient_id=patient_id
-            )
-
-        submission = QuestionnaireSubmission.objects.create(
-            user=patient_profile.user,
-            questionnaire_type="hitop",
-            title=title,
-            completed=False,
-            is_open=True,
-            simulation_mode=request.POST.get("simulation_mode", "normal"),
-        )
-
-        submission.spectra.set(selected_spectra_ids)
-
-        if submission.simulation_mode != "normal":
-            simulate_submission(submission)
-
-        messages.success(
-            request,
-            "Novo questionário criado com sucesso."
-        )
-
-        return redirect("website:dashboard")
+                return redirect("website:dashboard")
+    else:
+        form = NewQuestionnaireForm()
 
     return render(
         request,
         "website/new_questionnaire.html",
         {
             "patient": patient_profile,
-            "spectra": spectra,
+            "form": form,
         }
     )
 

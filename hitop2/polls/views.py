@@ -1,4 +1,3 @@
-import json
 import math
 import random
 
@@ -17,6 +16,12 @@ from .questions import get_questions_for_submission
 from .normative_export import process_normative_eligibility
 
 from .models import Question, QuestionCategory, DynamicAnswer, UserAnswer, QuestionnaireSubmission
+from .sociodemographic import (
+    dynamic_answer_value,
+    get_sociodemographic_category,
+    question_is_visible,
+    replace_dynamic_answers,
+)
 
 from datetime import datetime
 
@@ -34,15 +39,6 @@ answer_choices = [
 ]
 
 last_page_extra_choice = ('5', 'Não sei / Prefiro não responder')
-
-SOCIODEMOGRAPHIC_CATEGORY_NAME = "Dados Sociodemográficos"
-
-
-def _get_sociodemographic_category():
-    return QuestionCategory.objects.filter(
-        name=SOCIODEMOGRAPHIC_CATEGORY_NAME
-    ).first()
-
 
 def questionnaire(request):
 
@@ -309,7 +305,7 @@ def sociodemographic_form(request):
         questionnaire_type="hitop",
         is_open=True,
     )
-    category = _get_sociodemographic_category()
+    category = get_sociodemographic_category()
     if not category or not category.questions.filter(is_active=True).exists():
         messages.error(request, "As perguntas ainda não foram configuradas.")
         return redirect("polls:thank_you")
@@ -332,25 +328,6 @@ def dynamic_questionnaire(request, category_id):
         user=request.user,
         success_redirect="polls:index",
     )
-
-
-def _dynamic_answer_value(answer):
-    if answer.question.question_type != "checkbox":
-        return answer.answer_value
-    try:
-        value = json.loads(answer.answer_value)
-    except json.JSONDecodeError:
-        return [answer.answer_value]
-    return value if isinstance(value, list) else [answer.answer_value]
-
-
-def _question_is_visible(question, values):
-    if not question.show_if_question:
-        return True
-    parent_value = values.get(question.show_if_question, "")
-    if not isinstance(parent_value, list):
-        parent_value = [parent_value]
-    return bool(set(parent_value) & set(question.show_if_values))
 
 
 def _dynamic_questionnaire_response(
@@ -377,7 +354,7 @@ def _dynamic_questionnaire_response(
         user=user, submission=submission, question__category=category,
     ).select_related("question")
     values = {
-        answer.question.question_id: _dynamic_answer_value(answer)
+        answer.question.question_id: dynamic_answer_value(answer)
         for answer in previous_answers
     }
 
@@ -389,7 +366,7 @@ def _dynamic_questionnaire_response(
         for index, section_name in enumerate(section_names):
             if any(
                 question.required
-                and _question_is_visible(question, values)
+                and question_is_visible(question, values)
                 and not values.get(question.question_id)
                 for question in sections[section_name]
             ):
@@ -419,7 +396,7 @@ def _dynamic_questionnaire_response(
                 ).strip()
 
         for question in current_questions:
-            if not _question_is_visible(question, submitted):
+            if not question_is_visible(question, submitted):
                 submitted[question.question_id] = [] if question.question_type == "checkbox" else ""
                 continue
 
@@ -440,23 +417,12 @@ def _dynamic_questionnaire_response(
             values = submitted
         else:
             with transaction.atomic():
-                DynamicAnswer.objects.filter(
+                replace_dynamic_answers(
                     user=user,
                     submission=submission,
-                    question__in=current_questions,
-                ).delete()
-                for question in current_questions:
-                    value = submitted[question.question_id]
-                    if value:
-                        DynamicAnswer.objects.create(
-                            user=user,
-                            submission=submission,
-                            question=question,
-                            answer_value=(
-                                json.dumps(value)
-                                if isinstance(value, list) else value
-                            ),
-                        )
+                    questions=current_questions,
+                    values=submitted,
+                )
                 if submission:
                     submission.sociodemographic_step = max(
                         submission.sociodemographic_step, section_index + 1

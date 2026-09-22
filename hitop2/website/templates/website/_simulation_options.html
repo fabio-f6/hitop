@@ -1,0 +1,85 @@
+<div class="mb-4" data-simulation-configuration>
+    <label class="d-block fw-medium mb-2">
+        {{ form.simulation_mode.label }}
+    </label>
+
+    {% for radio in form.simulation_mode %}
+        <div class="form-check">
+            {{ radio.tag }}
+            <label class="form-check-label" for="{{ radio.id_for_label }}">
+                {{ radio.choice_label }}
+            </label>
+        </div>
+    {% endfor %}
+    {% for error in form.simulation_mode.errors %}
+        <div class="invalid-feedback d-block">{{ error }}</div>
+    {% endfor %}
+
+    <div class="form-text mt-2">
+        Utilize um modo de simulação para gerar automaticamente respostas de teste.
+        O modo com omissões usa 10% quando não for escolhida outra percentagem.
+    </div>
+
+    <fieldset
+        class="border rounded p-3 mt-3"
+        data-simulation-options
+        {% if not form.simulation_mode.value or form.simulation_mode.value == "normal" %}hidden{% endif %}
+    >
+        <legend class="float-none w-auto px-2 fs-6 mb-2">Opções de simulação</legend>
+
+        <div class="row g-3">
+            <div class="col-12 col-md-6">
+                {{ form.sociodemographic_simulation_mode.label_tag }}
+                {{ form.sociodemographic_simulation_mode }}
+                {{ form.sociodemographic_simulation_mode.errors }}
+            </div>
+            <div class="col-12 col-md-6">
+                {{ form.simulation_response_profile.label_tag }}
+                {{ form.simulation_response_profile }}
+                {{ form.simulation_response_profile.errors }}
+            </div>
+            <div class="col-12 col-md-4">
+                {{ form.simulation_missing_percentage.label_tag }}
+                {{ form.simulation_missing_percentage }}
+                {{ form.simulation_missing_percentage.errors }}
+            </div>
+            <div class="col-12 col-md-4">
+                {{ form.simulation_attention_mode.label_tag }}
+                {{ form.simulation_attention_mode }}
+                {{ form.simulation_attention_mode.errors }}
+            </div>
+            <div class="col-12 col-md-4">
+                {{ form.simulation_seed.label_tag }}
+                {{ form.simulation_seed }}
+                {{ form.simulation_seed.errors }}
+                <div class="form-text">Opcional; permite repetir exatamente a simulação.</div>
+            </div>
+        </div>
+    </fieldset>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    for (const container of document.querySelectorAll("[data-simulation-configuration]")) {
+        const radios = [...container.querySelectorAll('input[name="simulation_mode"]')];
+        const options = container.querySelector("[data-simulation-options]");
+        const missing = container.querySelector('[name="simulation_missing_percentage"]');
+
+        function updateSimulationOptions() {
+            const selected = radios.find(radio => radio.checked)?.value || "normal";
+            options.hidden = selected === "normal";
+            for (const field of options.querySelectorAll("input, select, textarea")) {
+                field.disabled = selected === "normal";
+            }
+            if (selected === "simulated_nulls" && missing.value === "0") {
+                missing.value = "10";
+            }
+        }
+
+        for (const radio of radios) {
+            radio.addEventListener("change", updateSimulationOptions);
+        }
+        updateSimulationOptions();
+    }
+});
+</script>

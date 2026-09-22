@@ -15,19 +15,13 @@
     <form method="post">
 
         {% csrf_token %}
+        {{ form.non_field_errors }}
 
         <div class="mb-3">
 
-            <label class="form-label">
-                Descrição da aplicação
-            </label>
-
-            <input
-                type="text"
-                name="title"
-                class="form-control"
-                placeholder="Ex: Avaliação após 3 meses de terapia"
-            >
+            {{ form.title.label_tag }}
+            {{ form.title }}
+            {{ form.title.errors }}
 
             <div
                 style="
@@ -41,112 +35,20 @@
 
         </div>
 
-        <div class="mb-4">
-
-            <label
-                style="
-                    display:block;
-                    font-weight:500;
-                    margin-bottom:10px;
-                "
-            >
-                Modo da aplicação:
-            </label>
-
-            <div class="form-check">
-
-                <input
-                    class="form-check-input"
-                    type="radio"
-                    name="simulation_mode"
-                    id="normal"
-                    value="normal"
-                    checked
-                >
-
-                <label
-                    class="form-check-label"
-                    for="normal"
-                >
-                    Aplicação normal
-                </label>
-
-            </div>
-
-            <div class="form-check">
-
-                <input
-                    class="form-check-input"
-                    type="radio"
-                    name="simulation_mode"
-                    id="simulated"
-                    value="simulated"
-                >
-
-                <label
-                    class="form-check-label"
-                    for="simulated"
-                >
-                    Simular respostas
-                </label>
-
-            </div>
-
-            <div class="form-check">
-
-                <input
-                    class="form-check-input"
-                    type="radio"
-                    name="simulation_mode"
-                    id="simulated_nulls"
-                    value="simulated_nulls"
-                >
-
-                <label
-                    class="form-check-label"
-                    for="simulated_nulls"
-                >
-                    Simular respostas com omissões
-                </label>
-
-            </div>
-
-            <div
-                style="
-                    color:#666;
-                    font-size:.9rem;
-                    margin-top:8px;
-                "
-            >
-                Utilize um modo de simulação para gerar automaticamente respostas de teste.
-            </div>
-
-        </div>
+        {% include "website/_simulation_options.html" %}
 
         <div class="mb-4">
 
-            <label class="form-label">
-                Módulos a incluir:
-            </label>
-
-            {% for spectrum in spectra %}
-
+            <label class="form-label">{{ form.spectra.label }}</label>
+            {% for checkbox in form.spectra %}
                 <div class="form-check">
-
-                    <input
-                        class="form-check-input"
-                        type="checkbox"
-                        name="spectra"
-                        value="{{ spectrum.id }}"
-                    >
-
-                    <label class="form-check-label">
-                        {{ spectrum.name|translate_spectrum }}
+                    {{ checkbox.tag }}
+                    <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                        {{ checkbox.choice_label|translate_spectrum }}
                     </label>
-
                 </div>
-
             {% endfor %}
+            {{ form.spectra.errors }}
 
         </div>
 

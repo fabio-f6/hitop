@@ -71,6 +71,41 @@ class QuestionnaireSubmission(models.Model):
         ("simulated_nulls", "Simular respostas com omissões"),
     ]
 
+    class SociodemographicSimulationMode(models.TextChoices):
+        NORMAL = "normal", "Não simular"
+        ELIGIBLE = "eligible", "Elegível para base normativa"
+        INELIGIBLE_LANGUAGE = (
+            "ineligible_language",
+            "Não elegível: Português-Europeu",
+        )
+        INELIGIBLE_MENTAL_HEALTH = (
+            "ineligible_mental_health",
+            "Não elegível: saúde mental",
+        )
+        INELIGIBLE_BOTH = "ineligible_both", "Não elegível: ambos"
+        PENDING_MISSING = (
+            "pending_missing",
+            "Indeterminado / resposta normativa em falta",
+        )
+
+    class SimulationAttentionMode(models.TextChoices):
+        ALL_CORRECT = "all_correct", "Todos corretos"
+        ONE_FAILURE = "one_failure", "Uma falha"
+        MULTIPLE_FAILURES = "multiple_failures", "Múltiplas falhas"
+
+    class SimulationResponseProfile(models.TextChoices):
+        RANDOM = "random", "Aleatório"
+        LOW = "low", "Baixo"
+        MEDIUM = "medium", "Médio"
+        HIGH = "high", "Alto"
+
+    SIMULATION_MISSING_PERCENTAGES = (
+        (0, "0%"),
+        (10, "10%"),
+        (25, "25%"),
+        (30, "30%"),
+    )
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE
@@ -137,10 +172,48 @@ class QuestionnaireSubmission(models.Model):
         default="normal",
     )
 
+    sociodemographic_simulation_mode = models.CharField(
+        max_length=32,
+        choices=SociodemographicSimulationMode.choices,
+        default=SociodemographicSimulationMode.NORMAL,
+    )
+
+    simulation_attention_mode = models.CharField(
+        max_length=24,
+        choices=SimulationAttentionMode.choices,
+        default=SimulationAttentionMode.ALL_CORRECT,
+    )
+
+    simulation_missing_percentage = models.PositiveSmallIntegerField(
+        choices=SIMULATION_MISSING_PERCENTAGES,
+        default=0,
+    )
+
+    simulation_response_profile = models.CharField(
+        max_length=10,
+        choices=SimulationResponseProfile.choices,
+        default=SimulationResponseProfile.RANDOM,
+    )
+
+    simulation_seed = models.IntegerField(
+        null=True,
+        blank=True,
+    )
+
     spectra = models.ManyToManyField(
         Spectra,
         blank=True
     )
+
+    @property
+    def effective_simulation_missing_percentage(self):
+        """Return the configured rate, preserving legacy null simulations."""
+        if (
+            self.simulation_mode == "simulated_nulls"
+            and self.simulation_missing_percentage == 0
+        ):
+            return 10
+        return self.simulation_missing_percentage
 
 class UserAnswer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='answers')

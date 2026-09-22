@@ -6,6 +6,102 @@ from polls.models import Spectra, QuestionnaireSubmission
 import random
 import string
 
+
+class SimulationConfigurationMixin:
+    simulation_field_names = (
+        "simulation_mode",
+        "sociodemographic_simulation_mode",
+        "simulation_response_profile",
+        "simulation_missing_percentage",
+        "simulation_attention_mode",
+        "simulation_seed",
+    )
+
+    def add_simulation_fields(self):
+        self.fields["simulation_mode"] = forms.TypedChoiceField(
+            label="Modo da aplicação:",
+            choices=QuestionnaireSubmission.SIMULATION_MODES,
+            initial="normal",
+            widget=forms.RadioSelect(attrs={"class": "form-check-input"}),
+            coerce=str,
+        )
+        self.fields["sociodemographic_simulation_mode"] = forms.ChoiceField(
+            label="Sociodemográfico",
+            choices=(
+                QuestionnaireSubmission.SociodemographicSimulationMode.choices
+            ),
+            initial=QuestionnaireSubmission.SociodemographicSimulationMode.NORMAL,
+            required=False,
+            widget=forms.Select(attrs={"class": "form-select"}),
+        )
+        self.fields["simulation_response_profile"] = forms.ChoiceField(
+            label="Perfil de respostas",
+            choices=QuestionnaireSubmission.SimulationResponseProfile.choices,
+            initial=QuestionnaireSubmission.SimulationResponseProfile.RANDOM,
+            required=False,
+            widget=forms.Select(attrs={"class": "form-select"}),
+        )
+        self.fields["simulation_missing_percentage"] = forms.TypedChoiceField(
+            label="Omissões",
+            choices=QuestionnaireSubmission.SIMULATION_MISSING_PERCENTAGES,
+            initial=0,
+            coerce=int,
+            empty_value=0,
+            required=False,
+            widget=forms.Select(attrs={"class": "form-select"}),
+        )
+        self.fields["simulation_attention_mode"] = forms.ChoiceField(
+            label="Attention checks",
+            choices=QuestionnaireSubmission.SimulationAttentionMode.choices,
+            initial=QuestionnaireSubmission.SimulationAttentionMode.ALL_CORRECT,
+            required=False,
+            widget=forms.Select(attrs={"class": "form-select"}),
+        )
+        self.fields["simulation_seed"] = forms.IntegerField(
+            label="Seed",
+            required=False,
+            widget=forms.NumberInput(attrs={
+                "class": "form-control",
+                "placeholder": "Opcional",
+            }),
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        mode = cleaned_data.get("simulation_mode", "normal")
+        cleaned_data["sociodemographic_simulation_mode"] = (
+            cleaned_data.get("sociodemographic_simulation_mode") or "normal"
+        )
+        cleaned_data["simulation_response_profile"] = (
+            cleaned_data.get("simulation_response_profile") or "random"
+        )
+        cleaned_data["simulation_attention_mode"] = (
+            cleaned_data.get("simulation_attention_mode") or "all_correct"
+        )
+        cleaned_data["simulation_missing_percentage"] = (
+            cleaned_data.get("simulation_missing_percentage") or 0
+        )
+        if mode == "normal":
+            cleaned_data.update({
+                "sociodemographic_simulation_mode": "normal",
+                "simulation_response_profile": "random",
+                "simulation_missing_percentage": 0,
+                "simulation_attention_mode": "all_correct",
+                "simulation_seed": None,
+            })
+        elif (
+            mode == "simulated_nulls"
+            and not cleaned_data.get("simulation_missing_percentage")
+        ):
+            cleaned_data["simulation_missing_percentage"] = 10
+        return cleaned_data
+
+    def simulation_configuration(self):
+        return {
+            name: self.cleaned_data[name]
+            for name in self.simulation_field_names
+        }
+
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(
         label="", widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'Email'})
@@ -75,7 +171,7 @@ class SignUpForm(UserCreationForm):
             '<span class="form-text text-muted"><small>Insira a mesma palavra-passe novamente para verificação.</small></span>'
         )
 
-class CreatePatientForm(UserCreationForm):
+class CreatePatientForm(SimulationConfigurationMixin, UserCreationForm):
 
     username = forms.CharField(
         label="ID de Utilizador",
@@ -112,16 +208,6 @@ class CreatePatientForm(UserCreationForm):
         })
     )
 
-    simulation_mode = forms.TypedChoiceField(
-        label="Modo da aplicação:",
-        choices=QuestionnaireSubmission.SIMULATION_MODES,
-        initial="normal",
-        widget=forms.RadioSelect(attrs={
-            "class": "form-check-input",
-        }),
-        coerce=str,
-    )
-
     spectra = forms.ModelMultipleChoiceField(
         queryset=Spectra.objects.all(),
         widget=forms.CheckboxSelectMultiple(attrs={
@@ -140,6 +226,7 @@ class CreatePatientForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.add_simulation_fields()
 
         def generate_username():
             return "P_" + "".join(
@@ -191,6 +278,34 @@ class CreatePatientForm(UserCreationForm):
             user.save()
 
         return user
+
+
+class NewQuestionnaireForm(SimulationConfigurationMixin, forms.Form):
+    title = forms.CharField(
+        label="Descrição da aplicação",
+        max_length=255,
+        widget=forms.TextInput(attrs={
+            "class": "form-control",
+            "placeholder": "Ex: Avaliação após 3 meses de terapia",
+        }),
+    )
+    spectra = forms.ModelMultipleChoiceField(
+        label="Módulos a incluir:",
+        queryset=Spectra.objects.all(),
+        widget=forms.CheckboxSelectMultiple(attrs={
+            "class": "form-check-input",
+        }),
+        required=True,
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.add_simulation_fields()
+        self.order_fields((
+            "title",
+            *self.simulation_field_names,
+            "spectra",
+        ))
 
 class EditPatientForm(forms.ModelForm):
     spectra = forms.ModelMultipleChoiceField(
