@@ -5,6 +5,8 @@
 
 <div>
 
+    {% include "website/components/test_environment_banner.html" %}
+
     <!-- CABEÇALHO -->
 
     <div class="mb-5">
@@ -17,7 +19,11 @@
                 color:#222;
             "
         >
-            Olá, {{ user.first_name|default:user.username }}!
+            {% if is_test_environment %}
+                Ambiente de Teste Profissional
+            {% else %}
+                Olá, {{ user.first_name|default:user.username }}!
+            {% endif %}
         </h1>
 
         <p
@@ -28,7 +34,11 @@
                 line-height:1.6;
             "
         >
-            Gerencie pacientes, acompanhe submissões e gere relatórios clínicos.
+            {% if is_test_environment %}
+                Crie pacientes de teste, simule aplicações e valide relatórios sem utilizar dados clínicos reais.
+            {% else %}
+                Gerencie pacientes, acompanhe submissões e gere relatórios clínicos.
+            {% endif %}
         </p>
 
     </div>
@@ -141,18 +151,18 @@
 
         <div class="d-flex gap-2">
             <a
-                href="{% url 'website:archived_patients' %}"
+                href="{% url archived_patients_url_name %}"
                 class="btn rounded-0"
                 style="border:1px solid #9ec9ff; color:black; padding:10px 18px;"
             >
                 Pacientes arquivados [{{ archived_patient_count }}]
             </a>
             <a
-                href="{% url 'website:create_patient' %}"
+                href="{% url create_patient_url_name %}"
                 class="btn rounded-0"
                 style="background:#e2f0ff; border:1px solid #9ec9ff; color:black; padding:10px 18px;"
             >
-                + Criar paciente
+                {% if is_test_environment %}Criar paciente de teste{% else %}+ Criar paciente{% endif %}
             </a>
         </div>
 
@@ -244,7 +254,7 @@
             {% endif %}
 
             <a
-                href="{% url 'website:patient_submissions' patient.profile.user.id %}"
+                href="{% url patient_submissions_url_name patient.profile.user.id %}"
                 class="btn rounded-0"
                 style="
                     background:#e2f0ff;
@@ -257,7 +267,7 @@
 
             <form
                 method="post"
-                action="{% url 'website:archive_patient' patient.profile.id %}"
+                action="{% url archive_patient_url_name patient.profile.id %}"
                 class="d-inline"
             >
                 {% csrf_token %}
@@ -306,7 +316,7 @@
             </p>
 
             <a
-                href="{% url 'website:create_patient' %}"
+                href="{% url create_patient_url_name %}"
                 class="btn rounded-0"
                 style="
                     background:#e2f0ff;
@@ -315,7 +325,7 @@
                     padding:10px 20px;
                 "
             >
-                Criar primeiro paciente
+                {% if is_test_environment %}Criar primeiro paciente de teste{% else %}Criar primeiro paciente{% endif %}
             </a>
 
         </div>

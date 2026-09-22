@@ -125,6 +125,46 @@ class QuestionnaireMonitoringTests(MonitoringHealthTestMixin, TestCase):
         self.assertEqual(report["summary"]["open"], 1)
         self.assertEqual(report["summary"]["completed"], 1)
 
+    def test_test_submissions_are_reported_separately_from_real_metrics(self):
+        self.create_submission(is_open=True, completed=False)
+        self.create_submission(
+            is_test_data=True,
+            is_open=True,
+            completed=False,
+            simulation_mode="simulated",
+        )
+        self.create_submission(
+            is_test_data=True,
+            is_open=False,
+            completed=True,
+            simulation_mode="simulated",
+        )
+
+        summary = get_questionnaire_monitoring_report()["summary"]
+
+        self.assertEqual(summary["total"], 1)
+        self.assertEqual(summary["open"], 1)
+        self.assertEqual(summary["completed"], 0)
+        self.assertEqual(summary["test_total"], 2)
+        self.assertEqual(summary["test_open"], 1)
+        self.assertEqual(summary["test_completed"], 1)
+
+    def test_legacy_simulation_mode_is_not_counted_as_clinical_activity(self):
+        self.create_submission(simulation_mode="normal")
+        self.create_submission(
+            simulation_mode="simulated_nulls",
+            is_test_data=False,
+            completed=True,
+            is_open=False,
+        )
+
+        summary = get_questionnaire_monitoring_report()["summary"]
+
+        self.assertEqual(summary["total"], 1)
+        self.assertEqual(summary["completed"], 0)
+        self.assertEqual(summary["test_total"], 1)
+        self.assertEqual(summary["test_completed"], 1)
+
     def test_normative_status_counts_are_correct(self):
         self.create_submission(
             normative_status=QuestionnaireSubmission.NormativeStatus.PENDING,

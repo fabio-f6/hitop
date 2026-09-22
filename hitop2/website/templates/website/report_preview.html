@@ -3,6 +3,8 @@
 
 {% block content %}
 
+{% include "website/components/test_environment_banner.html" %}
+
 <style>
     .attention-check-alert {
         border: 1px solid #f0ad4e;
@@ -30,7 +32,7 @@
             color:black;
             padding:10px 18px;
         "
-        href="{% url 'website:patient_submissions' submission.user.id %}"
+        href="{% url patient_submissions_url_name submission.user.id %}"
     >
         Voltar
     </a>
@@ -43,13 +45,22 @@
             color:black;
             padding:10px 18px;
         "
-        href="{% url 'website:export_report_docx' submission.id %}"
+        href="{% url export_report_url_name submission.id %}"
     >
         Exportar relatório
     </a>
 </div>
 
 <div class="report-container">
+
+    {% if is_test_environment %}
+    <div class="p-3 mb-3 text-center fw-semibold" style="background:#fff8e6; border:2px solid #c8a94f; color:#55450f;">
+        SIMULAÇÃO / TESTE — este relatório não corresponde a dados clínicos reais.
+        {% if normative_eligibility.eligible %}
+            <div class="small mt-1">A aplicação cumpre os critérios normativos, mas não foi incorporada na base normativa.</div>
+        {% endif %}
+    </div>
+    {% endif %}
 
     <div
         style="
@@ -108,10 +119,14 @@
             "
         >
 
-            {{ report.professional_name }},
-            {{ report.professional_area }},
-            Nº {{ report.professional_license }},
-            Referência Certificação HiTOP
+            {% if is_test_environment %}
+                Administrador responsável pelo teste: {{ report.professional_name }}
+            {% else %}
+                {{ report.professional_name }},
+                {{ report.professional_area }},
+                Nº {{ report.professional_license }},
+                Referência Certificação HiTOP
+            {% endif %}
 
         </p>
 

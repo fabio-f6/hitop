@@ -6,34 +6,45 @@ from polls.models import QuestionnaireSubmission
 def get_questionnaire_monitoring_summary():
     """Return operational submission metrics without loading clinical rows."""
     status = QuestionnaireSubmission.NormativeStatus
+    real = Q(is_test_data=False, simulation_mode="normal")
+    test = Q(is_test_data=True) | ~Q(simulation_mode="normal")
     metrics = QuestionnaireSubmission.objects.aggregate(
-        total=Count("id"),
-        open_count=Count("id", filter=Q(is_open=True)),
-        completed_count=Count("id", filter=Q(completed=True)),
-        pending=Count("id", filter=Q(normative_status=status.PENDING)),
+        total=Count("id", filter=real),
+        open_count=Count("id", filter=real & Q(is_open=True)),
+        completed_count=Count("id", filter=real & Q(completed=True)),
+        pending=Count(
+            "id",
+            filter=real & Q(normative_status=status.PENDING),
+        ),
         pending_incomplete=Count(
             "id",
-            filter=Q(
+            filter=real & Q(
                 normative_status=status.PENDING,
                 completed=False,
             ),
         ),
         completed_pending=Count(
             "id",
-            filter=Q(
+            filter=real & Q(
                 normative_status=status.PENDING,
                 completed=True,
             ),
         ),
-        ineligible=Count("id", filter=Q(normative_status=status.INELIGIBLE)),
-        exported=Count("id", filter=Q(normative_status=status.EXPORTED)),
+        ineligible=Count(
+            "id",
+            filter=real & Q(normative_status=status.INELIGIBLE),
+        ),
+        exported=Count(
+            "id",
+            filter=real & Q(normative_status=status.EXPORTED),
+        ),
         completed_open=Count(
             "id",
-            filter=Q(completed=True, is_open=True),
+            filter=real & Q(completed=True, is_open=True),
         ),
         exported_without_timestamp=Count(
             "id",
-            filter=Q(
+            filter=real & Q(
                 normative_status=status.EXPORTED,
                 normative_exported_at__isnull=True,
             ),
@@ -41,24 +52,28 @@ def get_questionnaire_monitoring_summary():
         timestamp_without_exported_status=Count(
             "id",
             filter=(
-                ~Q(normative_status=status.EXPORTED)
+                real
+                & ~Q(normative_status=status.EXPORTED)
                 & Q(normative_exported_at__isnull=False)
             ),
         ),
         exported_incomplete=Count(
             "id",
-            filter=Q(
+            filter=real & Q(
                 normative_status=status.EXPORTED,
                 completed=False,
             ),
         ),
         ineligible_incomplete=Count(
             "id",
-            filter=Q(
+            filter=real & Q(
                 normative_status=status.INELIGIBLE,
                 completed=False,
             ),
         ),
+        test_total=Count("id", filter=test),
+        test_open=Count("id", filter=test & Q(is_open=True)),
+        test_completed=Count("id", filter=test & Q(completed=True)),
     )
     metrics["open"] = metrics.pop("open_count")
     metrics["completed"] = metrics.pop("completed_count")

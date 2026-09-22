@@ -21,6 +21,24 @@
     </div>
 
     <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <article class="border bg-white h-100 p-3">
+                <div class="text-secondary mb-2">Aplicações reais</div>
+                <div class="h3 fw-bold mb-0">{{ summary.total }}</div>
+            </article>
+        </div>
+        <div class="col-md-6">
+            <article class="border h-100 p-3" style="background:#fff8e6; border-color:#e7cf85 !important;">
+                <div class="text-secondary mb-2">Aplicações de teste</div>
+                <div class="h3 fw-bold mb-0">{{ summary.test_total }}</div>
+                <div class="small text-secondary mt-1">
+                    {{ summary.test_open }} abertas; {{ summary.test_completed }} concluídas
+                </div>
+            </article>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
         <div class="col-md-4 col-xl-2">
             <article class="border bg-white h-100 p-3">
                 <div class="text-secondary mb-2">Total</div>

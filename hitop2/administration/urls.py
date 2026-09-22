@@ -7,6 +7,56 @@ app_name = "administration"
 
 urlpatterns = [
     path("", views.dashboard, name="dashboard"),
+    path(
+        "test-environment/",
+        views.professional_test_environment,
+        name="professional_test_environment",
+    ),
+    path(
+        "test-environment/patients/create/",
+        views.test_create_patient,
+        name="test_create_patient",
+    ),
+    path(
+        "test-environment/patients/archived/",
+        views.test_archived_patients,
+        name="test_archived_patients",
+    ),
+    path(
+        "test-environment/patients/<int:patient_id>/archive/",
+        views.test_archive_patient,
+        name="test_archive_patient",
+    ),
+    path(
+        "test-environment/patients/<int:patient_id>/restore/",
+        views.test_restore_patient,
+        name="test_restore_patient",
+    ),
+    path(
+        "test-environment/patients/<int:patient_id>/submissions/",
+        views.test_patient_submissions,
+        name="test_patient_submissions",
+    ),
+    path(
+        "test-environment/patients/<int:patient_id>/new-questionnaire/",
+        views.test_new_questionnaire,
+        name="test_new_questionnaire",
+    ),
+    path(
+        "test-environment/submissions/<int:submission_id>/answers/",
+        views.test_patient_answers,
+        name="test_patient_answers",
+    ),
+    path(
+        "test-environment/reports/<int:submission_id>/preview/",
+        views.test_report_preview,
+        name="test_report_preview",
+    ),
+    path(
+        "test-environment/reports/<int:submission_id>/export/docx/",
+        views.test_export_report_docx,
+        name="test_export_report_docx",
+    ),
     path("audit/", views.audit, name="audit"),
     path(
         "questionnaires/",

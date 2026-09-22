@@ -36,6 +36,10 @@ class SimulationConfigurationError(ValueError):
     pass
 
 
+class SimulationPermissionError(SimulationConfigurationError):
+    pass
+
+
 def _profile_answer(rng, profile):
     weights = PROFILE_WEIGHTS.get(profile, PROFILE_WEIGHTS["random"])
     return rng.choices(HITOP_RESPONSE_VALUES, weights=weights, k=1)[0]
@@ -292,6 +296,26 @@ def simulate_submission(submission):
     """Generate configured test data and run the real completion pipeline."""
     if submission.simulation_mode == "normal":
         return None
+
+    try:
+        patient_profile = submission.user.userprofile
+        test_owner = patient_profile.test_environment_owner
+        owner_is_administrator = (
+            test_owner is not None
+            and test_owner.userprofile.user_type == "admin"
+        )
+    except AttributeError:
+        patient_profile = None
+        owner_is_administrator = False
+    if (
+        not submission.is_test_data
+        or patient_profile is None
+        or not patient_profile.is_test_data
+        or not owner_is_administrator
+    ):
+        raise SimulationPermissionError(
+            "A simulação está reservada ao Ambiente de Teste Profissional."
+        )
 
     rng = random.Random(submission.simulation_seed)
     _simulate_sociodemographic_answers(submission, rng)

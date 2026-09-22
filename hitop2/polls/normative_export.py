@@ -18,6 +18,10 @@ class SubmissionAlreadyExported(NormativeExportError):
     """Raised when a submission has already been exported."""
 
 
+class TestSubmissionExportBlocked(NormativeExportError):
+    """Raised when test or simulated data reaches the real export boundary."""
+
+
 SEX_LABELS = {
     "1": "Feminino",
     "2": "Masculino",
@@ -32,6 +36,15 @@ PORTUGUESE_LANGUAGE_VALUES = {"1", "2"}
 MENTAL_DIAGNOSIS_QUESTION_ID = "mental_diagnosis"
 MENTAL_DIAGNOSIS_NEVER_VALUE = "1"
 MENTAL_DIAGNOSIS_VALUES = {"1", "2", "3"}
+
+
+def is_test_or_simulated_submission(submission):
+    if submission.is_test_data or submission.simulation_mode != "normal":
+        return True
+    try:
+        return submission.user.userprofile.is_test_data
+    except AttributeError:
+        return False
 
 
 def evaluate_normative_eligibility(submission):
@@ -84,7 +97,27 @@ def evaluate_normative_eligibility(submission):
 
 def process_normative_eligibility(submission):
     """Evaluate a completed submission and export it exactly once if eligible."""
-    submission.refresh_from_db(fields=["completed", "normative_status"])
+    submission.refresh_from_db(fields=[
+        "completed",
+        "normative_status",
+        "is_test_data",
+        "simulation_mode",
+    ])
+    if is_test_or_simulated_submission(submission):
+        if not submission.completed:
+            return {
+                "eligible": None,
+                "reason": "submission ainda não concluída",
+                "exported": False,
+                "test_data": True,
+            }
+        result = evaluate_normative_eligibility(submission)
+        return {
+            **result,
+            "exported": False,
+            "test_data": True,
+        }
+
     if submission.normative_status != QuestionnaireSubmission.NormativeStatus.PENDING:
         return {
             "eligible": submission.normative_status
@@ -132,9 +165,16 @@ def _normative_demographics(submission):
 @transaction.atomic
 def export_submission_to_normative(submission):
     """Copy one clinical submission into the anonymous normative data set."""
-    locked_submission = QuestionnaireSubmission.objects.select_for_update().get(
-        pk=submission.pk
+    locked_submission = (
+        QuestionnaireSubmission.objects.select_for_update()
+        .select_related("user")
+        .get(pk=submission.pk)
     )
+    if is_test_or_simulated_submission(locked_submission):
+        raise TestSubmissionExportBlocked(
+            "Dados de teste ou simulação não podem ser exportados para a "
+            "base normativa real."
+        )
     if locked_submission.normative_status == QuestionnaireSubmission.NormativeStatus.EXPORTED:
         raise SubmissionAlreadyExported("Esta submissão já foi exportada.")
 

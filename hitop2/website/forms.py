@@ -17,6 +17,20 @@ class SimulationConfigurationMixin:
         "simulation_seed",
     )
 
+    simulation_defaults = {
+        "simulation_mode": "normal",
+        "sociodemographic_simulation_mode": "normal",
+        "simulation_response_profile": "random",
+        "simulation_missing_percentage": 0,
+        "simulation_attention_mode": "all_correct",
+        "simulation_seed": None,
+    }
+
+    def configure_simulation_fields(self, *, allow_simulation):
+        self.allow_simulation = allow_simulation
+        if allow_simulation:
+            self.add_simulation_fields()
+
     def add_simulation_fields(self):
         self.fields["simulation_mode"] = forms.TypedChoiceField(
             label="Modo da aplicação:",
@@ -68,6 +82,10 @@ class SimulationConfigurationMixin:
 
     def clean(self):
         cleaned_data = super().clean()
+        if not self.allow_simulation:
+            cleaned_data.update(self.simulation_defaults)
+            return cleaned_data
+
         mode = cleaned_data.get("simulation_mode", "normal")
         cleaned_data["sociodemographic_simulation_mode"] = (
             cleaned_data.get("sociodemographic_simulation_mode") or "normal"
@@ -97,10 +115,9 @@ class SimulationConfigurationMixin:
         return cleaned_data
 
     def simulation_configuration(self):
-        return {
-            name: self.cleaned_data[name]
-            for name in self.simulation_field_names
-        }
+        if not self.allow_simulation:
+            return self.simulation_defaults.copy()
+        return {name: self.cleaned_data[name] for name in self.simulation_field_names}
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(
@@ -224,9 +241,9 @@ class CreatePatientForm(SimulationConfigurationMixin, UserCreationForm):
             "password2",
         )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, allow_simulation=False, **kwargs):
         super().__init__(*args, **kwargs)
-        self.add_simulation_fields()
+        self.configure_simulation_fields(allow_simulation=allow_simulation)
 
         def generate_username():
             return "P_" + "".join(
@@ -298,14 +315,15 @@ class NewQuestionnaireForm(SimulationConfigurationMixin, forms.Form):
         required=True,
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, allow_simulation=False, **kwargs):
         super().__init__(*args, **kwargs)
-        self.add_simulation_fields()
-        self.order_fields((
-            "title",
-            *self.simulation_field_names,
-            "spectra",
-        ))
+        self.configure_simulation_fields(allow_simulation=allow_simulation)
+        if allow_simulation:
+            self.order_fields((
+                "title",
+                *self.simulation_field_names,
+                "spectra",
+            ))
 
 class EditPatientForm(forms.ModelForm):
     spectra = forms.ModelMultipleChoiceField(

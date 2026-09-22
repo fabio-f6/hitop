@@ -4,7 +4,9 @@
 
 <div>
 
-    <h2>Novo paciente e aplicação HiTOP</h2>
+    {% include "website/components/test_environment_banner.html" %}
+
+    <h2>{% if is_test_environment %}Novo paciente de teste e aplicação HiTOP{% else %}Novo paciente e aplicação HiTOP{% endif %}</h2>
 
     <form method="POST">
 
@@ -31,7 +33,9 @@
             </div>
         </div>
 
-        {% include "website/_simulation_options.html" %}
+        {% if form.allow_simulation %}
+            {% include "website/_simulation_options.html" %}
+        {% endif %}
 
         <div class="mb-4">
 

@@ -26,6 +26,21 @@ from polls.normative_versions import (
     prepare_normative_version as prepare_normative_version_service,
 )
 from website.models import UserProfile
+from website.professional_environment import (
+    ProfessionalEnvironment,
+    archive_patient_response,
+    archived_patients_response,
+    create_patient_response,
+    dashboard_response,
+    new_questionnaire_response,
+    patient_answers_response,
+    patient_submissions_response,
+    restore_patient_response,
+)
+from website.views import (
+    export_report_docx_response,
+    report_preview_response,
+)
 
 from .audit import record_admin_action
 from .forms import NormativeVersionCreateForm
@@ -102,7 +117,6 @@ def dashboard(request):
         active_normative_version=active_normative_version,
         normative_participant_counts=normative_participant_counts,
     )
-
     return render(
         request,
         "administration/dashboard.html",
@@ -126,6 +140,91 @@ def dashboard(request):
             "system_health": system_health,
         },
     )
+
+
+@administrator_required
+def professional_test_environment(request):
+    return dashboard_response(
+        request,
+        ProfessionalEnvironment.test(request.user),
+    )
+
+
+@administrator_required
+def test_create_patient(request):
+    return create_patient_response(
+        request,
+        ProfessionalEnvironment.test(request.user),
+    )
+
+
+@administrator_required
+def test_archived_patients(request):
+    return archived_patients_response(
+        request,
+        ProfessionalEnvironment.test(request.user),
+    )
+
+
+@administrator_required
+@require_POST
+def test_archive_patient(request, patient_id):
+    return archive_patient_response(
+        request,
+        ProfessionalEnvironment.test(request.user),
+        patient_id,
+    )
+
+
+@administrator_required
+@require_POST
+def test_restore_patient(request, patient_id):
+    return restore_patient_response(
+        request,
+        ProfessionalEnvironment.test(request.user),
+        patient_id,
+    )
+
+
+@administrator_required
+def test_patient_submissions(request, patient_id):
+    return patient_submissions_response(
+        request,
+        ProfessionalEnvironment.test(request.user),
+        patient_id,
+    )
+
+
+@administrator_required
+def test_new_questionnaire(request, patient_id):
+    return new_questionnaire_response(
+        request,
+        ProfessionalEnvironment.test(request.user),
+        patient_id,
+    )
+
+
+@administrator_required
+def test_patient_answers(request, submission_id):
+    return patient_answers_response(
+        request,
+        ProfessionalEnvironment.test(request.user),
+        submission_id,
+    )
+
+
+@administrator_required
+def test_report_preview(request, submission_id):
+    environment = ProfessionalEnvironment.test(request.user)
+    submission = environment.get_submission(submission_id)
+    return report_preview_response(request, submission, environment)
+
+
+@administrator_required
+def test_export_report_docx(request, submission_id):
+    environment = ProfessionalEnvironment.test(request.user)
+    submission = environment.get_submission(submission_id)
+    return export_report_docx_response(submission, environment)
 
 
 @administrator_required

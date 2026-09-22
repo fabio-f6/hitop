@@ -3,50 +3,47 @@ from collections import defaultdict
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.core.paginator import Paginator
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError
 from django.http import HttpResponse
 from django.views.decorators.http import require_http_methods, require_POST
-from django.utils import timezone
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
 
 from polls.attention_checks import evaluate_attention_checks
 from polls.models import (
     DynamicAnswer,
     QuestionnaireSubmission,
     SociodemographicAnswer,
-    Spectra,
     UserAnswer,
 )
 from polls.percentiles import (
     calculate_percentile,
     calculate_spectrum_percentile,
 )
+from polls.normative_export import evaluate_normative_eligibility
 from polls.normative_versions import get_or_assign_report_normative_version
 from polls.report_constants import SPECTRUM_KEYS
 from polls.report_interpretation import build_report_analysis
-from polls.scoring import calculate_scale_scores, calculate_scale_scores_from_answers
-from polls.simulation import SimulationConfigurationError, simulate_submission
+from polls.scoring import calculate_scale_scores_from_answers
 from polls.spectrum_scores import calculate_spectrum_scores
-from polls.translations import (
-    SCALE_TRANSLATIONS,
-    translate_scale,
-    translate_spectrum,
-    translate_subfactor,
-)
+from polls.translations import translate_scale, translate_spectrum
 
-from .forms import (
-    CreatePatientForm,
-    EditPatientForm,
-    NewQuestionnaireForm,
-    SignUpForm,
-)
+from .forms import EditPatientForm, SignUpForm
 from .models import UserProfile
 from .patient_deletion import (
     ActivePatientDeletionBlocked,
     PendingNormativeStatusBlocked,
     permanently_delete_patient,
+)
+from .professional_environment import (
+    ProfessionalEnvironment,
+    archive_patient_response,
+    archived_patients_response,
+    create_patient_response,
+    dashboard_response,
+    new_questionnaire_response,
+    patient_answers_response,
+    patient_submissions_response,
+    restore_patient_response,
 )
 from .decorators import (
     PENDING_VERIFICATION_MESSAGE,
@@ -184,66 +181,10 @@ def register_user(request):
 
 @verified_professional_required
 def create_patient(request):
-
-    # garante que apenas profissionais podem acessar
-    if request.user.userprofile.user_type != 'professional':
-        messages.error(request, "Apenas profissionais podem criar pacientes.")
-        return redirect('website:home')
-
-    if request.method == "POST":
-
-        temp_credentials = request.session.get('temp_credentials')
-
-        form = CreatePatientForm(request.POST)
-
-        if temp_credentials:
-            form.generated_username = temp_credentials['username']
-            form.generated_password = temp_credentials['password']
-
-        if form.is_valid():
-            try:
-                with transaction.atomic():
-                    user = form.save()
-
-                    profile = user.userprofile
-                    profile.user_type = 'patient'
-                    profile.professional = request.user
-                    profile.save()
-
-                    submission = QuestionnaireSubmission.objects.create(
-                        user=user,
-                        questionnaire_type="hitop",
-                        title=form.cleaned_data["title"],
-                        completed=False,
-                        is_open=True,
-                        **form.simulation_configuration(),
-                    )
-
-                    submission.spectra.set(
-                        form.cleaned_data["spectra"]
-                    )
-
-                    if submission.simulation_mode != "normal":
-                        simulate_submission(submission)
-            except SimulationConfigurationError as error:
-                form.add_error(None, str(error))
-            else:
-                request.session.pop('temp_credentials', None)
-
-                return redirect(
-                    'website:patient_submissions',
-                    patient_id=user.id
-                    )
-
-    else:
-        form = CreatePatientForm()
-
-        request.session['temp_credentials'] = {
-            'username': form.generated_username,
-            'password': form.generated_password
-        }
-
-    return render(request, 'website/create_patient.html', {'form': form})
+    return create_patient_response(
+        request,
+        ProfessionalEnvironment.clinical(request.user),
+    )
 
 @verified_professional_required
 def edit_patient(request, patient_id):
@@ -269,164 +210,46 @@ def edit_patient(request, patient_id):
 
 @verified_professional_required
 def new_questionnaire(request, patient_id):
-
-    patient_profile = get_object_or_404(
-        UserProfile,
-        id=patient_id,
-        user_type="patient"
-    )
-
-    if patient_profile.professional != request.user:
-        messages.error(request, "Sem permissão.")
-        return redirect("website:dashboard")
-
-    if request.method == "POST":
-        form = NewQuestionnaireForm(request.POST)
-        if form.is_valid():
-            try:
-                with transaction.atomic():
-                    submission = QuestionnaireSubmission.objects.create(
-                        user=patient_profile.user,
-                        questionnaire_type="hitop",
-                        title=form.cleaned_data["title"],
-                        completed=False,
-                        is_open=True,
-                        **form.simulation_configuration(),
-                    )
-
-                    submission.spectra.set(form.cleaned_data["spectra"])
-
-                    if submission.simulation_mode != "normal":
-                        simulate_submission(submission)
-            except SimulationConfigurationError as error:
-                form.add_error(None, str(error))
-            else:
-                messages.success(
-                    request,
-                    "Novo questionário criado com sucesso."
-                )
-
-                return redirect("website:dashboard")
-    else:
-        form = NewQuestionnaireForm()
-
-    return render(
+    return new_questionnaire_response(
         request,
-        "website/new_questionnaire.html",
-        {
-            "patient": patient_profile,
-            "form": form,
-        }
+        ProfessionalEnvironment.clinical(request.user),
+        patient_id,
     )
 
 @verified_professional_required
 def dashboard(request):
-
-    if request.user.userprofile.user_type != "professional":
-        messages.error(request, "Acesso negado.")
-        return redirect("website:home")
-
-    patients = request.user.patients.filter(
-        user_type="patient",
-        archived_at__isnull=True,
-    ).select_related("user").order_by("user__username", "id")
-
-    patient_page = Paginator(patients, 10).get_page(request.GET.get("page"))
-
-    patient_cards = []
-
-    for patient in patient_page:
-
-        submissions = QuestionnaireSubmission.objects.filter(
-            user=patient.user
-        ).order_by("-started_at")
-
-        last_submission = submissions.first()
-
-        patient_cards.append({
-            "profile": patient,
-            "submission_count": submissions.count(),
-            "open_count": submissions.filter(is_open=True).count(),
-            "last_submission": last_submission,
-            "spectra": last_submission.spectra.all() if last_submission else [],
-        })
-
-    total_patients = patients.count()
-
-    archived_patient_count = request.user.patients.filter(
-        user_type="patient",
-        archived_at__isnull=False,
-    ).count()
-
-    total_submissions = QuestionnaireSubmission.objects.filter(
-        user__userprofile__professional=request.user
-    ).count()
-
-    open_submissions = QuestionnaireSubmission.objects.filter(
-        user__userprofile__professional=request.user,
-        is_open=True
-    ).count()
-
-    return render(
+    return dashboard_response(
         request,
-        "website/dashboard.html",
-        {
-            "patients": patient_cards,
-            "patient_page": patient_page,
-            "total_patients": total_patients,
-            "archived_patient_count": archived_patient_count,
-            "total_submissions": total_submissions,
-            "open_submissions": open_submissions,
-        },
+        ProfessionalEnvironment.clinical(request.user),
     )
 
 
 @verified_professional_required
 def archived_patients(request):
-    patients = request.user.patients.filter(
-        user_type="patient",
-        archived_at__isnull=False,
-    ).select_related("user").order_by("-archived_at", "user__username", "id")
-    patient_page = Paginator(patients, 10).get_page(request.GET.get("page"))
-
-    return render(
+    return archived_patients_response(
         request,
-        "website/archived_patients.html",
-        {
-            "patients": patient_page,
-            "patient_page": patient_page,
-        },
+        ProfessionalEnvironment.clinical(request.user),
     )
 
 
 @require_POST
 @verified_professional_required
 def archive_patient(request, patient_id):
-    patient = get_object_or_404(
-        UserProfile,
-        id=patient_id,
-        user_type="patient",
-        professional=request.user,
+    return archive_patient_response(
+        request,
+        ProfessionalEnvironment.clinical(request.user),
+        patient_id,
     )
-    patient.archived_at = timezone.now()
-    patient.save(update_fields=["archived_at"])
-    messages.success(request, "Paciente arquivado com sucesso.")
-    return redirect("website:dashboard")
 
 
 @require_POST
 @verified_professional_required
 def restore_patient(request, patient_id):
-    patient = get_object_or_404(
-        UserProfile,
-        id=patient_id,
-        user_type="patient",
-        professional=request.user,
+    return restore_patient_response(
+        request,
+        ProfessionalEnvironment.clinical(request.user),
+        patient_id,
     )
-    patient.archived_at = None
-    patient.save(update_fields=["archived_at"])
-    messages.success(request, "Paciente restaurado com sucesso.")
-    return redirect("website:archived_patients")
 
 
 @require_http_methods(["GET", "POST"])
@@ -480,63 +303,19 @@ def permanently_delete_patient_view(request, patient_id):
 
 @verified_professional_required
 def patient_answers(request, submission_id):
-
-    submission = get_object_or_404(
-        QuestionnaireSubmission,
-        id=submission_id
+    return patient_answers_response(
+        request,
+        ProfessionalEnvironment.clinical(request.user),
+        submission_id,
     )
-
-    # segurança
-    if submission.user.userprofile.professional != request.user:
-        messages.error(request, "Acesso negado.")
-        return redirect("website:dashboard")
-
-    answers = UserAnswer.objects.filter(
-        submission=submission
-    ).select_related('question')
-
-    return render(request, "website/patient_answers.html", {
-        "submission": submission,
-        "answers": answers
-    })
 
 @verified_professional_required
 def patient_submissions(request, patient_id):
-
-    patient = get_object_or_404(User, id=patient_id)
-
-    # segurança: só profissional dono pode ver
-    if patient.userprofile.professional != request.user:
-        messages.error(request, "Acesso negado.")
-        return redirect("website:dashboard")
-
-    submissions = QuestionnaireSubmission.objects.filter(
-        user=patient,
-        questionnaire_type="hitop"
-    ).order_by("-started_at")
-
-    has_open_submission = QuestionnaireSubmission.objects.filter(
-        user=patient,
-        questionnaire_type="hitop",
-        is_open=True
-    ).exists()
-
-    for submission in submissions:
-
-        submission.access_link = request.build_absolute_uri(
-            reverse(
-                "polls:questionnaire_by_token",
-                args=[submission.access_token]
-            )
-        )
-
-        submission.spectra_list = submission.spectra.all()
-
-    return render(request, "website/patient_submissions.html", {
-        "patient": patient,
-        "submissions": submissions,
-        "has_open_submission": has_open_submission,
-    })
+    return patient_submissions_response(
+        request,
+        ProfessionalEnvironment.clinical(request.user),
+        patient_id,
+    )
 
 @verified_professional_required
 def submission_detail(request, submission_id):
@@ -844,7 +623,15 @@ def _build_report_context(submission):
         "height": chart_height,
     }
 
-    professional = patient.userprofile.professional
+    patient_profile = patient.userprofile
+    if submission.is_test_data:
+        professional = patient_profile.test_environment_owner
+        professional_area = "Ambiente administrativo de teste"
+        professional_license = "Não aplicável"
+    else:
+        professional = patient_profile.professional
+        professional_area = professional.userprofile.area_formacao
+        professional_license = professional.userprofile.cedula_profissional
 
     socio = _report_sociodemographics(submission)
 
@@ -870,10 +657,10 @@ def _build_report_context(submission):
             or professional.username,
 
         "professional_area":
-            professional.userprofile.area_formacao,
+            professional_area,
 
         "professional_license":
-            professional.userprofile.cedula_profissional,
+            professional_license,
 
         "submission_date":
             submission.started_at,
@@ -936,38 +723,31 @@ def _build_report_context(submission):
         }
 
 
-def _professional_submission_or_redirect(request, submission_id):
-    submission = get_object_or_404(QuestionnaireSubmission, id=submission_id)
+def _report_context_for_environment(submission, environment):
+    context = _build_report_context(submission)
+    context.update(environment.template_context())
+    context["normative_eligibility"] = (
+        evaluate_normative_eligibility(submission)
+        if environment.is_test_environment
+        else None
+    )
+    return context
 
-    if submission.user.userprofile.professional != request.user:
-        messages.error(request, "Acesso negado.")
-        return None
 
-    return submission
-
-
-@verified_professional_required
-def report_preview(request, submission_id):
-    submission = _professional_submission_or_redirect(request, submission_id)
-    if submission is None:
-        return redirect("website:dashboard")
-
+def report_preview_response(request, submission, environment):
     return render(
         request,
         "website/report_preview.html",
-        _build_report_context(submission),
+        _report_context_for_environment(submission, environment),
     )
 
 
-@verified_professional_required
-def export_report_docx(request, submission_id):
-    submission = _professional_submission_or_redirect(request, submission_id)
-    if submission is None:
-        return redirect("website:dashboard")
-
+def export_report_docx_response(submission, environment):
     from .docx_report import build_report_docx
 
-    document = build_report_docx(_build_report_context(submission))
+    document = build_report_docx(
+        _report_context_for_environment(submission, environment)
+    )
     filename = f"relatorio-hitop-{submission.id}.docx"
     response = HttpResponse(
         document.getvalue(),
@@ -978,3 +758,24 @@ def export_report_docx(request, submission_id):
     )
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
+
+
+@verified_professional_required
+def report_preview(request, submission_id):
+    environment = ProfessionalEnvironment.clinical(request.user)
+    submission = environment.get_submission(submission_id)
+    return report_preview_response(
+        request,
+        submission,
+        environment,
+    )
+
+
+@verified_professional_required
+def export_report_docx(request, submission_id):
+    environment = ProfessionalEnvironment.clinical(request.user)
+    submission = environment.get_submission(submission_id)
+    return export_report_docx_response(
+        submission,
+        environment,
+    )

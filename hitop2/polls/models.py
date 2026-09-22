@@ -200,6 +200,11 @@ class QuestionnaireSubmission(models.Model):
         blank=True,
     )
 
+    is_test_data = models.BooleanField(
+        default=False,
+        db_index=True,
+    )
+
     spectra = models.ManyToManyField(
         Spectra,
         blank=True

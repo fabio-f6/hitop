@@ -4,8 +4,9 @@
 {% block content %}
 
 <div class="mb-3">
+    {% include "website/components/test_environment_banner.html" %}
     <a
-        href="{% url 'website:dashboard' %}"
+        href="{% url dashboard_url_name %}"
         class="btn rounded-0"
         style="
             background:#e2f0ff;
@@ -31,6 +32,9 @@
         "
     >
         {{ patient.username }}
+        {% if is_test_environment %}
+            <span class="badge text-bg-warning align-middle" style="font-size:.75rem;">Paciente de teste</span>
+        {% endif %}
     </h1>
 
     <p
@@ -87,6 +91,20 @@
         >
             {{ s.title }}
         </div>
+
+        {% if is_test_environment and s.completed %}
+        <div class="p-3 mb-3" style="background:#fff8e6; border:1px solid #e7cf85; color:#55450f;">
+            <strong>Elegibilidade normativa:</strong>
+            {% if s.normative_eligibility_state == "eligible" %}
+                Elegível
+                <div class="small mt-1">Simulação: esta aplicação não foi incorporada na base normativa.</div>
+            {% elif s.normative_eligibility_state == "ineligible" %}
+                Não elegível — {{ s.normative_eligibility.reason }}
+            {% else %}
+                Indeterminada — {{ s.normative_eligibility.reason }}
+            {% endif %}
+        </div>
+        {% endif %}
 
         <hr
             style="
@@ -224,7 +242,7 @@
             {% if s.completed %}
 
             <a
-                href="{% url 'website:report_preview' s.id %}"
+                href="{% url report_preview_url_name s.id %}"
                 class="btn rounded-0"
                 style="
                     background:#dbe7f5;
@@ -237,7 +255,7 @@
             </a>
 
             <a
-                href="{% url 'website:patient_answers' s.id %}"
+                href="{% url patient_answers_url_name s.id %}"
                 class="btn rounded-0"
                 style="
                     background:#e2f0ff;
@@ -307,7 +325,7 @@
         </p>
 
         <a
-            href="{% url 'website:new_questionnaire' patient.userprofile.id %}"
+            href="{% url new_questionnaire_url_name patient.userprofile.id %}"
             class="btn rounded-0"
             style="
                 background:#e2f0ff;
@@ -329,7 +347,7 @@
 
 {% if not has_open_submission %}
 <br>
-<a href="{% url 'website:new_questionnaire' patient.userprofile.id %}"
+<a href="{% url new_questionnaire_url_name patient.userprofile.id %}"
     class="btn btn-sm btn-warning rounded-0"
     style="background-color: #ffe2e2; color: #000; border: 1px solid #ff9e9e;">
     Nova aplicação HiTOP

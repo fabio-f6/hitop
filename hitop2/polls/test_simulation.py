@@ -19,14 +19,27 @@ from .models import (
 )
 from .normative_export import evaluate_normative_eligibility
 from .scoring import calculate_scale_scores_from_answers
-from .simulation import simulate_submission
+from .simulation import SimulationPermissionError, simulate_submission
 from .sociodemographic import question_is_visible
 
 
 class HitopSimulationTests(TestCase):
     @classmethod
     def setUpTestData(cls):
+        cls.administrator = User.objects.create_user(
+            username="simulation-administrator"
+        )
+        cls.administrator.userprofile.user_type = "admin"
+        cls.administrator.userprofile.save(update_fields=["user_type"])
         cls.patient = User.objects.create_user(username="simulation-patient")
+        cls.patient.userprofile.user_type = "patient"
+        cls.patient.userprofile.is_test_data = True
+        cls.patient.userprofile.test_environment_owner = cls.administrator
+        cls.patient.userprofile.save(update_fields=[
+            "user_type",
+            "is_test_data",
+            "test_environment_owner",
+        ])
         cls.spectrum = Spectra.objects.create(name="Simulation spectrum")
         subfactor = Subfactor.objects.create(
             name="Simulation subfactor",
@@ -60,6 +73,7 @@ class HitopSimulationTests(TestCase):
         defaults.update(configuration)
         submission = QuestionnaireSubmission.objects.create(
             user=self.patient,
+            is_test_data=True,
             **defaults,
         )
         submission.spectra.add(self.spectrum)
@@ -92,6 +106,27 @@ class HitopSimulationTests(TestCase):
         self.assertFalse(submission.is_open)
         self.assertEqual(self.answers(submission).count(), 103)
         self.assertTrue(values <= {"1", "2", "3", "4"})
+
+    def test_real_patient_and_submission_cannot_be_simulated(self):
+        real_patient = User.objects.create_user(username="real-simulation-patient")
+        real_patient.userprofile.user_type = "patient"
+        real_patient.userprofile.save(update_fields=["user_type"])
+        submission = QuestionnaireSubmission.objects.create(
+            user=real_patient,
+            simulation_mode="simulated",
+            simulation_seed=1234,
+        )
+        submission.spectra.add(self.spectrum)
+
+        with self.assertRaises(SimulationPermissionError):
+            simulate_submission(submission)
+
+        submission.refresh_from_db()
+        self.assertFalse(submission.is_test_data)
+        self.assertFalse(real_patient.userprofile.is_test_data)
+        self.assertFalse(submission.completed)
+        self.assertTrue(submission.is_open)
+        self.assertFalse(UserAnswer.objects.filter(submission=submission).exists())
 
     def test_legacy_simulated_nulls_maps_default_percentage_to_ten(self):
         submission = self.make_submission(
@@ -264,7 +299,20 @@ class SociodemographicSimulationTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         call_command("seed_sociodemographic", verbosity=0)
+        cls.administrator = User.objects.create_user(
+            username="socio-simulation-administrator"
+        )
+        cls.administrator.userprofile.user_type = "admin"
+        cls.administrator.userprofile.save(update_fields=["user_type"])
         cls.patient = User.objects.create_user(username="socio-simulation-patient")
+        cls.patient.userprofile.user_type = "patient"
+        cls.patient.userprofile.is_test_data = True
+        cls.patient.userprofile.test_environment_owner = cls.administrator
+        cls.patient.userprofile.save(update_fields=[
+            "user_type",
+            "is_test_data",
+            "test_environment_owner",
+        ])
         cls.spectrum = Spectra.objects.create(name="Socio simulation spectrum")
         subfactor = Subfactor.objects.create(
             name="Socio simulation subfactor",
@@ -280,6 +328,7 @@ class SociodemographicSimulationTests(TestCase):
     def simulate(self, mode, seed=4321):
         submission = QuestionnaireSubmission.objects.create(
             user=self.patient,
+            is_test_data=True,
             simulation_mode="simulated",
             sociodemographic_simulation_mode=mode,
             simulation_seed=seed,
@@ -300,32 +349,36 @@ class SociodemographicSimulationTests(TestCase):
         self.assertEqual(values["PT_lang"], "2")
         self.assertEqual(values["mental_diagnosis"], "1")
 
-    def test_eligible_is_exported_by_real_normative_service(self):
+    def test_eligible_is_recognized_without_exporting_test_data(self):
         submission = self.simulate("eligible")
         self.assertIs(evaluate_normative_eligibility(submission)["eligible"], True)
-        self.assertEqual(submission.normative_status, "exported")
-        self.assertEqual(NormativeParticipant.objects.count(), 1)
+        self.assertEqual(submission.normative_status, "pending")
+        self.assertIsNone(submission.normative_exported_at)
+        self.assertFalse(NormativeParticipant.objects.exists())
 
     def test_ineligible_language_fails_only_language_criterion(self):
         submission = self.simulate("ineligible_language")
         values = self.values(submission)
         self.assertNotEqual(values["PT_lang"], "2")
         self.assertEqual(values["mental_diagnosis"], "1")
-        self.assertEqual(submission.normative_status, "ineligible")
+        self.assertIs(evaluate_normative_eligibility(submission)["eligible"], False)
+        self.assertEqual(submission.normative_status, "pending")
 
     def test_ineligible_mental_health_fails_only_mental_health_criterion(self):
         submission = self.simulate("ineligible_mental_health")
         values = self.values(submission)
         self.assertEqual(values["PT_lang"], "2")
         self.assertNotEqual(values["mental_diagnosis"], "1")
-        self.assertEqual(submission.normative_status, "ineligible")
+        self.assertIs(evaluate_normative_eligibility(submission)["eligible"], False)
+        self.assertEqual(submission.normative_status, "pending")
 
     def test_ineligible_both_fails_both_criteria(self):
         submission = self.simulate("ineligible_both")
         values = self.values(submission)
         self.assertNotEqual(values["PT_lang"], "2")
         self.assertNotEqual(values["mental_diagnosis"], "1")
-        self.assertEqual(submission.normative_status, "ineligible")
+        self.assertIs(evaluate_normative_eligibility(submission)["eligible"], False)
+        self.assertEqual(submission.normative_status, "pending")
 
     def test_pending_missing_omits_a_criterion_and_remains_pending(self):
         submission = self.simulate("pending_missing")
@@ -385,9 +438,10 @@ class SociodemographicSimulationTests(TestCase):
         self.simulate("pending_missing")
         self.assertFalse(NormativeParticipant.objects.exists())
 
-    def test_eligible_submission_is_never_exported_twice(self):
+    def test_repeated_eligible_simulation_never_exports_test_data(self):
         submission = self.simulate("eligible")
         simulate_submission(submission)
         submission.refresh_from_db()
-        self.assertEqual(submission.normative_status, "exported")
-        self.assertEqual(NormativeParticipant.objects.count(), 1)
+        self.assertEqual(submission.normative_status, "pending")
+        self.assertIsNone(submission.normative_exported_at)
+        self.assertFalse(NormativeParticipant.objects.exists())

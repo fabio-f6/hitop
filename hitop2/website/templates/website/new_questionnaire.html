@@ -5,6 +5,8 @@
 
 <div>
 
+    {% include "website/components/test_environment_banner.html" %}
+
     <h2>Nova Aplicação HiTOP</h2>
 
     <p>
@@ -35,7 +37,9 @@
 
         </div>
 
-        {% include "website/_simulation_options.html" %}
+        {% if form.allow_simulation %}
+            {% include "website/_simulation_options.html" %}
+        {% endif %}
 
         <div class="mb-4">
 

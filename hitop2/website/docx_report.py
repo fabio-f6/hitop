@@ -408,13 +408,36 @@ def build_report_docx(context):
         paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
         paragraph.add_run().add_picture(str(logo_path), width=Inches(5.8))
 
+    if context.get("is_test_environment"):
+        test_banner = document.add_table(rows=1, cols=1)
+        test_banner.alignment = WD_TABLE_ALIGNMENT.CENTER
+        test_cell = test_banner.cell(0, 0)
+        _set_cell_fill(test_cell, "FFF4CC")
+        _set_cell_border(test_cell, "C8A94F", "16")
+        _set_cell_margins(test_cell, top=140, bottom=140, start=160, end=160)
+        test_paragraph = test_cell.paragraphs[0]
+        test_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        test_run = test_paragraph.add_run(
+            "SIMULAÇÃO / TESTE — este relatório não corresponde a dados "
+            "clínicos reais e esta aplicação não foi incorporada na base "
+            "normativa."
+        )
+        test_run.bold = True
+        document.add_paragraph().paragraph_format.space_after = Pt(2)
+
     title = document.add_paragraph("Relatório Clínico", style="Title")
     title.alignment = WD_ALIGN_PARAGRAPH.LEFT
     professional = document.add_paragraph()
-    run = professional.add_run(
-        f'{report["professional_name"]}, {report["professional_area"]}, '
-        f'Nº {report["professional_license"]}, Referência Certificação HiTOP'
-    )
+    if context.get("is_test_environment"):
+        run = professional.add_run(
+            "Administrador responsável pelo teste: "
+            f'{report["professional_name"]}'
+        )
+    else:
+        run = professional.add_run(
+            f'{report["professional_name"]}, {report["professional_area"]}, '
+            f'Nº {report["professional_license"]}, Referência Certificação HiTOP'
+        )
     run.italic = True
 
     details = document.add_table(rows=5, cols=2)
@@ -515,11 +538,14 @@ def build_report_docx(context):
     info = signature.cell(0, 1).paragraphs[0]
     name_run = info.add_run(str(report["professional_name"]).upper())
     name_run.bold = True
-    info.add_run(
-        f'\n{str(report["professional_area"]).upper()}'
-        f'\nNº CÉDULA PROFISSIONAL: {report["professional_license"]}'
-        "\nNº CERTIFICAÇÃO HITOP"
-    )
+    if context.get("is_test_environment"):
+        info.add_run("\nADMINISTRADOR — AMBIENTE DE TESTE")
+    else:
+        info.add_run(
+            f'\n{str(report["professional_area"]).upper()}'
+            f'\nNº CÉDULA PROFISSIONAL: {report["professional_license"]}'
+            "\nNº CERTIFICAÇÃO HITOP"
+        )
     _add_disclaimer(document)
 
     output = BytesIO()

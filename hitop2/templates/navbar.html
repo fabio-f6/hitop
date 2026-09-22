@@ -63,6 +63,12 @@
                             </a>
                         </li>
 
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'administration:professional_test_environment' %}">
+                                Ambiente de Teste Profissional
+                            </a>
+                        </li>
+
                     {% endif %}
 
                     {% if request.user.userprofile.user_type == "professional" %}

@@ -1,0 +1,10 @@
+{% if is_test_environment %}
+<div
+    class="p-3 mb-4"
+    role="status"
+    style="background:#fff8e6; border:1px solid #e7cf85; color:#55450f;"
+>
+    <strong>Ambiente de Teste Profissional</strong>
+    <span class="d-block mt-1">{{ test_environment_notice }}</span>
+</div>
+{% endif %}
