@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-3" style="max-width: 900px; margin: 0 auto;">
+    <a
+        href="{% url 'administration:professionals' %}"
+        class="btn rounded-0"
+        style="background:#e2f0ff; border:1px solid #9ec9ff; color:black; padding:8px 16px;"
+    >
+        ← Profissionais
+    </a>
+
+    <div class="d-flex flex-column flex-md-row justify-content-between gap-3 align-items-md-start mt-4 mb-4">
+        <div>
+            <h1 class="h2 fw-bold mb-2">
+                {% if professional.user.get_full_name %}
+                    {{ professional.user.get_full_name }}
+                {% else %}
+                    {{ professional.user.username }}
+                {% endif %}
+            </h1>
+            <p class="text-secondary mb-0">Detalhe do registo profissional</p>
+        </div>
+
+        <div>
+            {% if not professional.user.is_active %}
+                <span
+                    style="display:inline-block; background:#f5f5f5; border:1px solid #bbb; color:#555; padding:6px 11px;"
+                >
+                    Acesso retirado
+                </span>
+            {% elif professional.is_verified %}
+                <span
+                    style="display:inline-block; background:#e2f0ff; border:1px solid #9ec9ff; color:#222; padding:6px 11px;"
+                >
+                    Verificado
+                </span>
+            {% else %}
+                <span
+                    style="display:inline-block; background:#fff8e1; border:1px solid #e7cf85; color:#5d4c13; padding:6px 11px;"
+                >
+                    A aguardar verificação
+                </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <article class="border bg-white p-4 mb-4">
+        <h2 class="h5 fw-bold mb-4">Dados do registo</h2>
+        <dl class="row mb-0">
+            <dt class="col-sm-4 text-secondary mb-2">Nome</dt>
+            <dd class="col-sm-8 mb-2">
+                {{ professional.user.get_full_name|default:professional.user.username }}
+            </dd>
+
+            <dt class="col-sm-4 text-secondary mb-2">E-mail</dt>
+            <dd class="col-sm-8 mb-2">{{ professional.user.email|default:"—" }}</dd>
+
+            <dt class="col-sm-4 text-secondary mb-2">Data de registo</dt>
+            <dd class="col-sm-8 mb-2">
+                {{ professional.user.date_joined|date:"d/m/Y H:i" }}
+            </dd>
+
+            <dt class="col-sm-4 text-secondary mb-2">Área de formação</dt>
+            <dd class="col-sm-8 mb-2">{{ professional.area_formacao|default:"—" }}</dd>
+
+            <dt class="col-sm-4 text-secondary mb-2">Número de cédula</dt>
+            <dd class="col-sm-8 mb-2">{{ professional.cedula_profissional|default:"—" }}</dd>
+
+            <dt class="col-sm-4 text-secondary mb-0">Objetivo de utilização</dt>
+            <dd class="col-sm-8 mb-0">
+                {{ professional.get_objetivo_uso_display|default:"—" }}
+            </dd>
+        </dl>
+    </article>
+
+    {% if professional.user.is_active and not professional.is_verified %}
+        <article class="p-4" style="background:#eef4fb; border:1px solid #9ec9ff;">
+            <h2 class="h5 fw-bold">Pedido pendente</h2>
+            <p>
+                Confirme os dados do registo antes de conceder acesso às funcionalidades profissionais.
+            </p>
+            <form
+                method="post"
+                action="{% url 'administration:approve_professional' professional.id %}"
+            >
+                {% csrf_token %}
+                <button
+                    type="submit"
+                    class="btn rounded-0"
+                    style="background:#e2f0ff; border:1px solid #9ec9ff; color:black;"
+                >
+                    Aprovar profissional
+                </button>
+            </form>
+        </article>
+    {% elif professional.user.is_active and professional.is_verified %}
+        <article class="border p-4">
+            <h2 class="h5 fw-bold">Acesso à plataforma</h2>
+            <p class="text-secondary">
+                Este profissional encontra-se aprovado e pode utilizar as funcionalidades profissionais.
+            </p>
+            <a
+                href="{% url 'administration:deactivate_professional' professional.id %}"
+                class="btn rounded-0"
+                style="border:1px solid #bbb; color:#444;"
+            >
+                Retirar acesso
+            </a>
+        </article>
+    {% else %}
+        <div class="mb-0 p-3" style="background:#fafafa; border:1px solid #bbb; color:#555;">
+            Este profissional foi anteriormente aprovado, mas já não pode autenticar-se na plataforma.
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

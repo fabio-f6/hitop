@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+        <div>
+            <a
+                href="{% url 'administration:dashboard' %}"
+                class="btn rounded-0"
+                style="background:#e2f0ff; border:1px solid #9ec9ff; color:black; padding:8px 16px;"
+            >
+                ← Administração
+            </a>
+            <h1 class="h2 fw-bold mt-4 mb-2">Profissionais</h1>
+            <p class="text-secondary mb-0">
+                Consulte os registos e verifique pedidos de acesso à plataforma.
+            </p>
+        </div>
+    </div>
+
+    <nav class="d-flex flex-wrap gap-2 mb-4" aria-label="Filtrar profissionais por estado">
+        <a
+            class="btn rounded-0"
+            style="{% if selected_status == 'all' %}background:#e2f0ff;{% else %}background:white;{% endif %} border:1px solid #9ec9ff; color:black;"
+            href="{% url 'administration:professionals' %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}"
+        >
+            Todos ({{ all_count }})
+        </a>
+        <a
+            class="btn rounded-0"
+            style="{% if selected_status == 'pending' %}background:#e2f0ff;{% else %}background:white;{% endif %} border:1px solid #9ec9ff; color:black;"
+            href="?status=pending{% if search_query %}&amp;q={{ search_query|urlencode }}{% endif %}"
+        >
+            A aguardar verificação ({{ pending_count }})
+        </a>
+        <a
+            class="btn rounded-0"
+            style="{% if selected_status == 'verified' %}background:#e2f0ff;{% else %}background:white;{% endif %} border:1px solid #9ec9ff; color:black;"
+            href="?status=verified{% if search_query %}&amp;q={{ search_query|urlencode }}{% endif %}"
+        >
+            Verificados ({{ verified_count }})
+        </a>
+        {% if inactive_count %}
+            <a
+                class="btn rounded-0"
+                style="{% if selected_status == 'inactive' %}background:#e2f0ff;{% else %}background:white;{% endif %} border:1px solid #9ec9ff; color:black;"
+                href="?status=inactive{% if search_query %}&amp;q={{ search_query|urlencode }}{% endif %}"
+            >
+                Acesso retirado ({{ inactive_count }})
+            </a>
+        {% endif %}
+    </nav>
+
+    <form method="get" class="p-3 mb-4" style="border:1px solid #dddddd; background:#fafafa;">
+        {% if selected_status != "all" %}
+            <input type="hidden" name="status" value="{{ selected_status }}">
+        {% endif %}
+        <div class="row g-2 align-items-end">
+            <div class="col-md-9">
+                <label for="professional-search" class="form-label fw-semibold">
+                    Pesquisar por nome, e-mail ou cédula
+                </label>
+                <input
+                    id="professional-search"
+                    name="q"
+                    type="search"
+                    value="{{ search_query }}"
+                    class="form-control rounded-0"
+                    placeholder="Nome, e-mail ou número de cédula"
+                >
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button
+                    type="submit"
+                    class="btn rounded-0 flex-grow-1"
+                    style="background:#e2f0ff; border:1px solid #9ec9ff; color:black;"
+                >
+                    Pesquisar
+                </button>
+                {% if search_query %}
+                    <a
+                        href="?{% if selected_status != 'all' %}status={{ selected_status }}{% endif %}"
+                        class="btn rounded-0"
+                        style="border:1px solid #bbb; color:#444;"
+                    >
+                        Limpar
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+
+    <div class="table-responsive border bg-white">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col" class="ps-3">Nome</th>
+                    <th scope="col">E-mail</th>
+                    <th scope="col">Área</th>
+                    <th scope="col">Cédula</th>
+                    <th scope="col">Registo</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col" class="text-end pe-3">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for professional in professionals %}
+                    <tr>
+                        <td class="ps-3">
+                            <strong>
+                                {% if professional.user.get_full_name %}
+                                    {{ professional.user.get_full_name }}
+                                {% else %}
+                                    {{ professional.user.username }}
+                                {% endif %}
+                            </strong>
+                        </td>
+                        <td>{{ professional.user.email|default:"—" }}</td>
+                        <td>{{ professional.area_formacao|default:"—" }}</td>
+                        <td>{{ professional.cedula_profissional|default:"—" }}</td>
+                        <td>{{ professional.user.date_joined|date:"d/m/Y" }}</td>
+                        <td>
+                            {% if not professional.user.is_active %}
+                                <span
+                                    style="display:inline-block; background:#f5f5f5; border:1px solid #bbb; color:#555; padding:4px 9px;"
+                                >
+                                    Acesso retirado
+                                </span>
+                            {% elif professional.is_verified %}
+                                <span
+                                    style="display:inline-block; background:#e2f0ff; border:1px solid #9ec9ff; color:#222; padding:4px 9px;"
+                                >
+                                    Verificado
+                                </span>
+                            {% else %}
+                                <span
+                                    style="display:inline-block; background:#fff8e1; border:1px solid #e7cf85; color:#5d4c13; padding:4px 9px;"
+                                >
+                                    A aguardar verificação
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-3">
+                            <a
+                                href="{% url 'administration:professional_detail' professional.id %}"
+                                class="btn btn-sm rounded-0"
+                                style="background:#e2f0ff; border:1px solid #9ec9ff; color:black;"
+                            >
+                                Ver detalhe
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-secondary py-5">
+                            Não foram encontrados profissionais com estes critérios.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+        <nav class="mt-4" aria-label="Paginação dos profissionais">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link text-dark rounded-0" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">
+                            Anterior
+                        </a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-link rounded-0">
+                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link text-dark rounded-0" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}">
+                            Seguinte
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</section>
+{% endblock %}

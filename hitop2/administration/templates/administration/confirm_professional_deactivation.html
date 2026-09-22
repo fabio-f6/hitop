@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-3" style="max-width:720px; margin:0 auto;">
+    <h1 style="font-size:2rem; font-weight:500; color:#222;">
+        Retirar acesso do profissional?
+    </h1>
+
+    <article style="border:1px solid #dc3545; padding:24px; margin:24px 0; background:#fff;">
+        <p>
+            O profissional
+            <strong>
+                {{ professional.user.get_full_name|default:professional.user.username }}
+            </strong>
+            deixará de conseguir autenticar-se e utilizar a plataforma.
+            A conta e os registos existentes não serão eliminados.
+        </p>
+    </article>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger rounded-0">
+            Confirmar retirada de acesso
+        </button>
+    </form>
+
+    <a
+        href="{% url 'administration:professional_detail' professional.id %}"
+        class="btn rounded-0 mt-3"
+        style="border:1px solid #9ec9ff; color:black;"
+    >
+        Cancelar
+    </a>
+</section>
+{% endblock %}
