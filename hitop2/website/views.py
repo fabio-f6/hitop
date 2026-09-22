@@ -67,7 +67,7 @@ def home(request):
             return redirect("polls:questionnaire")
 
         elif request.user.userprofile.user_type == "admin":
-            return redirect("admin:index")
+            return redirect("administration:dashboard")
 
         else:
             return redirect("website:home")
@@ -104,7 +104,7 @@ def home(request):
                 return redirect("website:dashboard")
 
             elif user.userprofile.user_type == "admin":
-                return redirect("admin:index")
+                return redirect("administration:dashboard")
 
             else:
                 return redirect("website:home")

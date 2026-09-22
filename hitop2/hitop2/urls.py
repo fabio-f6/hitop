@@ -15,4 +15,10 @@ urlpatterns = [
 
     # Questionários
     path("polls/", include("polls.urls", namespace="polls")),
+
+    # Administração operacional
+    path(
+        "administration/",
+        include("administration.urls", namespace="administration"),
+    ),
 ]

@@ -184,7 +184,7 @@ class ProfessionalVerificationTests(TestCase):
             fetch_redirect_response=False,
         )
 
-    def test_admin_login_redirects_to_django_admin_dashboard(self):
+    def test_admin_login_redirects_to_operational_admin_dashboard(self):
         admin_user = self.create_user("admin", "admin")
         admin_user.is_staff = True
         admin_user.save()
@@ -199,7 +199,7 @@ class ProfessionalVerificationTests(TestCase):
 
         self.assertRedirects(
             response,
-            reverse("admin:index"),
+            reverse("administration:dashboard"),
             fetch_redirect_response=False,
         )
 
