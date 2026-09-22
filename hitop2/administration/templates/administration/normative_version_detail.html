@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-3" style="max-width:900px; margin:0 auto;">
+    <a
+        href="{% url 'administration:normative_versions' %}"
+        class="btn rounded-0"
+        style="background:#e2f0ff; border:1px solid #9ec9ff; color:black; padding:8px 16px;"
+    >
+        ← Histórico de versões
+    </a>
+
+    <div class="d-flex flex-column flex-md-row justify-content-between gap-3 align-items-md-start mt-4 mb-4">
+        <div>
+            <h1 class="h2 fw-bold mb-2">{{ version.name }}</h1>
+            <p class="text-secondary mb-0">Detalhe da versão normativa</p>
+        </div>
+        {% if version.status == "active" %}
+            <span style="display:inline-block; background:#e2f0ff; border:1px solid #9ec9ff; color:#222; padding:6px 11px;">
+                {{ version.get_status_display }}
+            </span>
+        {% elif version.status == "draft" %}
+            <span style="display:inline-block; background:#fff8e1; border:1px solid #e7cf85; color:#5d4c13; padding:6px 11px;">
+                {{ version.get_status_display }}
+            </span>
+        {% else %}
+            <span style="display:inline-block; background:#f5f5f5; border:1px solid #bbb; color:#555; padding:6px 11px;">
+                {{ version.get_status_display }}
+            </span>
+        {% endif %}
+    </div>
+
+    <article class="border bg-white p-4 mb-4">
+        <h2 class="h5 fw-bold mb-4">Informação da versão</h2>
+        <dl class="row mb-0">
+            <dt class="col-sm-5 text-secondary mb-2">Participantes no snapshot</dt>
+            <dd class="col-sm-7 mb-2">{{ version.participant_count }}</dd>
+            <dt class="col-sm-5 text-secondary mb-2">Participantes fora deste snapshot</dt>
+            <dd class="col-sm-7 mb-2">{{ unversioned_participant_count }}</dd>
+            <dt class="col-sm-5 text-secondary mb-2">Criada em</dt>
+            <dd class="col-sm-7 mb-2">{{ version.created_at|date:"d/m/Y H:i" }}</dd>
+            <dt class="col-sm-5 text-secondary mb-2">Preparação</dt>
+            <dd class="col-sm-7 mb-2">
+                {% if version.prepared_at %}
+                    Preparada em {{ version.prepared_at|date:"d/m/Y H:i" }}
+                {% else %}
+                    Ainda não preparada
+                {% endif %}
+            </dd>
+            <dt class="col-sm-5 text-secondary mb-0">Ativação</dt>
+            <dd class="col-sm-7 mb-0">
+                {% if version.activated_at %}
+                    {{ version.activated_at|date:"d/m/Y H:i" }}
+                {% else %}
+                    —
+                {% endif %}
+            </dd>
+        </dl>
+    </article>
+
+    {% if version.status == "draft" %}
+        <article class="p-4" style="background:#eef4fb; border:1px solid #9ec9ff;">
+            <h2 class="h5 fw-bold">Ações da versão</h2>
+            <p class="text-secondary">
+                A preparação calcula os scores do snapshot. A ativação só fica disponível depois da preparação.
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+                <a
+                    href="{% url 'administration:prepare_normative_version' version.id %}"
+                    class="btn rounded-0"
+                    style="background:#e2f0ff; border:1px solid #9ec9ff; color:black;"
+                >
+                    {% if version.prepared_at %}Preparar novamente{% else %}Preparar versão{% endif %}
+                </a>
+                {% if version.prepared_at %}
+                    <a
+                        href="{% url 'administration:activate_normative_version' version.id %}"
+                        class="btn rounded-0"
+                        style="border:1px solid #9ec9ff; color:black;"
+                    >
+                        Ativar versão
+                    </a>
+                {% endif %}
+            </div>
+        </article>
+    {% elif version.status == "active" %}
+        <div class="p-3" style="background:#eef4fb; border:1px solid #9ec9ff; color:#444;">
+            Esta versão está ativa. Os seus dados são controlados pelos services normativos e não permitem edição arbitrária.
+        </div>
+    {% else %}
+        <div class="p-3" style="background:#fafafa; border:1px solid #bbb; color:#555;">
+            Esta versão está no histórico e não permite alterações administrativas.
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

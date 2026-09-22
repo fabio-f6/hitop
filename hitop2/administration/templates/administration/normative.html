@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between gap-3 align-items-md-end mb-4">
+        <div>
+            <a
+                href="{% url 'administration:dashboard' %}"
+                class="btn rounded-0"
+                style="background:#e2f0ff; border:1px solid #9ec9ff; color:black; padding:8px 16px;"
+            >
+                ← Administração
+            </a>
+            <h1 class="h2 fw-bold mt-4 mb-2">Base normativa</h1>
+            <p class="text-secondary mb-0">
+                Consulte a versão ativa e administre o ciclo de vida das versões normativas.
+            </p>
+        </div>
+        <a
+            href="{% url 'administration:create_normative_version' %}"
+            class="btn rounded-0"
+            style="background:#e2f0ff; border:1px solid #9ec9ff; color:black; padding:10px 18px;"
+        >
+            + Criar nova versão
+        </a>
+    </div>
+
+    <article class="border bg-white p-4 mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+            <div>
+                <p class="text-secondary text-uppercase small mb-1">Versão ativa</p>
+                {% if active_version %}
+                    <h2 class="h3 fw-bold mb-0">{{ active_version.name }}</h2>
+                {% else %}
+                    <h2 class="h4 fw-normal text-secondary mb-0">Sem versão ativa</h2>
+                {% endif %}
+            </div>
+            {% if active_version %}
+                <span
+                    style="align-self:flex-start; display:inline-block; background:#e2f0ff; border:1px solid #9ec9ff; color:#222; padding:6px 11px;"
+                >
+                    {{ active_version.get_status_display }}
+                </span>
+            {% endif %}
+        </div>
+
+        {% if active_version %}
+            <dl class="row mb-0">
+                <dt class="col-sm-4 text-secondary mb-2">Criada em</dt>
+                <dd class="col-sm-8 mb-2">{{ active_version.created_at|date:"d/m/Y H:i" }}</dd>
+                <dt class="col-sm-4 text-secondary mb-2">Ativada em</dt>
+                <dd class="col-sm-8 mb-2">{{ active_version.activated_at|date:"d/m/Y H:i" }}</dd>
+                <dt class="col-sm-4 text-secondary mb-0">Participantes</dt>
+                <dd class="col-sm-8 mb-0">{{ active_participant_count }}</dd>
+            </dl>
+        {% else %}
+            <p class="text-secondary mb-0 mt-3">
+                Crie, prepare e ative uma versão para disponibilizar uma base normativa aos novos relatórios.
+            </p>
+        {% endif %}
+    </article>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="border bg-white p-4 h-100">
+                <p class="text-secondary mb-2">Total normativo</p>
+                <strong class="fs-3">{{ total_participant_count }}</strong>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="border bg-white p-4 h-100">
+                <p class="text-secondary mb-2">Na versão ativa</p>
+                <strong class="fs-3">{{ active_participant_count }}</strong>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="border bg-white p-4 h-100">
+                <p class="text-secondary mb-2">Novos participantes</p>
+                <strong class="fs-3">{{ unversioned_participant_count }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <a
+        href="{% url 'administration:normative_versions' %}"
+        class="btn rounded-0"
+        style="border:1px solid #9ec9ff; color:black; padding:10px 18px;"
+    >
+        Consultar histórico de versões
+    </a>
+</section>
+{% endblock %}
+

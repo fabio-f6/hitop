@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-3" style="max-width:720px; margin:0 auto;">
+    <a
+        href="{% url 'administration:normative' %}"
+        class="btn rounded-0"
+        style="background:#e2f0ff; border:1px solid #9ec9ff; color:black; padding:8px 16px;"
+    >
+        ← Base normativa
+    </a>
+    <h1 class="h2 fw-bold mt-4 mb-2">Criar nova versão</h1>
+    <p class="text-secondary mb-4">
+        A versão será criada como rascunho com um snapshot dos participantes normativos atuais.
+    </p>
+
+    <form method="post" class="border bg-white p-4">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="{{ form.name.id_for_label }}" class="form-label fw-semibold">
+                {{ form.name.label }}
+            </label>
+            {{ form.name }}
+            {% if form.name.errors %}
+                {% for error in form.name.errors %}
+                    <div class="text-danger small mt-2">{{ error }}</div>
+                {% endfor %}
+            {% endif %}
+            <div class="form-text">
+                Sugestão atual: {{ suggested_name }}. O nome tem de ser único.
+            </div>
+        </div>
+        <button
+            type="submit"
+            class="btn rounded-0"
+            style="background:#e2f0ff; border:1px solid #9ec9ff; color:black;"
+        >
+            Criar versão
+        </button>
+    </form>
+</section>
+{% endblock %}
+

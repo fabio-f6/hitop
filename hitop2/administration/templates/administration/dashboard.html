@@ -54,7 +54,7 @@
         </div>
 
         <div class="col-lg-6">
-            <article class="border bg-white h-100 p-4">
+            <article class="border bg-white h-100 p-4 d-flex flex-column">
                 <h2 class="h4 fw-bold mb-4">Base normativa</h2>
 
                 <dl class="mb-0">
@@ -81,6 +81,16 @@
                         <dd class="fs-5 fw-semibold mb-0">{{ unversioned_normative_participant_count }}</dd>
                     </div>
                 </dl>
+
+                <div class="mt-auto pt-4">
+                    <a
+                        href="{% url 'administration:normative' %}"
+                        class="btn rounded-0"
+                        style="background:#e2f0ff; border:1px solid #9ec9ff; color:black;"
+                    >
+                        Gerir base normativa
+                    </a>
+                </div>
             </article>
         </div>
     </div>

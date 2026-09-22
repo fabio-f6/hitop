@@ -1,16 +1,30 @@
+import re
+
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
+from django.db import IntegrityError
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST, require_http_methods
 
+from polls.models import NormativeDatasetVersion
 from polls.normative_versions import (
+    activate_normative_version as activate_normative_version_service,
+    create_normative_version as create_normative_version_service,
     get_active_normative_version,
+    get_active_normative_participant_count,
     get_normative_participant_counts,
+    get_normative_version_details,
+    get_normative_versions,
+    get_total_normative_participant_count,
+    get_unversioned_normative_participant_count,
+    prepare_normative_version as prepare_normative_version_service,
 )
 from website.models import UserProfile
 
+from .forms import NormativeVersionCreateForm
 from .permissions import administrator_required
 from .services import (
     ProfessionalStateError,
@@ -20,12 +34,40 @@ from .services import (
 
 
 PROFESSIONALS_PER_PAGE = 10
+NORMATIVE_VERSIONS_PER_PAGE = 10
 
 
 def _professional_queryset():
     return UserProfile.objects.filter(
         user_type="professional",
     ).select_related("user")
+
+
+def _normative_version_or_404(version_id):
+    try:
+        return get_normative_version_details(version_id)
+    except NormativeDatasetVersion.DoesNotExist as exception:
+        raise Http404 from exception
+
+
+def _suggest_next_normative_version_name(versions):
+    version_numbers = []
+    for version in versions:
+        match = re.fullmatch(r"v(\d+)", version.name, flags=re.IGNORECASE)
+        if match:
+            version_numbers.append(int(match.group(1)))
+    return f"v{max(version_numbers, default=0) + 1}"
+
+
+def _validation_error_message(exception):
+    return " ".join(exception.messages)
+
+
+def _normative_version_name_error(exception):
+    name_errors = getattr(exception, "error_dict", {}).get("name", ())
+    if any(error.code == "unique" for error in name_errors):
+        return "Já existe uma versão normativa com este nome."
+    return _validation_error_message(exception)
 
 
 @administrator_required
@@ -213,4 +255,186 @@ def deactivate_professional(request, professional_id):
         request,
         "administration/confirm_professional_deactivation.html",
         {"professional": professional},
+    )
+
+
+@administrator_required
+def normative(request):
+    active_version = get_active_normative_version()
+    return render(
+        request,
+        "administration/normative.html",
+        {
+            "active_version": active_version,
+            "total_participant_count": (
+                get_total_normative_participant_count()
+            ),
+            "active_participant_count": (
+                get_active_normative_participant_count()
+            ),
+            "unversioned_participant_count": (
+                get_unversioned_normative_participant_count(active_version)
+            ),
+        },
+    )
+
+
+@administrator_required
+def normative_versions(request):
+    versions = get_normative_versions().order_by("-created_at", "-id")
+    page_obj = Paginator(
+        versions,
+        NORMATIVE_VERSIONS_PER_PAGE,
+    ).get_page(request.GET.get("page"))
+    return render(
+        request,
+        "administration/normative_versions.html",
+        {
+            "page_obj": page_obj,
+            "versions": page_obj,
+        },
+    )
+
+
+@administrator_required
+def normative_version_detail(request, version_id):
+    version = _normative_version_or_404(version_id)
+    return render(
+        request,
+        "administration/normative_version_detail.html",
+        {
+            "version": version,
+            "unversioned_participant_count": (
+                get_unversioned_normative_participant_count(version)
+            ),
+        },
+    )
+
+
+@administrator_required
+@require_http_methods(["GET", "POST"])
+def create_normative_version(request):
+    existing_versions = list(get_normative_versions())
+    suggested_name = _suggest_next_normative_version_name(existing_versions)
+
+    if request.method == "POST":
+        form = NormativeVersionCreateForm(request.POST)
+        if form.is_valid():
+            try:
+                version = create_normative_version_service(
+                    form.cleaned_data["name"]
+                )
+            except ValidationError as exception:
+                form.add_error(
+                    "name",
+                    _normative_version_name_error(exception),
+                )
+            except IntegrityError:
+                form.add_error(
+                    "name",
+                    "Já existe uma versão normativa com este nome.",
+                )
+            else:
+                messages.success(
+                    request,
+                    "Versão normativa criada como rascunho.",
+                )
+                return redirect(
+                    "administration:normative_version_detail",
+                    version_id=version.pk,
+                )
+    else:
+        form = NormativeVersionCreateForm(initial={"name": suggested_name})
+
+    return render(
+        request,
+        "administration/normative_version_create.html",
+        {
+            "form": form,
+            "suggested_name": suggested_name,
+        },
+    )
+
+
+@administrator_required
+@require_http_methods(["GET", "POST"])
+def prepare_normative_version(request, version_id):
+    version = _normative_version_or_404(version_id)
+
+    if request.method == "POST":
+        try:
+            result = prepare_normative_version_service(version)
+        except ValidationError as exception:
+            messages.error(request, _validation_error_message(exception))
+        else:
+            messages.success(
+                request,
+                "Versão preparada com sucesso: "
+                f"{result.participant_count} participantes, "
+                f"{result.scale_score_count} scores de escalas e "
+                f"{result.spectrum_score_count} scores de espectros.",
+            )
+        return redirect(
+            "administration:normative_version_detail",
+            version_id=version.pk,
+        )
+
+    if version.status != NormativeDatasetVersion.Status.DRAFT:
+        messages.error(
+            request,
+            "Apenas uma versão em rascunho pode ser preparada.",
+        )
+        return redirect(
+            "administration:normative_version_detail",
+            version_id=version.pk,
+        )
+
+    return render(
+        request,
+        "administration/confirm_normative_version_preparation.html",
+        {"version": version},
+    )
+
+
+@administrator_required
+@require_http_methods(["GET", "POST"])
+def activate_normative_version(request, version_id):
+    version = _normative_version_or_404(version_id)
+
+    if request.method == "POST":
+        try:
+            activated_version = activate_normative_version_service(version)
+        except ValidationError as exception:
+            messages.error(request, _validation_error_message(exception))
+        else:
+            messages.success(
+                request,
+                f"A versão {activated_version.name} está agora ativa.",
+            )
+        return redirect(
+            "administration:normative_version_detail",
+            version_id=version.pk,
+        )
+
+    can_activate = (
+        version.status == NormativeDatasetVersion.Status.DRAFT
+        and version.prepared_at is not None
+    )
+    if not can_activate:
+        messages.error(
+            request,
+            "A versão deve estar preparada e em rascunho antes da ativação.",
+        )
+        return redirect(
+            "administration:normative_version_detail",
+            version_id=version.pk,
+        )
+
+    return render(
+        request,
+        "administration/confirm_normative_version_activation.html",
+        {
+            "version": version,
+            "active_version": get_active_normative_version(),
+        },
     )

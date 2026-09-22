@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-3" style="max-width:720px; margin:0 auto;">
+    <h1 style="font-size:2rem; font-weight:500; color:#222;">Ativar versão {{ version.name }}?</h1>
+    <div style="background:#eef4fb; border:1px solid #9ec9ff; padding:24px; margin:24px 0;">
+        <p>
+            Ao ativar esta versão, os novos relatórios passarão a utilizar esta base normativa.
+            A versão atualmente ativa será mantida no histórico.
+        </p>
+        {% if active_version %}
+            <p class="mb-0"><strong>Versão ativa atual:</strong> {{ active_version.name }}</p>
+        {% else %}
+            <p class="mb-0 text-secondary">Atualmente não existe uma versão ativa.</p>
+        {% endif %}
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <button
+            type="submit"
+            class="btn rounded-0"
+            style="background:#e2f0ff; border:1px solid #9ec9ff; color:black;"
+        >
+            Confirmar ativação
+        </button>
+    </form>
+    <a
+        href="{% url 'administration:normative_version_detail' version.id %}"
+        class="btn rounded-0 mt-3"
+        style="border:1px solid #9ec9ff; color:black;"
+    >
+        Cancelar
+    </a>
+</section>
+{% endblock %}

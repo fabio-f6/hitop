@@ -6,9 +6,15 @@ from django.test import TestCase
 from django.urls import resolve, reverse
 
 from polls.models import (
+    NormativeAnswer,
     NormativeDatasetMembership,
+    NormativeDatasetVersion,
     NormativeParticipant,
+    Question,
     QuestionnaireSubmission,
+    Scale,
+    Spectra,
+    Subfactor,
 )
 from polls.normative_versions import (
     activate_normative_version,
@@ -661,3 +667,436 @@ class ProfessionalManagementTests(TestCase):
         self.assertEqual(response.status_code, 403)
         professional.user.refresh_from_db()
         self.assertTrue(professional.user.is_active)
+
+
+class NormativeAdministrationTests(TestCase):
+    password = "Uma-palavra-passe-segura-123"
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.administrator = User.objects.create_user(
+            username="normative-admin",
+            password=cls.password,
+        )
+        cls.administrator.userprofile.user_type = "admin"
+        cls.administrator.userprofile.save()
+
+        cls.professional = User.objects.create_user(
+            username="normative-professional",
+            password=cls.password,
+        )
+        cls.professional.userprofile.user_type = "professional"
+        cls.professional.userprofile.is_verified = True
+        cls.professional.userprofile.save()
+
+        cls.spectrum = Spectra.objects.create(name="Administration spectrum")
+        subfactor = Subfactor.objects.create(
+            name="Administration subfactor",
+            spectra=cls.spectrum,
+        )
+        cls.scale = Scale.objects.create(
+            name="Administration scale",
+            subfactor=subfactor,
+        )
+        cls.question = Question.objects.create(
+            scale=cls.scale,
+            item_code="ADMIN-NORM-1",
+            question_text="Private normative answer question",
+        )
+
+    def setUp(self):
+        self.client.force_login(self.administrator)
+
+    def create_participant(self, answer="1"):
+        participant = NormativeParticipant.objects.create(
+            age=37,
+            sex="Feminino",
+        )
+        NormativeAnswer.objects.create(
+            participant=participant,
+            question=self.question,
+            answer=answer,
+        )
+        return participant
+
+    def create_prepared_version(self, name):
+        version = create_normative_version(name)
+        prepare_normative_version(version)
+        version.refresh_from_db()
+        return version
+
+    def test_administrator_can_access_normative_management(self):
+        response = self.client.get(reverse("administration:normative"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "administration/normative.html")
+
+    def test_professional_cannot_access_normative_management(self):
+        self.client.force_login(self.professional)
+
+        response = self.client.get(reverse("administration:normative"))
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_professional_cannot_call_normative_action_endpoints(self):
+        version = create_normative_version("v-protected")
+        self.client.force_login(self.professional)
+
+        create_response = self.client.post(
+            reverse("administration:create_normative_version"),
+            {"name": "v-forbidden"},
+        )
+        prepare_response = self.client.post(
+            reverse(
+                "administration:prepare_normative_version",
+                args=[version.pk],
+            )
+        )
+        activate_response = self.client.post(
+            reverse(
+                "administration:activate_normative_version",
+                args=[version.pk],
+            )
+        )
+
+        self.assertEqual(create_response.status_code, 403)
+        self.assertEqual(prepare_response.status_code, 403)
+        self.assertEqual(activate_response.status_code, 403)
+        self.assertFalse(
+            NormativeDatasetVersion.objects.filter(name="v-forbidden").exists()
+        )
+        version.refresh_from_db()
+        self.assertIsNone(version.prepared_at)
+        self.assertEqual(version.status, NormativeDatasetVersion.Status.DRAFT)
+
+    def test_active_version_appears_with_its_aggregated_information(self):
+        self.create_participant()
+        version = self.create_prepared_version("v-active-page")
+        activate_normative_version(version)
+
+        response = self.client.get(reverse("administration:normative"))
+
+        self.assertContains(response, "v-active-page")
+        self.assertContains(response, "Ativa")
+        self.assertEqual(response.context["active_version"].pk, version.pk)
+        self.assertEqual(response.context["active_participant_count"], 1)
+        self.assertEqual(response.context["total_participant_count"], 1)
+
+    def test_history_lists_versions_and_lifecycle_dates(self):
+        version = self.create_prepared_version("v-history")
+        activate_normative_version(version)
+        version.refresh_from_db()
+
+        response = self.client.get(
+            reverse("administration:normative_versions")
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "v-history")
+        self.assertContains(response, version.created_at.strftime("%d/%m/%Y"))
+        self.assertContains(response, version.prepared_at.strftime("%d/%m/%Y"))
+        self.assertContains(response, version.activated_at.strftime("%d/%m/%Y"))
+
+    def test_version_detail_shows_aggregates_without_individuals(self):
+        self.create_participant()
+        version = create_normative_version("v-detail")
+
+        response = self.client.get(
+            reverse(
+                "administration:normative_version_detail",
+                args=[version.pk],
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["version"].pk, version.pk)
+        self.assertContains(response, "v-detail")
+        self.assertContains(response, "Participantes no snapshot")
+        self.assertContains(response, "Ainda não preparada")
+
+    def test_creation_uses_service_and_generates_a_draft(self):
+        with patch(
+            "administration.views.create_normative_version_service",
+            wraps=create_normative_version,
+        ) as create_service:
+            response = self.client.post(
+                reverse("administration:create_normative_version"),
+                {"name": "v-created"},
+            )
+
+        version = NormativeDatasetVersion.objects.get(name="v-created")
+        create_service.assert_called_once_with("v-created")
+        self.assertEqual(version.status, NormativeDatasetVersion.Status.DRAFT)
+        self.assertIsNone(version.prepared_at)
+        self.assertRedirects(
+            response,
+            reverse(
+                "administration:normative_version_detail",
+                args=[version.pk],
+            ),
+        )
+
+    def test_created_version_snapshot_contains_only_current_participants(self):
+        included = [self.create_participant(), self.create_participant("2")]
+
+        self.client.post(
+            reverse("administration:create_normative_version"),
+            {"name": "v-snapshot"},
+        )
+        version = NormativeDatasetVersion.objects.get(name="v-snapshot")
+        later = self.create_participant("3")
+
+        self.assertCountEqual(version.participants.all(), included)
+        self.assertFalse(version.participants.filter(pk=later.pk).exists())
+
+    def test_prepare_action_uses_normative_service(self):
+        self.create_participant()
+        version = create_normative_version("v-prepare-service")
+
+        with patch(
+            "administration.views.prepare_normative_version_service",
+            wraps=prepare_normative_version,
+        ) as prepare_service:
+            response = self.client.post(
+                reverse(
+                    "administration:prepare_normative_version",
+                    args=[version.pk],
+                )
+            )
+
+        self.assertEqual(response.status_code, 302)
+        prepare_service.assert_called_once()
+        self.assertEqual(prepare_service.call_args.args[0].pk, version.pk)
+        version.refresh_from_db()
+        self.assertIsNotNone(version.prepared_at)
+
+    def test_activate_action_uses_normative_service(self):
+        self.create_participant()
+        version = self.create_prepared_version("v-activate-service")
+
+        with patch(
+            "administration.views.activate_normative_version_service",
+            wraps=activate_normative_version,
+        ) as activate_service:
+            response = self.client.post(
+                reverse(
+                    "administration:activate_normative_version",
+                    args=[version.pk],
+                )
+            )
+
+        self.assertEqual(response.status_code, 302)
+        activate_service.assert_called_once()
+        self.assertEqual(activate_service.call_args.args[0].pk, version.pk)
+        version.refresh_from_db()
+        self.assertEqual(version.status, NormativeDatasetVersion.Status.ACTIVE)
+
+    def test_get_requests_do_not_create_prepare_or_activate(self):
+        create_url = reverse("administration:create_normative_version")
+        self.client.get(create_url)
+        self.assertEqual(NormativeDatasetVersion.objects.count(), 0)
+
+        draft = create_normative_version("v-get-draft")
+        self.client.get(
+            reverse(
+                "administration:prepare_normative_version",
+                args=[draft.pk],
+            )
+        )
+        draft.refresh_from_db()
+        self.assertIsNone(draft.prepared_at)
+
+        prepare_normative_version(draft)
+        draft.refresh_from_db()
+        self.client.get(
+            reverse(
+                "administration:activate_normative_version",
+                args=[draft.pk],
+            )
+        )
+        draft.refresh_from_db()
+        self.assertEqual(draft.status, NormativeDatasetVersion.Status.DRAFT)
+
+    def test_unprepared_version_cannot_be_activated(self):
+        version = create_normative_version("v-unprepared")
+
+        response = self.client.post(
+            reverse(
+                "administration:activate_normative_version",
+                args=[version.pk],
+            ),
+            follow=True,
+        )
+
+        version.refresh_from_db()
+        self.assertEqual(version.status, NormativeDatasetVersion.Status.DRAFT)
+        self.assertContains(response, "deve ser preparada antes da ativação")
+
+    def test_activation_retires_the_previous_active_version(self):
+        self.create_participant()
+        first = self.create_prepared_version("v-first-active")
+        activate_normative_version(first)
+        second = self.create_prepared_version("v-second-active")
+
+        self.client.post(
+            reverse(
+                "administration:activate_normative_version",
+                args=[second.pk],
+            )
+        )
+
+        first.refresh_from_db()
+        second.refresh_from_db()
+        self.assertEqual(first.status, NormativeDatasetVersion.Status.RETIRED)
+        self.assertEqual(second.status, NormativeDatasetVersion.Status.ACTIVE)
+
+    def test_only_one_version_remains_active(self):
+        self.create_participant()
+        first = self.create_prepared_version("v-only-one-1")
+        activate_normative_version(first)
+        second = self.create_prepared_version("v-only-one-2")
+        self.client.post(
+            reverse(
+                "administration:activate_normative_version",
+                args=[second.pk],
+            )
+        )
+
+        self.assertEqual(
+            NormativeDatasetVersion.objects.filter(
+                status=NormativeDatasetVersion.Status.ACTIVE,
+            ).count(),
+            1,
+        )
+
+    def test_historical_versions_remain_available_after_activation(self):
+        self.create_participant()
+        first = self.create_prepared_version("v-retained-1")
+        activate_normative_version(first)
+        second = self.create_prepared_version("v-retained-2")
+        activate_normative_version(second)
+
+        history = self.client.get(reverse("administration:normative_versions"))
+        detail = self.client.get(
+            reverse(
+                "administration:normative_version_detail",
+                args=[first.pk],
+            )
+        )
+
+        self.assertTrue(
+            NormativeDatasetVersion.objects.filter(pk=first.pk).exists()
+        )
+        self.assertContains(history, "v-retained-1")
+        self.assertContains(history, "v-retained-2")
+        self.assertContains(detail, "Histórica")
+
+    def test_new_participants_since_active_snapshot_are_indicated(self):
+        self.create_participant()
+        version = self.create_prepared_version("v-new-participants")
+        activate_normative_version(version)
+        self.create_participant("2")
+        self.create_participant("3")
+
+        response = self.client.get(reverse("administration:normative"))
+
+        self.assertEqual(response.context["total_participant_count"], 3)
+        self.assertEqual(response.context["active_participant_count"], 1)
+        self.assertEqual(response.context["unversioned_participant_count"], 2)
+
+    def test_no_clinical_or_individual_normative_data_is_exposed(self):
+        participant = self.create_participant()
+        version = create_normative_version("v-private-data")
+        patient = User.objects.create_user(username="private-normative-patient")
+        patient.userprofile.user_type = "patient"
+        patient.userprofile.save()
+        QuestionnaireSubmission.objects.create(
+            user=patient,
+            title="Private clinical submission title",
+        )
+
+        responses = (
+            self.client.get(reverse("administration:normative")),
+            self.client.get(reverse("administration:normative_versions")),
+            self.client.get(
+                reverse(
+                    "administration:normative_version_detail",
+                    args=[version.pk],
+                )
+            ),
+        )
+        for response in responses:
+            self.assertNotContains(response, patient.username)
+            self.assertNotContains(response, "Private clinical submission title")
+            self.assertNotContains(response, self.question.question_text)
+            self.assertNotContains(response, f"Participante {participant.pk}")
+
+    def test_empty_normative_states_render_without_errors(self):
+        overview = self.client.get(reverse("administration:normative"))
+        history = self.client.get(reverse("administration:normative_versions"))
+
+        self.assertEqual(overview.status_code, 200)
+        self.assertContains(overview, "Sem versão ativa")
+        self.assertEqual(overview.context["total_participant_count"], 0)
+        self.assertEqual(overview.context["unversioned_participant_count"], 0)
+        self.assertContains(history, "Ainda não existem versões normativas")
+
+    def test_create_form_suggests_next_sequential_name(self):
+        create_normative_version("v1")
+        create_normative_version("v2")
+
+        response = self.client.get(
+            reverse("administration:create_normative_version")
+        )
+
+        self.assertEqual(response.context["suggested_name"], "v3")
+        self.assertEqual(response.context["form"].initial["name"], "v3")
+
+    def test_duplicate_version_name_is_reported_without_server_error(self):
+        create_normative_version("v-duplicate")
+
+        response = self.client.post(
+            reverse("administration:create_normative_version"),
+            {"name": "v-duplicate"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["form"].errors)
+        self.assertContains(
+            response,
+            "Já existe uma versão normativa com este nome.",
+        )
+        self.assertEqual(
+            NormativeDatasetVersion.objects.filter(name="v-duplicate").count(),
+            1,
+        )
+
+    @patch("administration.views.get_unversioned_normative_participant_count")
+    @patch("administration.views.get_active_normative_participant_count")
+    @patch("administration.views.get_total_normative_participant_count")
+    @patch("administration.views.get_active_normative_version")
+    def test_overview_reuses_normative_read_services(
+        self,
+        get_active_version,
+        get_total_count,
+        get_active_count,
+        get_unversioned_count,
+    ):
+        get_active_version.return_value = None
+        get_total_count.return_value = 12
+        get_active_count.return_value = 10
+        get_unversioned_count.return_value = 2
+
+        response = self.client.get(reverse("administration:normative"))
+
+        self.assertEqual(response.status_code, 200)
+        get_active_version.assert_called_once_with()
+        get_total_count.assert_called_once_with()
+        get_active_count.assert_called_once_with()
+        get_unversioned_count.assert_called_once_with(None)
+
+    def test_dashboard_links_to_normative_management(self):
+        response = self.client.get(reverse("administration:dashboard"))
+
+        self.assertContains(response, "Gerir base normativa")
+        self.assertContains(response, reverse("administration:normative"))
