@@ -112,6 +112,74 @@
                 </div>
             </article>
         </div>
+
+        <div class="col-lg-6">
+            <article class="border bg-white h-100 p-4 d-flex flex-column">
+                <h2 class="h4 fw-bold mb-4">Monitorização de questionários</h2>
+
+                <dl class="mb-0">
+                    <div class="d-flex justify-content-between gap-3 border-bottom pb-3 mb-3">
+                        <dt class="fw-normal text-secondary">Abertos</dt>
+                        <dd class="fs-5 fw-semibold mb-0">{{ questionnaire_monitoring.summary.open }}</dd>
+                    </div>
+                    <div class="d-flex justify-content-between gap-3 border-bottom pb-3 mb-3">
+                        <dt class="fw-normal text-secondary">Concluídos</dt>
+                        <dd class="fs-5 fw-semibold mb-0">{{ questionnaire_monitoring.summary.completed }}</dd>
+                    </div>
+                    <div class="d-flex justify-content-between gap-3">
+                        <dt class="fw-normal text-secondary">Concluídos ainda pendentes</dt>
+                        <dd class="fs-5 fw-semibold mb-0">{{ questionnaire_monitoring.summary.completed_pending }}</dd>
+                    </div>
+                </dl>
+
+                <div class="mt-auto pt-4">
+                    <a
+                        href="{% url 'administration:questionnaire_monitoring' %}"
+                        class="btn rounded-0"
+                        style="background:#e2f0ff; border:1px solid #9ec9ff; color:black;"
+                    >
+                        Monitorização de questionários
+                    </a>
+                </div>
+            </article>
+        </div>
+
+        <div class="col-lg-6">
+            <article class="border bg-white h-100 p-4 d-flex flex-column">
+                <h2 class="h4 fw-bold mb-4">Saúde do sistema</h2>
+
+                {% if system_health.issue_counts.total %}
+                    <dl class="mb-0">
+                        <div class="d-flex justify-content-between gap-3 border-bottom pb-3 mb-3">
+                            <dt class="fw-normal text-secondary">Erros</dt>
+                            <dd class="fs-5 fw-semibold mb-0">{{ system_health.issue_counts.error }}</dd>
+                        </div>
+                        <div class="d-flex justify-content-between gap-3 border-bottom pb-3 mb-3">
+                            <dt class="fw-normal text-secondary">Avisos</dt>
+                            <dd class="fs-5 fw-semibold mb-0">{{ system_health.issue_counts.warning }}</dd>
+                        </div>
+                        <div class="d-flex justify-content-between gap-3">
+                            <dt class="fw-normal text-secondary">Informações</dt>
+                            <dd class="fs-5 fw-semibold mb-0">{{ system_health.issue_counts.info }}</dd>
+                        </div>
+                    </dl>
+                {% else %}
+                    <div class="p-3" style="background:#eef4fb; border:1px solid #9ec9ff; color:#444;">
+                        Sem problemas detetados.
+                    </div>
+                {% endif %}
+
+                <div class="mt-auto pt-4">
+                    <a
+                        href="{% url 'administration:system_health' %}"
+                        class="btn rounded-0"
+                        style="background:#e2f0ff; border:1px solid #9ec9ff; color:black;"
+                    >
+                        Consultar saúde do sistema
+                    </a>
+                </div>
+            </article>
+        </div>
     </div>
 </section>
 {% endblock %}

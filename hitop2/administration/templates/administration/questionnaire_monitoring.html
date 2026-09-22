@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-3">
+    <div class="mb-4">
+        <a
+            href="{% url 'administration:dashboard' %}"
+            class="btn rounded-0"
+            style="background:#e2f0ff; border:1px solid #9ec9ff; color:black; padding:8px 16px;"
+        >
+            ← Administração
+        </a>
+        <h1 class="h2 fw-bold mt-4 mb-2">Monitorização de questionários</h1>
+        <p class="text-secondary mb-0">
+            Indicadores operacionais agregados. Esta página é exclusivamente de consulta.
+        </p>
+    </div>
+
+    <div class="p-3 mb-4" style="background:#eef4fb; border:1px solid #9ec9ff; color:#444;">
+        Não são apresentados pacientes, respostas, resultados clínicos ou credenciais de acesso.
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4 col-xl-2">
+            <article class="border bg-white h-100 p-3">
+                <div class="text-secondary mb-2">Total</div>
+                <div class="h3 fw-bold mb-0">{{ summary.total }}</div>
+            </article>
+        </div>
+        <div class="col-md-4 col-xl-2">
+            <article class="border bg-white h-100 p-3">
+                <div class="text-secondary mb-2">Abertos</div>
+                <div class="h3 fw-bold mb-0">{{ summary.open }}</div>
+            </article>
+        </div>
+        <div class="col-md-4 col-xl-2">
+            <article class="border bg-white h-100 p-3">
+                <div class="text-secondary mb-2">Concluídos</div>
+                <div class="h3 fw-bold mb-0">{{ summary.completed }}</div>
+            </article>
+        </div>
+        <div class="col-md-4 col-xl-2">
+            <article class="border bg-white h-100 p-3">
+                <div class="text-secondary mb-2">Pendentes</div>
+                <div class="h3 fw-bold mb-0">{{ summary.pending }}</div>
+            </article>
+        </div>
+        <div class="col-md-4 col-xl-2">
+            <article class="border bg-white h-100 p-3">
+                <div class="text-secondary mb-2">Não elegíveis</div>
+                <div class="h3 fw-bold mb-0">{{ summary.ineligible }}</div>
+            </article>
+        </div>
+        <div class="col-md-4 col-xl-2">
+            <article class="border bg-white h-100 p-3">
+                <div class="text-secondary mb-2">Exportados</div>
+                <div class="h3 fw-bold mb-0">{{ summary.exported }}</div>
+            </article>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <article class="border bg-white h-100 p-4">
+                <h2 class="h4 fw-bold mb-4">Estado clínico e de workflow</h2>
+                <dl class="mb-0">
+                    <div class="d-flex justify-content-between gap-3 border-bottom pb-3 mb-3">
+                        <dt class="fw-normal text-secondary">Atualmente abertos</dt>
+                        <dd class="fs-5 fw-semibold mb-0">{{ summary.open }}</dd>
+                    </div>
+                    <div class="d-flex justify-content-between gap-3">
+                        <dt class="fw-normal text-secondary">Concluídos</dt>
+                        <dd class="fs-5 fw-semibold mb-0">{{ summary.completed }}</dd>
+                    </div>
+                </dl>
+            </article>
+        </div>
+
+        <div class="col-lg-6">
+            <article class="border bg-white h-100 p-4">
+                <h2 class="h4 fw-bold mb-4">Estado normativo</h2>
+                <dl class="mb-0">
+                    <div class="d-flex justify-content-between gap-3 border-bottom pb-3 mb-3">
+                        <dt class="fw-normal text-secondary">Pendentes ainda não concluídos</dt>
+                        <dd class="fs-5 fw-semibold mb-0">{{ summary.pending_incomplete }}</dd>
+                    </div>
+                    <div class="d-flex justify-content-between gap-3 border-bottom pb-3 mb-3">
+                        <dt class="fw-normal text-secondary">Concluídos ainda pendentes</dt>
+                        <dd class="fs-5 fw-semibold mb-0">{{ summary.completed_pending }}</dd>
+                    </div>
+                    <div class="d-flex justify-content-between gap-3 border-bottom pb-3 mb-3">
+                        <dt class="fw-normal text-secondary">Não elegíveis</dt>
+                        <dd class="fs-5 fw-semibold mb-0">{{ summary.ineligible }}</dd>
+                    </div>
+                    <div class="d-flex justify-content-between gap-3">
+                        <dt class="fw-normal text-secondary">Exportados</dt>
+                        <dd class="fs-5 fw-semibold mb-0">{{ summary.exported }}</dd>
+                    </div>
+                </dl>
+            </article>
+        </div>
+    </div>
+
+    <article class="border bg-white p-4 mb-4">
+        <h2 class="h4 fw-bold mb-3">Alertas</h2>
+        {% for alert in alerts %}
+            <div class="alert {% if alert.severity == 'error' %}alert-danger{% else %}alert-warning{% endif %} rounded-0 mb-3" role="alert">
+                <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
+                    <div>
+                        <strong>{{ alert.title }}</strong>
+                        <p class="mb-0 mt-1">{{ alert.description }}</p>
+                    </div>
+                    <span class="fw-bold text-nowrap">{{ alert.count }}</span>
+                </div>
+            </div>
+        {% empty %}
+            <div class="p-3" style="background:#eef4fb; border:1px solid #9ec9ff; color:#444;">
+                Não foram detetadas inconsistências operacionais.
+            </div>
+        {% endfor %}
+    </article>
+
+    {% if not failure_tracking_available %}
+        <div class="p-3" style="background:#fafafa; border:1px solid #bbb; color:#555;">
+            O sistema atual não mantém um estado persistente que permita distinguir uma falha de exportação de uma submissão concluída que continua pendente por critérios ausentes ou ambíguos. Por esse motivo, estados pending não são classificados como falhas.
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

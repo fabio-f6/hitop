@@ -8,6 +8,12 @@ app_name = "administration"
 urlpatterns = [
     path("", views.dashboard, name="dashboard"),
     path("audit/", views.audit, name="audit"),
+    path(
+        "questionnaires/",
+        views.questionnaire_monitoring,
+        name="questionnaire_monitoring",
+    ),
+    path("system-health/", views.system_health, name="system_health"),
     path("professionals/", views.professionals, name="professionals"),
     path(
         "professionals/<int:professional_id>/",

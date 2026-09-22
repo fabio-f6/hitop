@@ -29,7 +29,9 @@ from website.models import UserProfile
 
 from .audit import record_admin_action
 from .forms import NormativeVersionCreateForm
+from .health_checks import get_system_health_report
 from .models import AdministrativeAuditLog
+from .monitoring import get_questionnaire_monitoring_report
 from .permissions import administrator_required
 from .services import (
     ProfessionalStateError,
@@ -95,6 +97,11 @@ def dashboard(request):
     professionals = _professional_queryset()
     active_normative_version = get_active_normative_version()
     normative_participant_counts = get_normative_participant_counts()
+    questionnaire_monitoring = get_questionnaire_monitoring_report()
+    system_health = get_system_health_report(
+        active_normative_version=active_normative_version,
+        normative_participant_counts=normative_participant_counts,
+    )
 
     return render(
         request,
@@ -115,6 +122,8 @@ def dashboard(request):
             "unversioned_normative_participant_count": (
                 normative_participant_counts["not_in_active_version"]
             ),
+            "questionnaire_monitoring": questionnaire_monitoring,
+            "system_health": system_health,
         },
     )
 
@@ -619,4 +628,24 @@ def audit(request):
             "search_query": search_query,
             "pagination_query": query_parameters.urlencode(),
         },
+    )
+
+
+@administrator_required
+@require_http_methods(["GET"])
+def questionnaire_monitoring(request):
+    return render(
+        request,
+        "administration/questionnaire_monitoring.html",
+        get_questionnaire_monitoring_report(),
+    )
+
+
+@administrator_required
+@require_http_methods(["GET"])
+def system_health(request):
+    return render(
+        request,
+        "administration/system_health.html",
+        get_system_health_report(),
     )

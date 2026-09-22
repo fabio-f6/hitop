@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-3">
+    <div class="mb-4">
+        <a
+            href="{% url 'administration:dashboard' %}"
+            class="btn rounded-0"
+            style="background:#e2f0ff; border:1px solid #9ec9ff; color:black; padding:8px 16px;"
+        >
+            ← Administração
+        </a>
+        <h1 class="h2 fw-bold mt-4 mb-2">Saúde e consistência da configuração</h1>
+        <p class="text-secondary mb-0">
+            Validação apenas de consulta da estrutura científica, configuração sociodemográfica e base normativa.
+        </p>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <article class="border bg-white h-100 p-4">
+                <h2 class="h4 fw-bold mb-4">Estrutura científica</h2>
+                <dl class="mb-0">
+                    <div class="d-flex justify-content-between gap-3 border-bottom pb-3 mb-3">
+                        <dt class="fw-normal text-secondary">Spectra</dt>
+                        <dd class="fs-5 fw-semibold mb-0">{{ structure.spectra_count }}</dd>
+                    </div>
+                    <div class="d-flex justify-content-between gap-3 border-bottom pb-3 mb-3">
+                        <dt class="fw-normal text-secondary">Subfatores</dt>
+                        <dd class="fs-5 fw-semibold mb-0">{{ structure.subfactor_count }}</dd>
+                    </div>
+                    <div class="d-flex justify-content-between gap-3 border-bottom pb-3 mb-3">
+                        <dt class="fw-normal text-secondary">Escalas</dt>
+                        <dd class="fs-5 fw-semibold mb-0">{{ structure.scale_count }}</dd>
+                    </div>
+                    <div class="d-flex justify-content-between gap-3">
+                        <dt class="fw-normal text-secondary">Perguntas</dt>
+                        <dd class="fs-5 fw-semibold mb-0">{{ structure.question_count }}</dd>
+                    </div>
+                </dl>
+            </article>
+        </div>
+
+        <div class="col-lg-6">
+            <article class="border bg-white h-100 p-4">
+                <h2 class="h4 fw-bold mb-4">Questionário sociodemográfico</h2>
+                <dl class="mb-4">
+                    <div class="d-flex justify-content-between gap-3 border-bottom pb-3 mb-3">
+                        <dt class="fw-normal text-secondary">Categorias</dt>
+                        <dd class="fs-5 fw-semibold mb-0">{{ sociodemographic.category_count }}</dd>
+                    </div>
+                    <div class="d-flex justify-content-between gap-3 border-bottom pb-3 mb-3">
+                        <dt class="fw-normal text-secondary">Perguntas dinâmicas</dt>
+                        <dd class="fs-5 fw-semibold mb-0">{{ sociodemographic.question_count }}</dd>
+                    </div>
+                    <div class="d-flex justify-content-between gap-3 border-bottom pb-3 mb-3">
+                        <dt class="fw-normal text-secondary">Perguntas ativas</dt>
+                        <dd class="fs-5 fw-semibold mb-0">{{ sociodemographic.active_question_count }}</dd>
+                    </div>
+                    <div class="d-flex justify-content-between gap-3">
+                        <dt class="fw-normal text-secondary">Configuração base presente</dt>
+                        <dd class="fs-5 fw-semibold mb-0">
+                            {{ sociodemographic.configured_question_present_count }}/{{ sociodemographic.configured_question_count }}
+                        </dd>
+                    </div>
+                </dl>
+
+                <h3 class="h6 fw-bold mb-3">Critérios de elegibilidade normativa</h3>
+                {% for criterion in sociodemographic.criteria %}
+                    <div class="d-flex justify-content-between gap-3 {% if not forloop.last %}border-bottom pb-2 mb-2{% endif %}">
+                        <span>{{ criterion.label }}</span>
+                        {% if criterion.ready %}
+                            <span style="display:inline-block; background:#e2f0ff; border:1px solid #9ec9ff; color:#222; padding:3px 8px;">
+                                Configurado
+                            </span>
+                        {% else %}
+                            <span style="display:inline-block; background:#fff8e1; border:1px solid #e7cf85; color:#5d4c13; padding:3px 8px;">
+                                Verificar
+                            </span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </article>
+        </div>
+    </div>
+
+    <article class="border bg-white p-4 mb-4">
+        <h2 class="h4 fw-bold mb-4">Versões normativas</h2>
+        <div class="row g-3">
+            <div class="col-md-4 col-xl-2">
+                <div class="text-secondary mb-1">Total</div>
+                <div class="h4 fw-bold mb-0">{{ normative.total_version_count }}</div>
+            </div>
+            <div class="col-md-4 col-xl-2">
+                <div class="text-secondary mb-1">Versão ativa</div>
+                <div class="h5 fw-bold mb-0">
+                    {% if normative.active_version %}
+                        {{ normative.active_version.name }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-4 col-xl-2">
+                <div class="text-secondary mb-1">Rascunhos</div>
+                <div class="h4 fw-bold mb-0">{{ normative.draft_version_count }}</div>
+            </div>
+            <div class="col-md-4 col-xl-2">
+                <div class="text-secondary mb-1">Históricas</div>
+                <div class="h4 fw-bold mb-0">{{ normative.retired_version_count }}</div>
+            </div>
+            <div class="col-md-4 col-xl-2">
+                <div class="text-secondary mb-1">Participantes ativos</div>
+                <div class="h4 fw-bold mb-0">{{ normative.active_participant_count }}</div>
+            </div>
+            <div class="col-md-4 col-xl-2">
+                <div class="text-secondary mb-1">Novos participantes</div>
+                <div class="h4 fw-bold mb-0">{{ normative.new_participant_count }}</div>
+            </div>
+        </div>
+    </article>
+
+    <article class="border bg-white p-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between gap-2 align-items-md-center mb-4">
+            <h2 class="h4 fw-bold mb-0">Problemas detetados</h2>
+            <div class="d-flex flex-wrap gap-2">
+                <span class="px-2 py-1" style="background:#f8d7da; border:1px solid #f1aeb5; color:#58151c;">
+                    Erros: {{ issue_counts.error }}
+                </span>
+                <span class="px-2 py-1" style="background:#fff3cd; border:1px solid #ffe69c; color:#664d03;">
+                    Avisos: {{ issue_counts.warning }}
+                </span>
+                <span class="px-2 py-1" style="background:#e2f0ff; border:1px solid #9ec9ff; color:#222;">
+                    Informações: {{ issue_counts.info }}
+                </span>
+            </div>
+        </div>
+
+        {% for problem in problems %}
+            <div class="alert {% if problem.severity == 'error' %}alert-danger{% elif problem.severity == 'warning' %}alert-warning{% else %}alert-info{% endif %} rounded-0 mb-3" role="alert">
+                <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
+                    <div>
+                        <div class="text-uppercase small fw-bold mb-1">
+                            {% if problem.severity == "error" %}Erro{% elif problem.severity == "warning" %}Aviso{% else %}Informação{% endif %}
+                        </div>
+                        <strong>{{ problem.title }}</strong>
+                        <p class="mb-0 mt-1">{{ problem.description }}</p>
+                    </div>
+                    {% if problem.count %}
+                        <span class="fw-bold text-nowrap">{{ problem.count }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <div class="p-3" style="background:#eef4fb; border:1px solid #9ec9ff; color:#444;">
+                Sem problemas detetados.
+            </div>
+        {% endfor %}
+    </article>
+</section>
+{% endblock %}
