@@ -7,6 +7,8 @@ app_name = "administration"
 
 urlpatterns = [
     path("", views.dashboard, name="dashboard"),
+    path("system/", views.system, name="system"),
+    path("system/master-reset/", views.master_reset, name="master_reset"),
     path(
         "test-environment/",
         views.professional_test_environment,

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-3">
+    <a href="{% url 'administration:system' %}" class="btn btn-link px-0 mb-3">← Zona de perigo</a>
+    <div class="border border-danger bg-white p-4 p-lg-5">
+        <p class="text-uppercase fw-bold text-danger mb-2">Zona de perigo</p>
+        <h1 class="h2 fw-bold mb-3">Confirmar Master Reset</h1>
+        <p>
+            Esta ação elimina definitivamente todos os outros utilizadores, todas as aplicações de
+            questionários e todas as respostas clínicas e sociodemográficas. Não existe undo.
+        </p>
+
+        <div class="row g-4 my-2">
+            <div class="col-md-6">
+                <h2 class="h5 fw-bold">Serão eliminados</h2>
+                <dl>
+                    <div class="d-flex justify-content-between border-bottom py-2"><dt>Utilizadores</dt><dd class="mb-0">{{ preview.users }}</dd></div>
+                    <div class="d-flex justify-content-between border-bottom py-2"><dt>Aplicações</dt><dd class="mb-0">{{ preview.submissions }}</dd></div>
+                    <div class="d-flex justify-content-between py-2"><dt>Aplicações de teste</dt><dd class="mb-0">{{ preview.test_submissions }}</dd></div>
+                </dl>
+            </div>
+            <div class="col-md-6">
+                <h2 class="h5 fw-bold">Serão preservados</h2>
+                <dl>
+                    <div class="d-flex justify-content-between border-bottom py-2"><dt>A sua conta</dt><dd class="mb-0">{{ preview.actor_username }}</dd></div>
+                    <div class="d-flex justify-content-between border-bottom py-2"><dt>Auditoria</dt><dd class="mb-0">Preservada</dd></div>
+                    <div class="d-flex justify-content-between py-2"><dt>Dados normativos</dt><dd class="mb-0">Preservados</dd></div>
+                </dl>
+                <p class="mb-0"><strong>Versão após reset:</strong> {{ preview.normative_version }} — {{ preview.normative_participants }} participantes</p>
+            </div>
+        </div>
+
+        <form method="post" id="master-reset-form" class="mt-4" novalidate>
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="{{ form.confirmation.id_for_label }}" class="form-label fw-semibold">Escreva exatamente MASTER RESET</label>
+                {{ form.confirmation }}
+                {% for error in form.confirmation.errors %}<div class="text-danger mt-1">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="mb-4">
+                <label for="{{ form.password.id_for_label }}" class="form-label fw-semibold">Password atual</label>
+                {{ form.password }}
+                {% for error in form.password.errors %}<div class="text-danger mt-1">{{ error }}</div>{% endfor %}
+            </div>
+            <button type="submit" id="master-reset-submit" class="btn btn-danger rounded-0">Executar Master Reset</button>
+        </form>
+    </div>
+</section>
+<script>
+document.getElementById("master-reset-form").addEventListener("submit", function () {
+    document.getElementById("master-reset-submit").disabled = true;
+});
+</script>
+{% endblock %}

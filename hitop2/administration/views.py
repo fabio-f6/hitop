@@ -43,11 +43,15 @@ from website.views import (
 )
 
 from .audit import record_admin_action
-from .forms import NormativeVersionCreateForm
+from .forms import MasterResetConfirmationForm, NormativeVersionCreateForm
 from .health_checks import get_system_health_report
-from .models import AdministrativeAuditLog
+from .models import AdministrativeAuditLog, MASTER_RESET_ACTION
 from .monitoring import get_questionnaire_monitoring_report
-from .permissions import administrator_required
+from .master_reset import (
+    get_master_reset_preview,
+    perform_master_reset,
+)
+from .permissions import administrator_required, can_master_reset, master_reset_required
 from .questionnaire_map import build_questionnaire_structure
 from .services import (
     ProfessionalStateError,
@@ -139,7 +143,47 @@ def dashboard(request):
             ),
             "questionnaire_monitoring": questionnaire_monitoring,
             "system_health": system_health,
+            "can_master_reset": can_master_reset(request.user),
         },
+    )
+
+
+@master_reset_required
+def system(request):
+    return render(request, "administration/system.html")
+
+
+@master_reset_required
+@require_http_methods(["GET", "POST"])
+def master_reset(request):
+    preview = get_master_reset_preview(request.user)
+    form = MasterResetConfirmationForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        # check_password uses the configured Django password hasher. The raw
+        # password is not retained or passed to the destructive service.
+        if not request.user.check_password(form.cleaned_data["password"]):
+            form.add_error("password", "A password atual está incorreta.")
+        else:
+            try:
+                perform_master_reset(request.user)
+            except Exception:
+                messages.error(
+                    request,
+                    "Não foi possível executar o Master Reset. Nenhuma alteração foi aplicada.",
+                )
+            else:
+                messages.success(
+                    request,
+                    "Master Reset concluído com sucesso. Todos os outros utilizadores "
+                    "e aplicações de questionários foram eliminados. A versão normativa "
+                    "ativa foi reposta para v1. O histórico de auditoria foi preservado.",
+                )
+                return redirect("administration:system")
+
+    return render(
+        request,
+        "administration/master_reset_confirm.html",
+        {"form": form, "preview": preview},
     )
 
 
@@ -677,7 +721,8 @@ def audit(request):
     selected_period = request.GET.get("period", "").strip()
     search_query = request.GET.get("q", "").strip()
 
-    if selected_action in AdministrativeAuditLog.Action.values:
+    allowed_actions = {*AdministrativeAuditLog.Action.values, MASTER_RESET_ACTION}
+    if selected_action in allowed_actions:
         logs = logs.filter(action=selected_action)
     else:
         selected_action = ""
@@ -719,7 +764,10 @@ def audit(request):
         {
             "page_obj": page_obj,
             "audit_logs": page_obj,
-            "action_choices": AdministrativeAuditLog.Action.choices,
+            "action_choices": (
+                *AdministrativeAuditLog.Action.choices,
+                (MASTER_RESET_ACTION, "Master Reset"),
+            ),
             "actor_options": actor_options,
             "period_choices": AUDIT_PERIOD_CHOICES,
             "selected_action": selected_action,

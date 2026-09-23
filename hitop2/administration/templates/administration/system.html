@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-3">
+    <a href="{% url 'administration:dashboard' %}" class="btn btn-link px-0 mb-3">← Administração</a>
+    <div class="border border-danger bg-white p-4 p-lg-5">
+        <p class="text-uppercase fw-bold text-danger mb-2">Zona de perigo</p>
+        <h1 class="h2 fw-bold mb-3">Master Reset</h1>
+        <p class="mb-3">
+            Elimina todos os utilizadores, aplicações de questionários e dados clínicos associados,
+            preservando apenas a sua conta, o histórico de auditoria e os dados normativos. A versão
+            normativa ativa será reposta para v1.
+        </p>
+        <p class="fw-semibold">Esta operação não pode ser anulada através da aplicação.</p>
+        <a href="{% url 'administration:master_reset' %}" class="btn btn-danger rounded-0">
+            Master Reset
+        </a>
+    </div>
+</section>
+{% endblock %}

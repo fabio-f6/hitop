@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 
-from .models import AdministrativeAuditLog
+from .models import AdministrativeAuditLog, MASTER_RESET_ACTION, SYSTEM_OBJECT_TYPE
 
 
 _ALLOWED_METADATA_KEYS = {
@@ -30,6 +30,14 @@ _ALLOWED_METADATA_KEYS = {
         "previous_active_version_id",
         "previous_active_version_label",
     },
+    MASTER_RESET_ACTION: {
+        "users_deleted",
+        "submissions_deleted",
+        "test_submissions_deleted",
+        "previous_active_normative_version",
+        "restored_normative_version",
+        "restored_normative_participant_count",
+    },
 }
 
 
@@ -47,10 +55,13 @@ def record_admin_action(
     if actor is None or not getattr(actor, "pk", None):
         raise ValidationError("A auditoria administrativa requer um administrador.")
 
-    if action not in AdministrativeAuditLog.Action.values:
+    if action not in {*AdministrativeAuditLog.Action.values, MASTER_RESET_ACTION}:
         raise ValidationError("Código de ação administrativa inválido.")
 
-    if object_type not in AdministrativeAuditLog.ObjectType.values:
+    if object_type not in {
+        *AdministrativeAuditLog.ObjectType.values,
+        SYSTEM_OBJECT_TYPE,
+    }:
         raise ValidationError("Tipo de objeto administrativo inválido.")
 
     if result != AdministrativeAuditLog.Result.SUCCESS:
@@ -73,6 +84,14 @@ def record_admin_action(
         result=result,
         metadata=metadata,
     )
-    entry.full_clean()
+    # Master Reset uses stable audit codes without changing TextChoices (and
+    # therefore without a schema-state-only migration). They were validated
+    # explicitly above; all other model fields still receive normal validation.
+    excluded_choice_fields = []
+    if action == MASTER_RESET_ACTION:
+        excluded_choice_fields.append("action")
+    if object_type == SYSTEM_OBJECT_TYPE:
+        excluded_choice_fields.append("object_type")
+    entry.full_clean(exclude=excluded_choice_fields)
     entry.save()
     return entry

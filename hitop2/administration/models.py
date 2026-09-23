@@ -3,6 +3,10 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 
+MASTER_RESET_ACTION = "system.master_reset"
+SYSTEM_OBJECT_TYPE = "system"
+
+
 class AdministrativeAuditLog(models.Model):
     class Action(models.TextChoices):
         PROFESSIONAL_APPROVED = (
@@ -96,6 +100,16 @@ class AdministrativeAuditLog(models.Model):
         raise ValidationError(
             "Os registos de auditoria administrativa não podem ser eliminados."
         )
+
+    def get_action_display(self):
+        if self.action == MASTER_RESET_ACTION:
+            return "Master Reset"
+        return dict(self.Action.choices).get(self.action, self.action)
+
+    def get_object_type_display(self):
+        if self.object_type == SYSTEM_OBJECT_TYPE:
+            return "Sistema"
+        return dict(self.ObjectType.choices).get(self.object_type, self.object_type)
 
     def __str__(self):
         return f"{self.get_action_display()} — {self.object_label}"

@@ -220,6 +220,21 @@
                 </div>
             </article>
         </div>
+
+        {% if can_master_reset %}
+        <div class="col-12">
+            <article class="border border-danger bg-white p-4">
+                <p class="text-uppercase fw-bold text-danger mb-2">Zona de perigo</p>
+                <h2 class="h4 fw-bold mb-3">Master Reset</h2>
+                <p class="text-secondary mb-3">
+                    Área isolada para a reposição destrutiva integral da plataforma.
+                </p>
+                <a href="{% url 'administration:system' %}" class="btn btn-outline-danger rounded-0">
+                    Abrir zona de perigo
+                </a>
+            </article>
+        </div>
+        {% endif %}
     </div>
 </section>
 {% endblock %}
