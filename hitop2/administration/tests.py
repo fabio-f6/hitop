@@ -30,18 +30,36 @@ class AdministrationAccessTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.administrator = cls.create_user("administrator", "admin")
+        cls.staff_administrator = cls.create_user(
+            "staff-administrator",
+            "admin",
+            is_staff=True,
+        )
         cls.professional = cls.create_user(
             "professional",
             "professional",
             is_verified=True,
         )
         cls.patient = cls.create_user("patient", "patient")
+        cls.technical_staff = cls.create_user(
+            "technical-staff",
+            "professional",
+            is_verified=True,
+            is_staff=True,
+        )
 
     @classmethod
-    def create_user(cls, username, user_type, is_verified=False):
+    def create_user(
+        cls,
+        username,
+        user_type,
+        is_verified=False,
+        **user_fields,
+    ):
         user = User.objects.create_user(
             username=username,
             password=cls.password,
+            **user_fields,
         )
         profile = user.userprofile
         profile.user_type = user_type
@@ -94,6 +112,38 @@ class AdministrationAccessTests(TestCase):
         self.assertContains(response, "Administração")
         self.assertContains(response, reverse("administration:dashboard"))
 
+    def test_staff_administrator_sees_both_administration_links(self):
+        self.client.force_login(self.staff_administrator)
+
+        response = self.client.get(reverse("administration:dashboard"))
+
+        self.assertContains(
+            response,
+            f'<a class="nav-link" href="{reverse("administration:dashboard")}">'
+            "Administração</a>",
+            html=True,
+        )
+        self.assertContains(
+            response,
+            f'<a class="nav-link" href="{reverse("admin:index")}">'
+            "Django Admin</a>",
+            html=True,
+        )
+
+    def test_non_staff_administrator_does_not_see_django_admin_link(self):
+        self.client.force_login(self.administrator)
+
+        response = self.client.get(reverse("administration:dashboard"))
+
+        self.assertContains(
+            response,
+            f'<a class="nav-link" href="{reverse("administration:dashboard")}">'
+            "Administração</a>",
+            html=True,
+        )
+        self.assertNotContains(response, "Django Admin")
+        self.assertNotContains(response, reverse("admin:index"))
+
     def test_administration_link_does_not_appear_for_professional(self):
         self.client.force_login(self.professional)
 
@@ -101,6 +151,8 @@ class AdministrationAccessTests(TestCase):
 
         self.assertNotContains(response, ">Administração<", html=True)
         self.assertNotContains(response, reverse("administration:dashboard"))
+        self.assertNotContains(response, "Django Admin")
+        self.assertNotContains(response, reverse("admin:index"))
 
     def test_administration_link_does_not_appear_for_patient(self):
         self.client.force_login(self.patient)
@@ -109,6 +161,51 @@ class AdministrationAccessTests(TestCase):
 
         self.assertNotContains(response, ">Administração<", html=True)
         self.assertNotContains(response, reverse("administration:dashboard"))
+        self.assertNotContains(response, "Django Admin")
+        self.assertNotContains(response, reverse("admin:index"))
+
+    def test_staff_non_operational_user_only_sees_django_admin_link(self):
+        self.client.force_login(self.technical_staff)
+
+        response = self.client.get(reverse("website:dashboard"))
+
+        self.assertNotContains(response, ">Administração<", html=True)
+        self.assertNotContains(response, reverse("administration:dashboard"))
+        self.assertContains(
+            response,
+            f'<a class="nav-link" href="{reverse("admin:index")}">'
+            "Django Admin</a>",
+            html=True,
+        )
+
+    def test_rendering_navbar_does_not_modify_user_permissions(self):
+        expected = {
+            user.pk: (user.is_staff, user.is_superuser, user.userprofile.user_type)
+            for user in (
+                self.administrator,
+                self.staff_administrator,
+                self.professional,
+                self.patient,
+                self.technical_staff,
+            )
+        }
+
+        for user in (
+            self.administrator,
+            self.staff_administrator,
+            self.professional,
+            self.patient,
+            self.technical_staff,
+        ):
+            self.client.force_login(user)
+            self.client.get(reverse("polls:thank_you"))
+
+        for user_id, permissions in expected.items():
+            user = User.objects.select_related("userprofile").get(pk=user_id)
+            self.assertEqual(
+                (user.is_staff, user.is_superuser, user.userprofile.user_type),
+                permissions,
+            )
 
     def test_administrator_login_redirects_to_operational_dashboard(self):
         response = self.client.post(

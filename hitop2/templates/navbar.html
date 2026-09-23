@@ -71,6 +71,16 @@
 
                     {% endif %}
 
+                    {% if request.user.is_staff %}
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'admin:index' %}">
+                                Django Admin
+                            </a>
+                        </li>
+
+                    {% endif %}
+
                     {% if request.user.userprofile.user_type == "professional" %}
 
                         <li class="nav-item">
