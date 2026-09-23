@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'administration/css/questionnaire-map.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="questionnaire-map py-3" data-questionnaire-map>
+    <header class="mb-4">
+        <a href="{% url 'administration:dashboard' %}" class="btn rounded-0 map-back-link">← Administração</a>
+        <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mt-4">
+            <div>
+                <h1 class="h2 fw-bold mb-2">Mapa do Questionário</h1>
+                <p class="text-secondary mb-0">Visualização de consulta da estrutura científica atualmente configurada.</p>
+            </div>
+            <div class="map-totals" aria-label="Totais da estrutura">
+                <span><strong>{{ questionnaire_map.totals.spectra_count }}</strong> Spectra</span>
+                <span><strong>{{ questionnaire_map.totals.subfactor_count }}</strong> Subfactors</span>
+                <span><strong>{{ questionnaire_map.totals.scale_count }}</strong> Scales</span>
+                <span><strong>{{ questionnaire_map.totals.question_count }}</strong> Questions</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="map-toolbar mb-3">
+        <div class="map-search-wrap">
+            <label class="visually-hidden" for="questionnaire-map-search">Pesquisar estrutura</label>
+            <input id="questionnaire-map-search" class="form-control rounded-0" type="search"
+                   placeholder="Pesquisar Spectrum, Subfactor, Scale ou Question..." autocomplete="off">
+            <div class="map-search-results" data-search-results hidden aria-live="polite"></div>
+        </div>
+        <div class="btn-group" role="group" aria-label="Filtrar estrutura">
+            <button type="button" class="btn btn-outline-secondary active rounded-0" data-filter="all" aria-pressed="true">Todos</button>
+            <button type="button" class="btn btn-outline-secondary rounded-0" data-filter="problems" aria-pressed="false">Com problemas</button>
+            <button type="button" class="btn btn-outline-secondary rounded-0" data-filter="healthy" aria-pressed="false">Sem problemas</button>
+        </div>
+        <div class="btn-group" role="group" aria-label="Controlar árvore">
+            <button type="button" class="btn btn-outline-secondary rounded-0" data-expand-all>Expandir tudo</button>
+            <button type="button" class="btn btn-outline-secondary rounded-0" data-collapse-all>Recolher tudo</button>
+        </div>
+    </div>
+
+    <div class="map-tabs mb-3" role="tablist" aria-label="Modo de visualização">
+        <button id="visual-tab" class="map-tab active" type="button" role="tab" aria-selected="true" aria-controls="visual-panel">Mapa Visual</button>
+        <button id="hierarchy-tab" class="map-tab" type="button" role="tab" aria-selected="false" aria-controls="hierarchy-panel">Hierarquia</button>
+    </div>
+
+    {% if questionnaire_map.unmapped_problems %}
+    <div class="alert alert-warning rounded-0" role="status">
+        Existem problemas estruturais globais que não correspondem a um nó existente.
+    </div>
+    {% endif %}
+
+    <div class="map-layout">
+        <div class="map-stage">
+            <div id="hierarchy-panel" role="tabpanel" aria-labelledby="hierarchy-tab" hidden>
+                <div class="map-tree" data-tree role="tree" aria-label="Estrutura do questionário"></div>
+                <div class="map-empty" data-empty hidden>Nenhum elemento corresponde aos critérios atuais.</div>
+            </div>
+            <div id="visual-panel" role="tabpanel" aria-labelledby="visual-tab">
+                <div class="visual-map-toolbar">
+                    <span class="text-secondary small">Arraste para mover e use a roda do rato ou os controlos para ampliar.</span>
+                    <div class="btn-group" aria-label="Controlos de zoom">
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-0" data-zoom-in aria-label="Aumentar zoom">+</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-0" data-zoom-out aria-label="Diminuir zoom">−</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-0" data-zoom-fit>Ajustar</button>
+                    </div>
+                </div>
+                <div class="visual-map" data-visual-map tabindex="0" aria-label="Mapa visual hierárquico do questionário">
+                    <svg role="img" aria-labelledby="visual-map-title" preserveAspectRatio="xMidYMid meet">
+                        <title id="visual-map-title">Árvore radial da estrutura hierárquica do questionário</title>
+                        <g data-visual-viewport>
+                            <g data-visual-links></g>
+                            <g data-visual-nodes></g>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <aside class="map-details" data-details aria-live="polite">
+            <h2 class="h5 fw-bold">Detalhes</h2>
+            <p class="text-secondary mb-0">Selecione um elemento da hierarquia ou do mapa.</p>
+        </aside>
+    </div>
+
+    {{ questionnaire_map|json_script:"questionnaire-map-data" }}
+    <div class="radial-tooltip" data-visual-tooltip role="tooltip"></div>
+</section>
+<script src="{% static 'administration/vendor/d3/d3.v7.9.0.min.js' %}" defer></script>
+<script src="{% static 'administration/js/questionnaire-map.js' %}" defer></script>
+{% endblock %}

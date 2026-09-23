@@ -261,6 +261,29 @@ class NormativeEligibilityTests(TestCase):
         self.assertEqual(NormativeParticipant.objects.count(), 1)
         self.assertEqual(NormativeAnswer.objects.count(), 1)
 
+    def test_attention_checks_are_not_exported_to_normative_answers(self):
+        submission = self.make_submission()
+        attention_question = Question.objects.create(
+            scale=self.scale,
+            item_code="norm-attention-1",
+            question_text="Attention check",
+            is_attention_check=True,
+            expected_answer="1",
+        )
+        UserAnswer.objects.create(
+            user=self.patient,
+            submission=submission,
+            question=attention_question,
+            answer="1",
+        )
+
+        process_normative_eligibility(submission)
+
+        self.assertEqual(NormativeAnswer.objects.count(), 1)
+        self.assertFalse(
+            NormativeAnswer.objects.filter(question=attention_question).exists()
+        )
+
     def test_evaluating_exported_submission_does_not_duplicate_data(self):
         submission = self.make_submission()
         process_normative_eligibility(submission)

@@ -64,6 +64,7 @@ urlpatterns = [
         name="questionnaire_monitoring",
     ),
     path("system-health/", views.system_health, name="system_health"),
+    path("questionnaire-map/", views.questionnaire_map, name="questionnaire_map"),
     path("professionals/", views.professionals, name="professionals"),
     path(
         "professionals/<int:professional_id>/",

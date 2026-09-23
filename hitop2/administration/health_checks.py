@@ -65,90 +65,76 @@ def _append_count_problem(
         )
 
 
-def _scientific_structure_health():
-    spectra = Spectra.objects.aggregate(
-        total=Count("id", distinct=True),
-        empty_name=Count(
-            "id",
-            filter=Q(name__regex=EMPTY_VALUE_PATTERN),
-            distinct=True,
-        ),
-        without_subfactors=Count(
-            "id",
-            filter=Q(subfactors__isnull=True),
-            distinct=True,
-        ),
-    )
-    subfactors = Subfactor.objects.aggregate(
-        total=Count("id", distinct=True),
-        empty_name=Count(
-            "id",
-            filter=Q(name__regex=EMPTY_VALUE_PATTERN),
-            distinct=True,
-        ),
-        without_scales=Count(
-            "id",
-            filter=Q(scales__isnull=True),
-            distinct=True,
-        ),
-    )
-    scales = Scale.objects.aggregate(
-        total=Count("id", distinct=True),
-        empty_name=Count(
-            "id",
-            filter=Q(name__regex=EMPTY_VALUE_PATTERN),
-            distinct=True,
-        ),
-        without_questions=Count(
-            "id",
-            filter=Q(questions__isnull=True),
-            distinct=True,
-        ),
-    )
+def _is_empty(value):
+    return not value or not value.strip()
 
-    valid_expected_answers = [value for value, _label in Question.ANSWER_CHOICES]
-    questions = Question.objects.aggregate(
-        total=Count("id"),
-        empty_item_code=Count(
-            "id",
-            filter=Q(item_code__regex=EMPTY_VALUE_PATTERN),
-        ),
-        empty_text=Count(
-            "id",
-            filter=Q(question_text__regex=EMPTY_VALUE_PATTERN),
-        ),
-        attention_missing_expected=Count(
-            "id",
-            filter=Q(
-                is_attention_check=True,
-                expected_answer__regex=EMPTY_VALUE_PATTERN,
+
+def evaluate_scientific_structure(spectra, subfactors, scales, questions):
+    """Evaluate structure rows and return the health report plus node issues.
+
+    This is the canonical scientific-structure health evaluation.  Callers may
+    pass already-loaded rows, allowing read-only visualisations to reuse the
+    exact health semantics without issuing another set of queries.
+    """
+    spectra = list(spectra)
+    subfactors = list(subfactors)
+    scales = list(scales)
+    questions = list(questions)
+    subfactor_counts = Counter(row["spectra_id"] for row in subfactors)
+    scale_counts = Counter(row["subfactor_id"] for row in scales)
+    question_counts = Counter(row["scale_id"] for row in questions)
+    valid_expected_answers = {value for value, _label in Question.ANSWER_CHOICES}
+
+    stats = {
+        "spectra": {
+            "total": len(spectra),
+            "empty_name": sum(_is_empty(row["name"]) for row in spectra),
+            "without_subfactors": sum(
+                not subfactor_counts[row["id"]] for row in spectra
             ),
-        ),
-        attention_invalid_expected=Count(
-            "id",
-            filter=(
-                Q(is_attention_check=True)
-                & ~Q(expected_answer__in=valid_expected_answers)
-                & ~Q(expected_answer__regex=EMPTY_VALUE_PATTERN)
+        },
+        "subfactors": {
+            "total": len(subfactors),
+            "empty_name": sum(_is_empty(row["name"]) for row in subfactors),
+            "without_scales": sum(not scale_counts[row["id"]] for row in subfactors),
+        },
+        "scales": {
+            "total": len(scales),
+            "empty_name": sum(_is_empty(row["name"]) for row in scales),
+            "without_questions": sum(
+                not question_counts[row["id"]] for row in scales
             ),
-        ),
-        non_attention_with_expected=Count(
-            "id",
-            filter=(
-                Q(is_attention_check=False)
-                & ~Q(expected_answer__regex=EMPTY_VALUE_PATTERN)
+        },
+        "questions": {
+            "total": len(questions),
+            "empty_item_code": sum(_is_empty(row["item_code"]) for row in questions),
+            "empty_text": sum(_is_empty(row["question_text"]) for row in questions),
+            "attention_missing_expected": sum(
+                row["is_attention_check"] and _is_empty(row["expected_answer"])
+                for row in questions
             ),
-        ),
-    )
+            "attention_invalid_expected": sum(
+                row["is_attention_check"]
+                and not _is_empty(row["expected_answer"])
+                and row["expected_answer"] not in valid_expected_answers
+                for row in questions
+            ),
+            "non_attention_with_expected": sum(
+                not row["is_attention_check"]
+                and not _is_empty(row["expected_answer"])
+                for row in questions
+            ),
+        },
+    }
 
     problems = []
-    for layer, label, stats in (
-        ("spectra", "spectra", spectra),
-        ("subfactors", "subfatores", subfactors),
-        ("scales", "escalas", scales),
-        ("questions", "perguntas", questions),
+    for layer, label, layer_stats in (
+        ("spectra", "spectra", stats["spectra"]),
+        ("subfactors", "subfatores", stats["subfactors"]),
+        ("scales", "escalas", stats["scales"]),
+        ("questions", "perguntas", stats["questions"]),
     ):
-        if stats["total"] == 0:
+        if layer_stats["total"] == 0:
             problems.append(
                 _problem(
                     "error",
@@ -161,14 +147,14 @@ def _scientific_structure_health():
                 )
             )
 
-    for stats, suffix, label in (
-        (spectra, "spectrum", "spectra"),
-        (subfactors, "subfactor", "subfatores"),
-        (scales, "scale", "escalas"),
+    for item_stats, suffix, label in (
+        (stats["spectra"], "spectrum", "spectra"),
+        (stats["subfactors"], "subfactor", "subfatores"),
+        (stats["scales"], "scale", "escalas"),
     ):
         _append_count_problem(
             problems,
-            count=stats["empty_name"],
+            count=item_stats["empty_name"],
             severity="error",
             code=f"empty_{suffix}_name",
             title=f"Existem {label} sem nome",
@@ -177,7 +163,7 @@ def _scientific_structure_health():
 
     _append_count_problem(
         problems,
-        count=spectra["without_subfactors"],
+        count=stats["spectra"]["without_subfactors"],
         severity="warning",
         code="spectrum_without_subfactors",
         title="Spectra sem subfatores",
@@ -185,7 +171,7 @@ def _scientific_structure_health():
     )
     _append_count_problem(
         problems,
-        count=subfactors["without_scales"],
+        count=stats["subfactors"]["without_scales"],
         severity="warning",
         code="subfactor_without_scales",
         title="Subfatores sem escalas",
@@ -193,7 +179,7 @@ def _scientific_structure_health():
     )
     _append_count_problem(
         problems,
-        count=scales["without_questions"],
+        count=stats["scales"]["without_questions"],
         severity="warning",
         code="scale_without_questions",
         title="Escalas sem perguntas",
@@ -201,7 +187,7 @@ def _scientific_structure_health():
     )
     _append_count_problem(
         problems,
-        count=questions["empty_item_code"],
+        count=stats["questions"]["empty_item_code"],
         severity="error",
         code="question_empty_item_code",
         title="Perguntas sem item_code",
@@ -209,7 +195,7 @@ def _scientific_structure_health():
     )
     _append_count_problem(
         problems,
-        count=questions["empty_text"],
+        count=stats["questions"]["empty_text"],
         severity="error",
         code="question_empty_text",
         title="Perguntas sem texto",
@@ -217,7 +203,7 @@ def _scientific_structure_health():
     )
     _append_count_problem(
         problems,
-        count=questions["attention_missing_expected"],
+        count=stats["questions"]["attention_missing_expected"],
         severity="warning",
         code="attention_check_missing_expected_answer",
         title="Attention checks sem resposta esperada",
@@ -227,7 +213,7 @@ def _scientific_structure_health():
     )
     _append_count_problem(
         problems,
-        count=questions["attention_invalid_expected"],
+        count=stats["questions"]["attention_invalid_expected"],
         severity="error",
         code="attention_check_invalid_expected_answer",
         title="Attention checks com resposta esperada inválida",
@@ -237,7 +223,7 @@ def _scientific_structure_health():
     )
     _append_count_problem(
         problems,
-        count=questions["non_attention_with_expected"],
+        count=stats["questions"]["non_attention_with_expected"],
         severity="warning",
         code="non_attention_check_with_expected_answer",
         title="Perguntas comuns com resposta esperada",
@@ -247,15 +233,73 @@ def _scientific_structure_health():
         ),
     )
 
+    problem_by_code = {problem["code"]: problem for problem in problems}
+    entity_issues = {}
+
+    def attach(entity_type, entity_id, code):
+        problem = problem_by_code.get(code)
+        if problem:
+            entity_issues.setdefault((entity_type, entity_id), []).append(
+                {key: value for key, value in problem.items() if key != "count"}
+            )
+
+    for row in spectra:
+        if _is_empty(row["name"]):
+            attach("spectrum", row["id"], "empty_spectrum_name")
+        if not subfactor_counts[row["id"]]:
+            attach("spectrum", row["id"], "spectrum_without_subfactors")
+    for row in subfactors:
+        if _is_empty(row["name"]):
+            attach("subfactor", row["id"], "empty_subfactor_name")
+        if not scale_counts[row["id"]]:
+            attach("subfactor", row["id"], "subfactor_without_scales")
+    for row in scales:
+        if _is_empty(row["name"]):
+            attach("scale", row["id"], "empty_scale_name")
+        if not question_counts[row["id"]]:
+            attach("scale", row["id"], "scale_without_questions")
+    for row in questions:
+        if _is_empty(row["item_code"]):
+            attach("question", row["id"], "question_empty_item_code")
+        if _is_empty(row["question_text"]):
+            attach("question", row["id"], "question_empty_text")
+        if row["is_attention_check"] and _is_empty(row["expected_answer"]):
+            attach("question", row["id"], "attention_check_missing_expected_answer")
+        if (
+            row["is_attention_check"]
+            and not _is_empty(row["expected_answer"])
+            and row["expected_answer"] not in valid_expected_answers
+        ):
+            attach("question", row["id"], "attention_check_invalid_expected_answer")
+        if not row["is_attention_check"] and not _is_empty(row["expected_answer"]):
+            attach("question", row["id"], "non_attention_check_with_expected_answer")
+
     return {
         "summary": {
-            "spectra_count": spectra["total"],
-            "subfactor_count": subfactors["total"],
-            "scale_count": scales["total"],
-            "question_count": questions["total"],
+            "spectra_count": stats["spectra"]["total"],
+            "subfactor_count": stats["subfactors"]["total"],
+            "scale_count": stats["scales"]["total"],
+            "question_count": stats["questions"]["total"],
         },
         "problems": problems,
+        "entity_issues": entity_issues,
     }
+
+
+def _scientific_structure_health():
+    return evaluate_scientific_structure(
+        Spectra.objects.values("id", "name"),
+        Subfactor.objects.values("id", "name", "spectra_id"),
+        Scale.objects.values("id", "name", "subfactor_id"),
+        Question.objects.values(
+            "id",
+            "scale_id",
+            "item_code",
+            "question_text",
+            "is_attention_check",
+            "expected_answer",
+        ),
+    )
 
 
 def _sociodemographic_health():

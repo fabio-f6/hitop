@@ -19,6 +19,7 @@ from polls.percentiles import (
     calculate_percentile,
     calculate_spectrum_percentile,
 )
+from polls.questions import get_questions_for_submission
 from polls.normative_export import evaluate_normative_eligibility
 from polls.normative_versions import get_or_assign_report_normative_version
 from polls.report_constants import SPECTRUM_KEYS
@@ -373,11 +374,9 @@ def _build_report_context(submission):
     patient = submission.user
     normative_version = get_or_assign_report_normative_version(submission)
 
-    selected_spectra = submission.spectra.all()
-
     answers = UserAnswer.objects.filter(
         submission=submission,
-        question__scale__subfactor__spectra__in=selected_spectra,
+        question__in=get_questions_for_submission(submission),
     ).select_related(
         "question__scale__subfactor__spectra"
     ).distinct()

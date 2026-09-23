@@ -48,6 +48,7 @@ from .health_checks import get_system_health_report
 from .models import AdministrativeAuditLog
 from .monitoring import get_questionnaire_monitoring_report
 from .permissions import administrator_required
+from .questionnaire_map import build_questionnaire_structure
 from .services import (
     ProfessionalStateError,
     approve_professional as approve_professional_service,
@@ -747,4 +748,14 @@ def system_health(request):
         request,
         "administration/system_health.html",
         get_system_health_report(),
+    )
+
+
+@administrator_required
+@require_http_methods(["GET"])
+def questionnaire_map(request):
+    return render(
+        request,
+        "administration/questionnaire_map.html",
+        {"questionnaire_map": build_questionnaire_structure()},
     )

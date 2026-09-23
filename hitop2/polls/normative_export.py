@@ -183,7 +183,10 @@ def export_submission_to_normative(submission):
     )
 
     clinical_answers = list(
-        UserAnswer.objects.filter(submission=locked_submission)
+        UserAnswer.objects.filter(
+            submission=locked_submission,
+            question__is_attention_check=False,
+        )
         .select_related("question__scale__subfactor__spectra")
     )
     normative_answers = [

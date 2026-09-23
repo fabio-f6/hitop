@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django import forms
 from .models import UserProfile
 from polls.models import Spectra, QuestionnaireSubmission
+from polls.questions import get_scientific_spectra
 import random
 import string
 
@@ -226,7 +227,7 @@ class CreatePatientForm(SimulationConfigurationMixin, UserCreationForm):
     )
 
     spectra = forms.ModelMultipleChoiceField(
-        queryset=Spectra.objects.all(),
+        queryset=get_scientific_spectra(),
         widget=forms.CheckboxSelectMultiple(attrs={
             "class": "form-check-input",
         }),
@@ -308,7 +309,7 @@ class NewQuestionnaireForm(SimulationConfigurationMixin, forms.Form):
     )
     spectra = forms.ModelMultipleChoiceField(
         label="Módulos a incluir:",
-        queryset=Spectra.objects.all(),
+        queryset=get_scientific_spectra(),
         widget=forms.CheckboxSelectMultiple(attrs={
             "class": "form-check-input",
         }),
@@ -327,7 +328,7 @@ class NewQuestionnaireForm(SimulationConfigurationMixin, forms.Form):
 
 class EditPatientForm(forms.ModelForm):
     spectra = forms.ModelMultipleChoiceField(
-        queryset=Spectra.objects.all(),
+        queryset=get_scientific_spectra(),
         widget=forms.CheckboxSelectMultiple,
         required=True,
         label="Módulos (HiTOP)"
