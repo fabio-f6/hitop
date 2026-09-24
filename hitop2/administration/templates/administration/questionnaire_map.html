@@ -15,10 +15,10 @@
                 <p class="text-secondary mb-0">Visualização de consulta da estrutura científica atualmente configurada.</p>
             </div>
             <div class="map-totals" aria-label="Totais da estrutura">
-                <span><strong>{{ questionnaire_map.totals.spectra_count }}</strong> Spectra</span>
-                <span><strong>{{ questionnaire_map.totals.subfactor_count }}</strong> Subfactors</span>
-                <span><strong>{{ questionnaire_map.totals.scale_count }}</strong> Scales</span>
-                <span><strong>{{ questionnaire_map.totals.question_count }}</strong> Questions</span>
+                <span><strong>{{ questionnaire_map.totals.spectra_count }}</strong> Espetros</span>
+                <span><strong>{{ questionnaire_map.totals.subfactor_count }}</strong> Subfatores</span>
+                <span><strong>{{ questionnaire_map.totals.scale_count }}</strong> Escalas</span>
+                <span><strong>{{ questionnaire_map.totals.question_count }}</strong> Perguntas</span>
             </div>
         </div>
     </header>
@@ -27,7 +27,7 @@
         <div class="map-search-wrap">
             <label class="visually-hidden" for="questionnaire-map-search">Pesquisar estrutura</label>
             <input id="questionnaire-map-search" class="form-control rounded-0" type="search"
-                   placeholder="Pesquisar Spectrum, Subfactor, Scale ou Question..." autocomplete="off">
+                   placeholder="Pesquisar espetro, subfator, escala ou pergunta..." autocomplete="off">
             <div class="map-search-results" data-search-results hidden aria-live="polite"></div>
         </div>
         <div class="btn-group" role="group" aria-label="Filtrar estrutura">

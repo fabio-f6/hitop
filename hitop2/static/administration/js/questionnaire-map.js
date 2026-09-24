@@ -28,6 +28,10 @@
         return spectrumColors[node.spectrumIndex % spectrumColors.length];
     }
 
+    function questionCountLabel(count) {
+        return `${count} ${count === 1 ? "pergunta" : "perguntas"}`;
+    }
+
     function visibleForFilter(node) {
         if (currentFilter === "all") return true;
         if (currentFilter === "problems") return node.has_problem_in_branch;
@@ -61,7 +65,7 @@
         toggle.type = "button";
         toggle.className = "map-toggle";
         toggle.disabled = node.children.length === 0;
-        toggle.setAttribute("aria-label", `${expanded.has(node.id) ? "Recolher" : "Expandir"} ${node.name}`);
+        toggle.setAttribute("aria-label", `${expanded.has(node.id) ? "Recolher" : "Expandir"} ${node.label || node.name}`);
         toggle.setAttribute("aria-expanded", String(expanded.has(node.id)));
         toggle.textContent = expanded.has(node.id) ? "▾" : "▸";
         toggle.addEventListener("click", () => toggleTreeNode(node.id));
@@ -69,15 +73,15 @@
         select.type = "button";
         select.className = "map-node-select";
         select.dataset.selectNode = node.id;
-        select.setAttribute("aria-label", `Selecionar ${node.type_label} ${node.name}`);
+        select.setAttribute("aria-label", `Selecionar ${node.type_label} ${node.label || node.name}`);
         const name = document.createElement("span");
         name.className = "map-node-name";
-        name.textContent = node.name;
+        name.textContent = node.label || node.name;
         const meta = document.createElement("span");
         meta.className = "map-node-meta";
         if (node.type !== "question") {
             const count = document.createElement("span");
-            count.textContent = `${node.question_count} Question${node.question_count === 1 ? "" : "s"}`;
+            count.textContent = questionCountLabel(node.question_count);
             meta.appendChild(count);
         }
         if (node.issues.length) {
@@ -173,7 +177,7 @@
         detailsElement.replaceChildren();
         const heading = document.createElement("h2");
         heading.className = "h5 fw-bold mb-2";
-        heading.textContent = node.name;
+        heading.textContent = node.label || node.name;
         const breadcrumb = document.createElement("nav");
         breadcrumb.className = "map-breadcrumb";
         breadcrumb.setAttribute("aria-label", "Caminho completo");
@@ -181,17 +185,17 @@
             if (index) breadcrumb.append(" → ");
             const button = document.createElement("button");
             button.type = "button";
-            button.textContent = part.name;
+            button.textContent = part.label || part.name;
             button.addEventListener("click", () => selectNode(part.id));
             breadcrumb.appendChild(button);
         });
         const dl = document.createElement("dl");
         const fields = [["Tipo", node.type_label]];
-        node.path.slice(0, -1).forEach(part => fields.push([nodes.get(part.id).type_label, part.name]));
-        if (node.type !== "question") fields.push(["Questions", String(node.question_count)]);
+        node.path.slice(0, -1).forEach(part => fields.push([nodes.get(part.id).type_label, part.label || part.name]));
+        if (node.type !== "question") fields.push(["Perguntas", String(node.question_count)]);
         if (node.type === "question") {
             fields.push(["Texto", node.details.question_text || "Sem texto"]);
-            fields.push(["Attention check", node.details.is_attention_check ? "Sim" : "Não"]);
+            fields.push(["Verificação de atenção", node.details.is_attention_check ? "Sim" : "Não"]);
             if (node.details.is_attention_check) fields.push(["Resposta esperada", node.details.expected_answer || "Não definida"]);
         }
         fields.push(["Estado", node.issues.length ? "Requer atenção" : "Sem problemas detetados"]);
@@ -237,15 +241,15 @@
             searchResults.hidden = true;
             return;
         }
-        const matches = [...nodes.values()].filter(node => normalized(`${node.name} ${node.details.item_code || ""} ${node.details.question_text || ""}`).includes(query)).slice(0, 30);
+        const matches = [...nodes.values()].filter(node => normalized(`${node.name} ${node.label || ""} ${node.details.item_code || ""} ${node.details.question_text || ""}`).includes(query)).slice(0, 30);
         matches.forEach(node => {
             const button = document.createElement("button");
             button.type = "button";
             button.className = "map-search-result";
             const label = document.createElement("strong");
             const path = document.createElement("small");
-            label.textContent = `${node.name} · ${node.type_label}`;
-            path.textContent = node.path_text;
+            label.textContent = `${node.label || node.name} · ${node.type_label}`;
+            path.textContent = node.display_path_text || node.path_text;
             button.append(label, path);
             button.addEventListener("click", () => {
                 searchResults.hidden = true;
@@ -295,7 +299,7 @@
         }
 
         function hierarchyData() {
-            return { id: "visual-root", name: "HiTOP", type: "root", type_label: "Estrutura", children: data.roots.filter(visibleForFilter), issues: [], question_count: data.totals.question_count };
+            return { id: "visual-root", name: "HiTOP", label: "HiTOP", type: "root", type_label: "Estrutura", children: data.roots.filter(visibleForFilter), issues: [], question_count: data.totals.question_count };
         }
 
         function spectrumNode(datum) {
@@ -320,15 +324,15 @@
         }
 
         function estimatedLabelWidth(datum) {
-            if (datum.data.type === "question") return Math.max(48, datum.data.name.length * 6.2);
-            return Math.min(210, Math.max(58, datum.data.name.length * 6.4));
+            const label = datum.data.label || datum.data.name;
+            if (datum.data.type === "question") return Math.max(48, label.length * 6.2);
+            return Math.min(210, Math.max(58, label.length * 6.4));
         }
 
         function visibleLabel(datum) {
-            if (datum.data.type !== "scale") return datum.data.name;
-            return datum.data.name.length > 30
-                ? `${datum.data.name.slice(0, 29)}…`
-                : datum.data.name;
+            const label = datum.data.label || datum.data.name;
+            if (datum.data.type !== "scale") return label;
+            return label.length > 30 ? `${label.slice(0, 29)}…` : label;
         }
 
         function polarPoint(angle, radius) {
@@ -404,16 +408,16 @@
 
         function tooltipLines(datum) {
             const node = datum.data;
-            if (node.type === "root") return ["HiTOP", `${node.question_count} Questions`];
-            const lines = [node.name, node.type_label];
+            if (node.type === "root") return ["HiTOP", questionCountLabel(node.question_count)];
+            const lines = [node.label || node.name, node.type_label];
             if (node.type === "question") {
                 const scale = node.path.find(part => part.type === "scale");
-                if (scale) lines.push(`Scale: ${scale.name}`);
+                if (scale) lines.push(`Escala: ${scale.label || scale.name}`);
             } else {
-                lines.push(`${node.question_count} Question${node.question_count === 1 ? "" : "s"}`);
+                lines.push(questionCountLabel(node.question_count));
                 if (node.type === "scale") {
                     const subfactor = node.path.find(part => part.type === "subfactor");
-                    if (subfactor) lines.push(`Subfactor: ${subfactor.name}`);
+                    if (subfactor) lines.push(`Subfator: ${subfactor.label || subfactor.name}`);
                 }
             }
             if (node.issues.length) lines.push(node.issues[0].title);
@@ -498,7 +502,7 @@
                             .attr("transform", datum => transformFor(datum.parent || datum))
                             .attr("role", datum => datum.data.type === "root" ? null : "button")
                             .attr("tabindex", datum => datum.data.type === "root" ? null : 0)
-                            .attr("aria-label", datum => `${datum.data.type_label}: ${datum.data.name}`)
+                            .attr("aria-label", datum => `${datum.data.type_label}: ${datum.data.label || datum.data.name}`)
                             .on("click", activateNode)
                             .on("keydown", (event, datum) => {
                                 if (event.key === "Enter" || event.key === " ") { event.preventDefault(); activateNode(event, datum); }

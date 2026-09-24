@@ -117,6 +117,10 @@ SCALE_TRANSLATIONS = {
     "Reality Distortion (Hallucinations)": "Distorção da Realidade (Alucinações)",
     "Manic Energy": "Ativação Maníaca",
     "Withdrawal": "Abstinência",
+    # Canonical names used in the project's official translation list.
+    "Deceitfulness": "Dissimulação",
+    "Manipulativeness": "Manipulação",
+    "Specific Phobia (Blood-Injection Phobia)": "Fobias Específicas (Fobia a Sangue-Injeções)",
 }
 
 def translate_scale(name):

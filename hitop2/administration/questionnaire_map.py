@@ -1,15 +1,22 @@
 from collections import defaultdict
 
 from polls.models import Question, Scale, Spectra, Subfactor
+from polls.translations import translate_scale, translate_spectrum, translate_subfactor
 
 from .health_checks import evaluate_scientific_structure
 
 
 TYPE_LABELS = {
-    "spectrum": "Spectrum",
-    "subfactor": "Subfactor",
-    "scale": "Scale",
-    "question": "Question",
+    "spectrum": "Espetro",
+    "subfactor": "Subfator",
+    "scale": "Escala",
+    "question": "Pergunta",
+}
+
+NAME_TRANSLATORS = {
+    "spectrum": translate_spectrum,
+    "subfactor": translate_subfactor,
+    "scale": translate_scale,
 }
 
 
@@ -76,13 +83,14 @@ def build_questionnaire_structure():
     subfactors_by_spectrum = defaultdict(list)
 
     def make_node(node_type, row, name, children=None, details=None):
+        display_name = NAME_TRANSLATORS.get(node_type, lambda value: value)(name)
         node = {
             "id": _node_id(node_type, row["id"]),
             "database_id": row["id"],
             "type": node_type,
             "type_label": TYPE_LABELS[node_type],
             "name": name or "Sem nome",
-            "label": name or "Sem nome",
+            "label": display_name or "Sem nome",
             "question_count": 1 if node_type == "question" else 0,
             "issues": issues.get((node_type, row["id"]), []),
             "children": children or [],
@@ -124,9 +132,18 @@ def build_questionnaire_structure():
         roots.append(spectrum)
 
     def add_paths(node, ancestors):
-        path = [*ancestors, {"id": node["id"], "name": node["name"], "type": node["type"]}]
+        path = [
+            *ancestors,
+            {
+                "id": node["id"],
+                "name": node["name"],
+                "label": node["label"],
+                "type": node["type"],
+            },
+        ]
         node["path"] = path
         node["path_text"] = " → ".join(part["name"] for part in path)
+        node["display_path_text"] = " → ".join(part["label"] for part in path)
         node["has_problem_in_branch"] = bool(node["issues"])
         for child in node["children"]:
             add_paths(child, path)
