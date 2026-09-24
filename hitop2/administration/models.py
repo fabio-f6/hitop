@@ -29,10 +29,17 @@ class AdministrativeAuditLog(models.Model):
             "normative_version.activated",
             "Versão normativa ativada",
         )
+        NORMATIVE_TEST_SYNTHETIC_BATCH_CREATED = (
+            "normative_test.synthetic_batch_created", "Batch normativo sintético criado",
+        )
+        NORMATIVE_TEST_CLEARED = (
+            "normative_test.cleared", "Ambiente normativo de teste limpo",
+        )
 
     class ObjectType(models.TextChoices):
         PROFESSIONAL = "professional", "Profissional"
         NORMATIVE_VERSION = "normative_version", "Versão normativa"
+        NORMATIVE_TEST = "normative_test", "Ambiente normativo de teste"
 
     class Result(models.TextChoices):
         SUCCESS = "success", "Concluída"

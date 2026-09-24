@@ -1,4 +1,5 @@
 import random
+import hashlib
 from collections import defaultdict
 
 from django.db import transaction
@@ -11,6 +12,7 @@ from polls.normative_export import (
     PORTUGUESE_LANGUAGE_QUESTION_ID,
     PORTUGUESE_LANGUAGE_YES_VALUE,
     process_normative_eligibility,
+    export_submission_to_test_normative,
 )
 from polls.questions import get_questions_for_submission
 from polls.sociodemographic import (
@@ -38,6 +40,16 @@ class SimulationConfigurationError(ValueError):
 
 class SimulationPermissionError(SimulationConfigurationError):
     pass
+
+
+MIN_SIMULATION_QUANTITY = 1
+MAX_SIMULATION_QUANTITY = 200
+
+
+def derive_simulation_seed(base_seed, index):
+    """Derive stable, distinct signed 32-bit seeds without global RNG state."""
+    material = f"{base_seed!r}:{index}".encode("utf-8")
+    return int.from_bytes(hashlib.sha256(material).digest()[:4], "big") & 0x7fffffff
 
 
 def _profile_answer(rng, profile):
@@ -327,3 +339,31 @@ def simulate_submission(submission):
     submission.save(update_fields=["completed", "completed_at", "is_open"])
 
     return process_normative_eligibility(submission)
+
+
+@transaction.atomic
+def simulate_submission_batch(submissions, *, base_seed=None, export_to_normative_test=False):
+    submissions = list(submissions)
+    quantity = len(submissions)
+    if not MIN_SIMULATION_QUANTITY <= quantity <= MAX_SIMULATION_QUANTITY:
+        raise SimulationConfigurationError(
+            f"A quantidade deve estar entre {MIN_SIMULATION_QUANTITY} e {MAX_SIMULATION_QUANTITY}."
+        )
+    summary = {"created": quantity, "eligible": 0, "ineligible": 0, "pending": 0, "exported": 0}
+    for index, submission in enumerate(submissions, start=1):
+        submission.simulation_seed = (
+            base_seed if quantity == 1 else derive_simulation_seed(base_seed, index)
+        )
+        submission.save(update_fields=["simulation_seed"])
+        result = simulate_submission(submission)
+        state = result.get("eligible") if result else None
+        if state is True:
+            summary["eligible"] += 1
+            if export_to_normative_test:
+                export_submission_to_test_normative(submission)
+                summary["exported"] += 1
+        elif state is False:
+            summary["ineligible"] += 1
+        else:
+            summary["pending"] += 1
+    return summary

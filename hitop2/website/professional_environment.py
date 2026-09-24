@@ -9,7 +9,9 @@ from django.utils import timezone
 
 from polls.models import QuestionnaireSubmission, UserAnswer
 from polls.normative_export import evaluate_normative_eligibility
-from polls.simulation import SimulationConfigurationError, simulate_submission
+from polls.simulation import SimulationConfigurationError, simulate_submission_batch
+from administration.audit import record_admin_action
+from administration.models import AdministrativeAuditLog
 
 from .forms import CreatePatientForm, NewQuestionnaireForm
 from .models import UserProfile
@@ -139,10 +141,15 @@ class ProfessionalEnvironment:
 
 def _safe_simulation_configuration(form, *, is_test_data):
     if is_test_data:
-        return form.simulation_configuration()
-    # This backend normalization is intentional even though the clinical form
-    # does not expose or bind simulation fields.
-    return form.simulation_defaults.copy()
+        configuration = form.simulation_configuration()
+    else:
+        # This backend normalization is intentional even though the clinical form
+        # does not expose or bind simulation fields.
+        configuration = form.simulation_defaults.copy()
+    return {
+        key: value for key, value in configuration.items()
+        if key not in {"simulation_quantity", "include_in_normative_test"}
+    }
 
 
 @transaction.atomic
@@ -168,23 +175,44 @@ def _create_patient_and_first_submission(form, environment):
 
 @transaction.atomic
 def _create_submission(form, patient_profile, environment):
-    submission = QuestionnaireSubmission.objects.create(
-        user=patient_profile.user,
-        questionnaire_type="hitop",
-        title=form.cleaned_data["title"],
-        completed=False,
-        is_open=True,
-        is_test_data=environment.is_test_environment,
-        **_safe_simulation_configuration(
-            form,
-            is_test_data=environment.is_test_environment,
-        ),
+    configuration = _safe_simulation_configuration(
+        form, is_test_data=environment.is_test_environment,
     )
-    submission.spectra.set(form.cleaned_data["spectra"])
+    quantity = form.cleaned_data.get("simulation_quantity", 1)
+    if configuration["simulation_mode"] == "normal":
+        quantity = 1
+    submissions = []
+    for index in range(quantity):
+        title = form.cleaned_data["title"]
+        if quantity > 1:
+            title = f"{title} ({index + 1}/{quantity})"
+        submission = QuestionnaireSubmission.objects.create(
+            user=patient_profile.user, questionnaire_type="hitop", title=title,
+            completed=False, is_open=True,
+            is_test_data=environment.is_test_environment, **configuration,
+        )
+        submission.spectra.set(form.cleaned_data["spectra"])
+        submissions.append(submission)
 
-    if submission.simulation_mode != "normal":
-        simulate_submission(submission)
-    return submission
+    if configuration["simulation_mode"] != "normal":
+        summary = simulate_submission_batch(
+            submissions,
+            base_seed=configuration["simulation_seed"],
+            export_to_normative_test=form.cleaned_data.get("include_in_normative_test", False),
+        )
+        record_admin_action(
+            actor=environment.owner,
+            action=AdministrativeAuditLog.Action.NORMATIVE_TEST_SYNTHETIC_BATCH_CREATED,
+            object_type=AdministrativeAuditLog.ObjectType.NORMATIVE_TEST,
+            object_id=f"batch-{submissions[0].pk}", object_label="Batch de simulação normativa",
+            metadata={
+                "quantity_requested": quantity, "quantity_eligible": summary["eligible"],
+                "quantity_exported": summary["exported"], "base_seed": configuration["simulation_seed"],
+                "response_profile": configuration["simulation_response_profile"],
+            },
+        )
+        submissions[0].simulation_batch_summary = summary
+    return submissions[0]
 
 
 def dashboard_response(request, environment):
@@ -236,13 +264,21 @@ def create_patient_response(request, environment):
 
         if form.is_valid():
             try:
-                user, _submission = _create_patient_and_first_submission(
+                user, submission = _create_patient_and_first_submission(
                     form,
                     environment,
                 )
             except SimulationConfigurationError as error:
                 form.add_error(None, str(error))
             else:
+                summary = getattr(submission, "simulation_batch_summary", None)
+                if summary:
+                    messages.success(
+                        request,
+                        "Simulações criadas: {created}; elegíveis: {eligible}; "
+                        "exportadas para normativa de teste: {exported}; "
+                        "ineligíveis: {ineligible}; pendentes: {pending}.".format(**summary),
+                    )
                 request.session.pop(environment.temporary_credentials_key, None)
                 return redirect(
                     environment.patient_submissions_url_name,
@@ -268,11 +304,20 @@ def new_questionnaire_response(request, environment, patient_id):
         form = NewQuestionnaireForm(request.POST, **form_kwargs)
         if form.is_valid():
             try:
-                _create_submission(form, patient_profile, environment)
+                submission = _create_submission(form, patient_profile, environment)
             except SimulationConfigurationError as error:
                 form.add_error(None, str(error))
             else:
-                messages.success(request, "Novo questionário criado com sucesso.")
+                summary = getattr(submission, "simulation_batch_summary", None)
+                if summary:
+                    messages.success(
+                        request,
+                        "Simulações criadas: {created}; elegíveis: {eligible}; "
+                        "exportadas para normativa de teste: {exported}; "
+                        "ineligíveis: {ineligible}; pendentes: {pending}.".format(**summary),
+                    )
+                else:
+                    messages.success(request, "Novo questionário criado com sucesso.")
                 return redirect(environment.dashboard_url_name)
     else:
         form = NewQuestionnaireForm(**form_kwargs)
@@ -319,7 +364,7 @@ def patient_submissions_response(request, environment, patient_id):
         environment.submission_queryset().filter(
             user=patient,
             questionnaire_type="hitop",
-        ).order_by("-started_at")
+        ).select_related("report_normative_version").order_by("-started_at")
     )
     for submission in submissions:
         submission.access_link = request.build_absolute_uri(

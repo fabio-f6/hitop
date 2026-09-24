@@ -15,6 +15,8 @@ _ALLOWED_METADATA_KEYS = {
     AdministrativeAuditLog.Action.NORMATIVE_VERSION_CREATED: {
         "new_status",
         "participant_count",
+        "environment",
+        "baseline_version",
     },
     AdministrativeAuditLog.Action.NORMATIVE_VERSION_PREPARED: {
         "previously_prepared",
@@ -30,6 +32,13 @@ _ALLOWED_METADATA_KEYS = {
         "previous_active_version_id",
         "previous_active_version_label",
     },
+    AdministrativeAuditLog.Action.NORMATIVE_TEST_SYNTHETIC_BATCH_CREATED: {
+        "quantity_requested", "quantity_eligible", "quantity_exported",
+        "base_seed", "response_profile",
+    },
+    AdministrativeAuditLog.Action.NORMATIVE_TEST_CLEARED: {
+        "versions_deleted", "synthetic_participants_deleted",
+    },
     MASTER_RESET_ACTION: {
         "users_deleted",
         "submissions_deleted",
@@ -37,6 +46,8 @@ _ALLOWED_METADATA_KEYS = {
         "previous_active_normative_version",
         "restored_normative_version",
         "restored_normative_participant_count",
+        "test_versions_deleted",
+        "synthetic_participants_deleted",
     },
 }
 

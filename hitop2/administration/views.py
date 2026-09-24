@@ -12,7 +12,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST, require_http_methods
 
-from polls.models import NormativeDatasetVersion
+from polls.models import NormativeDatasetVersion, NormativeParticipant
+from polls.normative_test import clear_normative_test_environment
 from polls.normative_versions import (
     activate_normative_version as activate_normative_version_service,
     create_normative_version as create_normative_version_service,
@@ -43,7 +44,8 @@ from website.views import (
 )
 
 from .audit import record_admin_action
-from .forms import MasterResetConfirmationForm, NormativeVersionCreateForm
+from .forms import (MasterResetConfirmationForm, NormativeVersionCreateForm,
+                    NormativeTestVersionCreateForm, NormativeTestCleanupForm)
 from .health_checks import get_system_health_report
 from .models import AdministrativeAuditLog, MASTER_RESET_ACTION
 from .monitoring import get_questionnaire_monitoring_report
@@ -464,6 +466,10 @@ def deactivate_professional(request, professional_id):
 @administrator_required
 def normative(request):
     active_version = get_active_normative_version()
+    active_test_version = NormativeDatasetVersion.objects.filter(
+        environment=NormativeDatasetVersion.Environment.TEST,
+        status=NormativeDatasetVersion.Status.ACTIVE,
+    ).first()
     return render(
         request,
         "administration/normative.html",
@@ -478,8 +484,75 @@ def normative(request):
             "unversioned_participant_count": (
                 get_unversioned_normative_participant_count(active_version)
             ),
+            "active_test_version": active_test_version,
+            "synthetic_participant_count": NormativeParticipant.objects.filter(
+                source=NormativeParticipant.Source.SYNTHETIC
+            ).count(),
+            "test_versions": get_normative_versions(
+                NormativeDatasetVersion.Environment.TEST
+            ).order_by("-created_at", "-id")[:10],
         },
     )
+
+
+@administrator_required
+@require_http_methods(["GET", "POST"])
+def create_test_normative_version(request):
+    form = NormativeTestVersionCreateForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        try:
+            with transaction.atomic():
+                version = create_normative_version_service(
+                    form.cleaned_data["name"],
+                    environment=NormativeDatasetVersion.Environment.TEST,
+                    baseline_version=form.cleaned_data["baseline_version"],
+                )
+                record_admin_action(
+                    actor=request.user,
+                    action=AdministrativeAuditLog.Action.NORMATIVE_VERSION_CREATED,
+                    object_type=AdministrativeAuditLog.ObjectType.NORMATIVE_VERSION,
+                    object_id=version.pk, object_label=version.name,
+                    metadata={"environment": "test", "baseline_version": version.baseline_version.name,
+                              "participant_count": version.participant_count},
+                )
+        except ValidationError as exception:
+            form.add_error("name", _validation_error_message(exception))
+        except IntegrityError:
+            form.add_error("name", "Já existe uma versão normativa com este nome.")
+        else:
+            return redirect("administration:normative_version_detail", version_id=version.pk)
+    synthetic_count = NormativeParticipant.objects.filter(
+        source=NormativeParticipant.Source.SYNTHETIC
+    ).count()
+    baseline = form["baseline_version"].value()
+    baseline_count = 0
+    if baseline:
+        candidate = NormativeDatasetVersion.objects.filter(pk=baseline).first()
+        baseline_count = candidate.participant_count if candidate else 0
+    return render(request, "administration/normative_test_version_create.html", {
+        "form": form, "synthetic_count": synthetic_count,
+        "resulting_count": baseline_count + synthetic_count,
+    })
+
+
+@administrator_required
+@require_http_methods(["GET", "POST"])
+def clear_test_normative_environment(request):
+    form = NormativeTestCleanupForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        with transaction.atomic():
+            result = clear_normative_test_environment()
+            record_admin_action(
+                actor=request.user,
+                action=AdministrativeAuditLog.Action.NORMATIVE_TEST_CLEARED,
+                object_type=AdministrativeAuditLog.ObjectType.NORMATIVE_TEST,
+                object_id="environment", object_label="Ambiente normativo de teste",
+                metadata={"versions_deleted": result.versions,
+                          "synthetic_participants_deleted": result.participants},
+            )
+        messages.success(request, "Ambiente normativo de teste limpo.")
+        return redirect("administration:normative")
+    return render(request, "administration/normative_test_cleanup.html", {"form": form})
 
 
 @administrator_required

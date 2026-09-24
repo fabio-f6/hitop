@@ -1,10 +1,26 @@
+from contextlib import contextmanager
+from contextvars import ContextVar
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db.models import Q
-from django.db.models.signals import m2m_changed, pre_delete
+from django.db.models.signals import m2m_changed, pre_delete, pre_save
 from django.dispatch import receiver
 import uuid
+
+
+_normative_test_cleanup = ContextVar("normative_test_cleanup", default=False)
+
+
+@contextmanager
+def normative_test_cleanup_boundary():
+    """Permit TEST snapshot deletion only inside its explicit cleanup service."""
+    token = _normative_test_cleanup.set(True)
+    try:
+        yield
+    finally:
+        _normative_test_cleanup.reset(token)
 
 class Spectra(models.Model):
     name = models.CharField(max_length=100)
@@ -352,6 +368,10 @@ class DynamicAnswer(models.Model):
 
 class NormativeDatasetVersion(models.Model):
 
+    class Environment(models.TextChoices):
+        PRODUCTION = "production", "Produção"
+        TEST = "test", "Teste"
+
     class Status(models.TextChoices):
         DRAFT = "draft", "Rascunho"
         ACTIVE = "active", "Ativa"
@@ -360,6 +380,18 @@ class NormativeDatasetVersion(models.Model):
     name = models.CharField(
         max_length=100,
         unique=True,
+    )
+
+    environment = models.CharField(
+        max_length=12,
+        choices=Environment.choices,
+        default=Environment.PRODUCTION,
+        db_index=True,
+    )
+
+    baseline_version = models.ForeignKey(
+        "self", on_delete=models.PROTECT, null=True, blank=True,
+        related_name="test_derivatives",
     )
 
     status = models.CharField(
@@ -393,9 +425,9 @@ class NormativeDatasetVersion(models.Model):
         ordering = ("-created_at", "-id")
         constraints = (
             models.UniqueConstraint(
-                fields=("status",),
+                fields=("environment",),
                 condition=Q(status="active"),
-                name="polls_one_active_normative_version",
+                name="polls_one_active_normative_version_per_environment",
             ),
             models.CheckConstraint(
                 condition=(
@@ -408,6 +440,11 @@ class NormativeDatasetVersion(models.Model):
 
     def clean(self):
         super().clean()
+        if self.baseline_version_id:
+            if self.environment != self.Environment.TEST:
+                raise ValidationError({"baseline_version": "Apenas versões de teste têm baseline."})
+            if self.baseline_version.environment != self.Environment.PRODUCTION:
+                raise ValidationError({"baseline_version": "O baseline deve ser uma versão de produção."})
         if self.status == self.Status.DRAFT and self.activated_at is not None:
             raise ValidationError({
                 "activated_at": "Uma versão draft não pode ter data de ativação."
@@ -429,7 +466,7 @@ class NormativeDatasetVersion(models.Model):
                     "O estado da versão só pode ser alterado pelo serviço normativo."
                 )
             if previous.status != self.Status.DRAFT:
-                immutable_fields = ("name", "prepared_at", "activated_at")
+                immutable_fields = ("name", "environment", "baseline_version_id", "prepared_at", "activated_at")
                 if any(
                     getattr(previous, field) != getattr(self, field)
                     for field in immutable_fields
@@ -453,6 +490,19 @@ class NormativeDatasetVersion(models.Model):
         return f"{self.name} ({self.get_status_display()})"
 
 class NormativeParticipant(models.Model):
+
+    class Source(models.TextChoices):
+        REAL = "real", "Real"
+        SYNTHETIC = "synthetic", "Sintético"
+
+    source = models.CharField(
+        max_length=12, choices=Source.choices, default=Source.REAL, db_index=True,
+    )
+
+    source_submission = models.OneToOneField(
+        QuestionnaireSubmission, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="synthetic_normative_participant",
+    )
 
     sex = models.CharField(
         max_length=20,
@@ -496,6 +546,15 @@ class NormativeDatasetMembership(models.Model):
 
     def clean(self):
         super().clean()
+        if (
+            self.version_id
+            and self.participant_id
+            and self.version.environment == NormativeDatasetVersion.Environment.PRODUCTION
+            and self.participant.source == NormativeParticipant.Source.SYNTHETIC
+        ):
+            raise ValidationError(
+                "Participantes sintéticos não podem integrar versões de produção."
+            )
         if self.version_id and _version_is_immutable(self.version_id):
             raise ValidationError(
                 "Os participantes desta versão normativa já não podem ser alterados."
@@ -668,6 +727,20 @@ def _version_is_immutable(version_or_id):
     return status != NormativeDatasetVersion.Status.DRAFT or prepared_at is not None
 
 
+@receiver(pre_save, sender=QuestionnaireSubmission)
+def protect_report_normative_environment(sender, instance, **kwargs):
+    if not instance.report_normative_version_id:
+        return
+    environment = NormativeDatasetVersion.objects.values_list(
+        "environment", flat=True
+    ).get(pk=instance.report_normative_version_id)
+    is_test_submission = instance.is_test_data or instance.simulation_mode != "normal"
+    if not is_test_submission and environment != NormativeDatasetVersion.Environment.PRODUCTION:
+        raise ValidationError(
+            "Uma submissão clínica real não pode usar uma versão normativa de teste."
+        )
+
+
 @receiver(m2m_changed, sender=NormativeDatasetMembership)
 def protect_normative_snapshot(sender, instance, action, reverse, pk_set, **kwargs):
     if action not in {"pre_add", "pre_remove", "pre_clear"}:
@@ -691,12 +764,22 @@ def protect_normative_snapshot(sender, instance, action, reverse, pk_set, **kwar
 
 @receiver(pre_delete, sender=NormativeDatasetVersion)
 def protect_historical_normative_version_deletion(sender, instance, **kwargs):
+    if (
+        _normative_test_cleanup.get()
+        and instance.environment == NormativeDatasetVersion.Environment.TEST
+    ):
+        return
     if _version_status(instance.pk) != NormativeDatasetVersion.Status.DRAFT:
         raise ValidationError("Uma versão normativa histórica não pode ser eliminada.")
 
 
 @receiver(pre_delete, sender=NormativeDatasetMembership)
 def protect_normative_membership_deletion(sender, instance, **kwargs):
+    if (
+        _normative_test_cleanup.get()
+        and instance.version.environment == NormativeDatasetVersion.Environment.TEST
+    ):
+        return
     if _version_is_immutable(instance.version_id):
         raise ValidationError(
             "Os participantes desta versão normativa já não podem ser alterados."
@@ -706,5 +789,10 @@ def protect_normative_membership_deletion(sender, instance, **kwargs):
 @receiver(pre_delete, sender=NormativeScaleScore)
 @receiver(pre_delete, sender=NormativeSpectrumScore)
 def protect_historical_normative_score_deletion(sender, instance, **kwargs):
+    if (
+        _normative_test_cleanup.get()
+        and instance.version.environment == NormativeDatasetVersion.Environment.TEST
+    ):
+        return
     if _version_status(instance.version_id) != NormativeDatasetVersion.Status.DRAFT:
         raise ValidationError("Os scores de uma versão histórica são imutáveis.")

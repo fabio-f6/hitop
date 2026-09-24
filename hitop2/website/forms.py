@@ -16,6 +16,8 @@ class SimulationConfigurationMixin:
         "simulation_missing_percentage",
         "simulation_attention_mode",
         "simulation_seed",
+        "simulation_quantity",
+        "include_in_normative_test",
     )
 
     simulation_defaults = {
@@ -25,6 +27,8 @@ class SimulationConfigurationMixin:
         "simulation_missing_percentage": 0,
         "simulation_attention_mode": "all_correct",
         "simulation_seed": None,
+        "simulation_quantity": 1,
+        "include_in_normative_test": False,
     }
 
     def configure_simulation_fields(self, *, allow_simulation):
@@ -33,6 +37,15 @@ class SimulationConfigurationMixin:
             self.add_simulation_fields()
 
     def add_simulation_fields(self):
+        self.fields["simulation_quantity"] = forms.IntegerField(
+            label="Quantidade de simulações", min_value=1, max_value=200,
+            initial=1, required=False,
+            widget=forms.NumberInput(attrs={"class": "form-control", "min": 1, "max": 200}),
+        )
+        self.fields["include_in_normative_test"] = forms.BooleanField(
+            label="Incluir participantes elegíveis na base normativa de teste",
+            required=False, initial=False,
+        )
         self.fields["simulation_mode"] = forms.TypedChoiceField(
             label="Modo da aplicação:",
             choices=QuestionnaireSubmission.SIMULATION_MODES,
@@ -100,6 +113,7 @@ class SimulationConfigurationMixin:
         cleaned_data["simulation_missing_percentage"] = (
             cleaned_data.get("simulation_missing_percentage") or 0
         )
+        cleaned_data["simulation_quantity"] = cleaned_data.get("simulation_quantity") or 1
         if mode == "normal":
             cleaned_data.update({
                 "sociodemographic_simulation_mode": "normal",
@@ -107,6 +121,8 @@ class SimulationConfigurationMixin:
                 "simulation_missing_percentage": 0,
                 "simulation_attention_mode": "all_correct",
                 "simulation_seed": None,
+                "simulation_quantity": 1,
+                "include_in_normative_test": False,
             })
         elif (
             mode == "simulated_nulls"

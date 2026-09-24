@@ -11,7 +11,7 @@
             >
                 ← Administração
             </a>
-            <h1 class="h2 fw-bold mt-4 mb-2">Base normativa</h1>
+            <h1 class="h2 fw-bold mt-4 mb-2">Base normativa de produção</h1>
             <p class="text-secondary mb-0">
                 Consulte a versão ativa e administre o ciclo de vida das versões normativas.
             </p>
@@ -88,6 +88,25 @@
     >
         Consultar histórico de versões
     </a>
+
+    <hr class="my-5">
+    <section class="border border-warning bg-white p-4">
+        <h2 class="h3 fw-bold">Ambiente normativo de teste</h2>
+        <p class="text-danger fw-bold">DADOS SINTÉTICOS — NÃO UTILIZADOS EM PRODUÇÃO</p>
+        <dl class="row">
+            <dt class="col-sm-5">Participantes sintéticos disponíveis</dt>
+            <dd class="col-sm-7">{{ synthetic_participant_count }}</dd>
+            <dt class="col-sm-5">Versão de teste ativa</dt>
+            <dd class="col-sm-7">{% if active_test_version %}{{ active_test_version.name }} — {{ active_test_version.participant_count }} participantes{% else %}Nenhuma{% endif %}</dd>
+        </dl>
+        <div class="d-flex gap-2 flex-wrap mb-4">
+            <a class="btn btn-warning rounded-0" href="{% url 'administration:create_test_normative_version' %}">Criar versão de teste</a>
+            <a class="btn btn-outline-danger rounded-0" href="{% url 'administration:clear_test_normative_environment' %}">Limpar ambiente normativo de teste</a>
+        </div>
+        <h3 class="h5">Histórico de teste</h3>
+        <ul class="mb-0">
+            {% for version in test_versions %}<li><a href="{% url 'administration:normative_version_detail' version.id %}">{{ version.name }}</a> — {{ version.get_status_display }} — {{ version.participant_count }} participantes</li>{% empty %}<li>Nenhuma versão de teste.</li>{% endfor %}
+        </ul>
+    </section>
 </section>
 {% endblock %}
-

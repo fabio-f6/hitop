@@ -169,6 +169,18 @@
 
             </span>
 
+            {% if s.completed %}
+            <br>
+            <strong>Base normativa:</strong>
+            <span style="float:right;">
+                {% if s.report_normative_version %}
+                    {{ s.report_normative_version.name }}{% if is_test_environment %} ({{ s.report_normative_version.get_environment_display }}){% endif %}
+                {% else %}
+                    ainda não atribuída
+                {% endif %}
+            </span>
+            {% endif %}
+
         </div>
 
         <hr

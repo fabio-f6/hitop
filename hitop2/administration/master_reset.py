@@ -17,6 +17,7 @@ from polls.models import (
     Spectra,
     UserAnswer,
 )
+from polls.normative_test import clear_normative_test_environment
 from website.models import UserProfile
 
 from .audit import record_admin_action
@@ -60,6 +61,8 @@ def _validate_original_version(locked_versions):
     if len(matches) != 1:
         raise MasterResetError("A versão normativa original não é identificável.")
     version = matches[0]
+    if version.environment != NormativeDatasetVersion.Environment.PRODUCTION:
+        raise MasterResetError("A versão normativa original não é de produção.")
     if version.status not in {
         NormativeDatasetVersion.Status.ACTIVE,
         NormativeDatasetVersion.Status.RETIRED,
@@ -91,7 +94,9 @@ def _restore_existing_version_as_active(version, locked_versions):
     """Restore a historical snapshot without recalculation or timestamp loss."""
     other_active_ids = [
         item.pk for item in locked_versions
-        if item.status == NormativeDatasetVersion.Status.ACTIVE and item.pk != version.pk
+        if item.status == NormativeDatasetVersion.Status.ACTIVE
+        and item.environment == NormativeDatasetVersion.Environment.PRODUCTION
+        and item.pk != version.pk
     ]
     if other_active_ids:
         NormativeDatasetVersion.objects.filter(pk__in=other_active_ids).update(
@@ -110,6 +115,14 @@ def perform_master_reset(actor):
     if actor_pk is None or not can_master_reset(actor):
         raise MasterResetError("O actor não tem autorização.")
 
+    # Report generation locks a submission before its selected version. Match
+    # that order before taking lifecycle locks so reset and report cannot
+    # deadlock while trying to acquire the same rows.
+    list(
+        QuestionnaireSubmission.objects.select_for_update()
+        .order_by("pk")
+        .values_list("pk", flat=True)
+    )
     # Lock every lifecycle row in a stable order. This is also the global reset
     # mutex: concurrent reset/activation operations serialize on these rows.
     locked_versions = list(
@@ -147,13 +160,19 @@ def perform_master_reset(actor):
         is_test_data=True,
     ).count()
     audit_count_before = AdministrativeAuditLog.objects.count()
+    production_versions = NormativeDatasetVersion.objects.filter(
+        environment=NormativeDatasetVersion.Environment.PRODUCTION
+    )
+    real_participants = NormativeParticipant.objects.filter(
+        source=NormativeParticipant.Source.REAL
+    )
     normative_counts_before = {
-        "participants": NormativeParticipant.objects.count(),
-        "answers": NormativeAnswer.objects.count(),
-        "versions": NormativeDatasetVersion.objects.count(),
-        "memberships": NormativeDatasetMembership.objects.count(),
-        "scale_scores": NormativeScaleScore.objects.count(),
-        "spectrum_scores": NormativeSpectrumScore.objects.count(),
+        "participants": real_participants.count(),
+        "answers": NormativeAnswer.objects.filter(participant__source="real").count(),
+        "versions": production_versions.count(),
+        "memberships": NormativeDatasetMembership.objects.filter(version__environment="production").count(),
+        "scale_scores": NormativeScaleScore.objects.filter(version__environment="production").count(),
+        "spectrum_scores": NormativeSpectrumScore.objects.filter(version__environment="production").count(),
     }
 
     # Submission-owned answers cascade; the explicit deletes also remove all
@@ -162,6 +181,7 @@ def perform_master_reset(actor):
     UserAnswer.objects.all().delete()
     DynamicAnswer.objects.all().delete()
     SociodemographicAnswer.objects.all().delete()
+    test_cleanup = clear_normative_test_environment()
 
     doomed_users = User.objects.exclude(pk=actor_pk)
     doomed_user_ids = list(doomed_users.values_list("pk", flat=True))
@@ -201,15 +221,17 @@ def perform_master_reset(actor):
     v1.refresh_from_db()
     if v1.status != v1.Status.ACTIVE or v1.memberships.count() != 255:
         raise MasterResetError("A v1 não ficou ativa e íntegra.")
-    if NormativeDatasetVersion.objects.filter(status=v1.Status.ACTIVE).count() != 1:
+    if NormativeDatasetVersion.objects.filter(
+        status=v1.Status.ACTIVE, environment=v1.Environment.PRODUCTION
+    ).count() != 1:
         raise MasterResetError("O lifecycle normativo ficou inconsistente.")
     normative_counts_after = {
-        "participants": NormativeParticipant.objects.count(),
-        "answers": NormativeAnswer.objects.count(),
-        "versions": NormativeDatasetVersion.objects.count(),
-        "memberships": NormativeDatasetMembership.objects.count(),
-        "scale_scores": NormativeScaleScore.objects.count(),
-        "spectrum_scores": NormativeSpectrumScore.objects.count(),
+        "participants": NormativeParticipant.objects.filter(source="real").count(),
+        "answers": NormativeAnswer.objects.filter(participant__source="real").count(),
+        "versions": NormativeDatasetVersion.objects.filter(environment="production").count(),
+        "memberships": NormativeDatasetMembership.objects.filter(version__environment="production").count(),
+        "scale_scores": NormativeScaleScore.objects.filter(version__environment="production").count(),
+        "spectrum_scores": NormativeSpectrumScore.objects.filter(version__environment="production").count(),
     }
     if normative_counts_after != normative_counts_before:
         raise MasterResetError("Os dados normativos foram alterados.")
@@ -230,6 +252,8 @@ def perform_master_reset(actor):
                 "previous_active_normative_version": previous_active,
                 "restored_normative_version": ORIGINAL_VERSION_NAME,
                 "restored_normative_participant_count": ORIGINAL_PARTICIPANT_COUNT,
+                "test_versions_deleted": test_cleanup.versions,
+                "synthetic_participants_deleted": test_cleanup.participants,
             },
         )
     except Exception as exception:

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="py-3">
+  <a href="{% url 'administration:normative' %}">← Base normativa</a>
+  <h1 class="h2 mt-4">Criar versão normativa de teste</h1>
+  <p class="text-danger fw-bold">DADOS SINTÉTICOS — NÃO UTILIZADOS EM PRODUÇÃO</p>
+  <form method="post" class="border bg-white p-4">{% csrf_token %}
+    {{ form.as_p }}
+    <p>Serão incluídos os participantes do baseline e todos os {{ synthetic_count }} participantes sintéticos disponíveis. Contagem prevista: <strong>{{ resulting_count }}</strong>.</p>
+    <button class="btn btn-warning rounded-0" type="submit">Criar versão de teste</button>
+  </form>
+</section>
+{% endblock %}

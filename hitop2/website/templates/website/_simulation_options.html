@@ -28,6 +28,11 @@
         <legend class="float-none w-auto px-2 fs-6 mb-2">Opções de simulação</legend>
 
         <div class="row g-3">
+            <div class="col-12 col-md-4">
+                {{ form.simulation_quantity.label_tag }}
+                {{ form.simulation_quantity }}
+                {{ form.simulation_quantity.errors }}
+            </div>
             <div class="col-12 col-md-6">
                 {{ form.sociodemographic_simulation_mode.label_tag }}
                 {{ form.sociodemographic_simulation_mode }}
@@ -55,6 +60,14 @@
                 <div class="form-text">Opcional; permite repetir exatamente a simulação.</div>
             </div>
         </div>
+        <fieldset class="border border-warning p-3 mt-3">
+            <legend class="float-none w-auto px-2 fs-6">Simulação normativa</legend>
+            <div class="form-check">
+                {{ form.include_in_normative_test }}
+                {{ form.include_in_normative_test.label_tag }}
+            </div>
+            <div class="form-text">Os participantes elegíveis serão exportados como dados normativos sintéticos para o ambiente normativo de teste. Nunca serão incluídos numa versão normativa de produção.</div>
+        </fieldset>
     </fieldset>
 </div>
 

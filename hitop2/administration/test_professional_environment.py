@@ -7,6 +7,8 @@ from django.test import TestCase
 from django.urls import reverse
 
 from polls.models import (
+    NormativeDatasetVersion,
+    NormativeParticipant,
     Question,
     QuestionnaireSubmission,
     Scale,
@@ -14,6 +16,8 @@ from polls.models import (
     Subfactor,
     UserAnswer,
 )
+from polls.normative_versions import create_normative_version
+from .models import AdministrativeAuditLog
 
 
 class ProfessionalTestEnvironmentMixin:
@@ -118,6 +122,79 @@ class ProfessionalTestEnvironmentMixin:
             question=cls.question,
             answer="2",
         )
+
+
+class NormativeTestCleanupViewTests(ProfessionalTestEnvironmentMixin, TestCase):
+    def setUp(self):
+        self.client.force_login(self.administrator)
+        self.production = create_normative_version("cleanup-view-production")
+        self.synthetic = NormativeParticipant.objects.create(
+            source="synthetic",
+        )
+        self.test_version = create_normative_version(
+            "cleanup-view-test",
+            environment=NormativeDatasetVersion.Environment.TEST,
+            baseline_version=self.production,
+        )
+        self.test_submission.report_normative_version = self.test_version
+        self.test_submission.save(update_fields=["report_normative_version"])
+
+    def test_cleanup_endpoint_preserves_submission_and_records_audit(self):
+        prior_audit = AdministrativeAuditLog.objects.create(
+            actor=self.administrator,
+            action=AdministrativeAuditLog.Action.NORMATIVE_VERSION_CREATED,
+            object_type=AdministrativeAuditLog.ObjectType.NORMATIVE_VERSION,
+            object_id=str(self.production.pk),
+            object_label=self.production.name,
+            metadata={"new_status": "draft", "participant_count": 0,
+                      "environment": "production", "baseline_version": None},
+        )
+        response = self.client.post(
+            reverse("administration:clear_test_normative_environment"),
+            {"confirmation": "LIMPAR TESTE NORMATIVO"},
+        )
+
+        self.assertRedirects(response, reverse("administration:normative"))
+        self.assertTrue(QuestionnaireSubmission.objects.filter(
+            pk=self.test_submission.pk,
+        ).exists())
+        self.test_submission.refresh_from_db()
+        self.assertIsNone(self.test_submission.report_normative_version)
+        self.assertTrue(NormativeDatasetVersion.objects.filter(
+            pk=self.production.pk,
+        ).exists())
+        self.assertFalse(NormativeDatasetVersion.objects.filter(
+            environment=NormativeDatasetVersion.Environment.TEST,
+        ).exists())
+        self.assertFalse(NormativeParticipant.objects.filter(
+            source="synthetic",
+        ).exists())
+        self.assertTrue(AdministrativeAuditLog.objects.filter(
+            action=AdministrativeAuditLog.Action.NORMATIVE_TEST_CLEARED,
+        ).exists())
+        self.assertTrue(AdministrativeAuditLog.objects.filter(pk=prior_audit.pk).exists())
+
+    def test_cleanup_audit_failure_rolls_back_the_whole_operation(self):
+        with patch(
+            "administration.views.record_admin_action",
+            side_effect=RuntimeError("forced audit failure"),
+        ), self.assertRaises(RuntimeError):
+            self.client.post(
+                reverse("administration:clear_test_normative_environment"),
+                {"confirmation": "LIMPAR TESTE NORMATIVO"},
+            )
+
+        self.test_submission.refresh_from_db()
+        self.assertEqual(self.test_submission.report_normative_version, self.test_version)
+        self.assertTrue(NormativeDatasetVersion.objects.filter(
+            pk=self.test_version.pk,
+        ).exists())
+        self.assertTrue(NormativeParticipant.objects.filter(
+            pk=self.synthetic.pk,
+        ).exists())
+        self.assertFalse(AdministrativeAuditLog.objects.filter(
+            action=AdministrativeAuditLog.Action.NORMATIVE_TEST_CLEARED,
+        ).exists())
 
 
 class ProfessionalTestEnvironmentPermissionTests(

@@ -828,6 +828,23 @@ class NormativeAdministrationTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "administration/normative.html")
 
+    def test_administrator_can_open_test_normative_version_detail(self):
+        baseline = create_normative_version("v-test-detail-baseline")
+        version = create_normative_version(
+            "test-detail",
+            environment=NormativeDatasetVersion.Environment.TEST,
+            baseline_version=baseline,
+        )
+
+        response = self.client.get(reverse(
+            "administration:normative_version_detail",
+            args=[version.pk],
+        ))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["version"], version)
+        self.assertContains(response, "DADOS SINTÉTICOS")
+
     def test_professional_cannot_access_normative_management(self):
         self.client.force_login(self.professional)
 

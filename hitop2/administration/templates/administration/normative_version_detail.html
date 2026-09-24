@@ -3,17 +3,20 @@
 {% block content %}
 <section class="py-3">
     <a
-        href="{% url 'administration:normative_versions' %}"
+        href="{% if version.environment == 'test' %}{% url 'administration:normative' %}{% else %}{% url 'administration:normative_versions' %}{% endif %}"
         class="btn rounded-0"
         style="background:#e2f0ff; border:1px solid #9ec9ff; color:black; padding:8px 16px;"
     >
-        ← Histórico de versões
+        {% if version.environment == "test" %}← Ambiente normativo de teste{% else %}← Histórico de versões{% endif %}
     </a>
 
     <div class="d-flex flex-column flex-md-row justify-content-between gap-3 align-items-md-start mt-4 mb-4">
         <div>
             <h1 class="h2 fw-bold mb-2">{{ version.name }}</h1>
-            <p class="text-secondary mb-0">Detalhe da versão normativa</p>
+            <p class="text-secondary mb-0">Detalhe da versão normativa — {{ version.get_environment_display }}</p>
+            {% if version.environment == "test" %}
+                <p class="text-danger fw-bold mt-2 mb-0">DADOS SINTÉTICOS — NÃO UTILIZADOS EM PRODUÇÃO</p>
+            {% endif %}
         </div>
         {% if version.status == "active" %}
             <span style="display:inline-block; background:#e2f0ff; border:1px solid #9ec9ff; color:#222; padding:6px 11px;">
@@ -35,6 +38,12 @@
         <dl class="row mb-0">
             <dt class="col-sm-5 text-secondary mb-2">Participantes no snapshot</dt>
             <dd class="col-sm-7 mb-2">{{ version.participant_count }}</dd>
+            <dt class="col-sm-5 text-secondary mb-2">Ambiente</dt>
+            <dd class="col-sm-7 mb-2">{{ version.get_environment_display }}</dd>
+            {% if version.baseline_version %}
+                <dt class="col-sm-5 text-secondary mb-2">Baseline de produção</dt>
+                <dd class="col-sm-7 mb-2">{{ version.baseline_version.name }}</dd>
+            {% endif %}
             <dt class="col-sm-5 text-secondary mb-2">Participantes fora deste snapshot</dt>
             <dd class="col-sm-7 mb-2">{{ unversioned_participant_count }}</dd>
             <dt class="col-sm-5 text-secondary mb-2">Criada em</dt>

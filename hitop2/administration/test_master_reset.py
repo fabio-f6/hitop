@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
+from django.db.models.deletion import ProtectedError
 
 from polls.models import (
     DynamicAnswer,
@@ -14,6 +15,7 @@ from polls.models import (
     NormativeParticipant,
     NormativeScaleScore,
     NormativeSpectrumScore,
+    NormativeAnswer,
     Question,
     QuestionCategory,
     QuestionnaireSubmission,
@@ -23,6 +25,8 @@ from polls.models import (
     Subfactor,
     UserAnswer,
 )
+from polls.normative_versions import create_normative_version
+from polls.normative_versions import NormativeVersionError
 
 from .master_reset import MasterResetError, perform_master_reset
 from .models import AdministrativeAuditLog, MASTER_RESET_ACTION
@@ -101,16 +105,54 @@ class MasterResetTests(TestCase):
                     raw_score=1,
                 )
             ])
+        cls.synthetic_participant = NormativeParticipant.objects.create(
+            source=NormativeParticipant.Source.SYNTHETIC,
+            age=31,
+        )
+        cls.test_version = create_normative_version(
+            "master-reset-test-v1",
+            environment=NormativeDatasetVersion.Environment.TEST,
+            baseline_version=cls.v1,
+        )
+        test_now = timezone.now()
+        NormativeDatasetVersion.objects.filter(pk=cls.test_version.pk).update(
+            status=NormativeDatasetVersion.Status.ACTIVE,
+            prepared_at=test_now,
+            activated_at=test_now,
+        )
+        cls.test_version.refresh_from_db()
+        NormativeAnswer.objects.create(
+            participant=cls.synthetic_participant,
+            question=question,
+            answer="3",
+        )
+        NormativeScaleScore.objects.bulk_create([
+            NormativeScaleScore(
+                version=cls.test_version,
+                participant=cls.synthetic_participant,
+                scale=scale,
+                raw_score=3,
+            )
+        ])
+        NormativeSpectrumScore.objects.bulk_create([
+            NormativeSpectrumScore(
+                version=cls.test_version,
+                participant=cls.synthetic_participant,
+                spectrum=spectra,
+                raw_score=3,
+            )
+        ])
         NormativeAnswer.objects.create(
             participant=participants[255], question=question, answer="1"
         )
 
         cls.actor_submission = QuestionnaireSubmission.objects.create(user=cls.actor)
         cls.completed_submission = QuestionnaireSubmission.objects.create(
-            user=cls.patient, completed=True
+            user=cls.patient, completed=True, report_normative_version=cls.v3
         )
         cls.test_submission = QuestionnaireSubmission.objects.create(
-            user=cls.test_user, is_test_data=True, simulation_mode="simulated"
+            user=cls.test_user, is_test_data=True, simulation_mode="simulated",
+            report_normative_version=cls.test_version,
         )
         UserAnswer.objects.create(
             user=cls.actor,
@@ -255,26 +297,39 @@ class MasterResetTests(TestCase):
         self.assertFalse(SociodemographicAnswer.objects.exists())
 
     def test_normative_history_and_audit_are_preserved(self):
-        version_ids = set(NormativeDatasetVersion.objects.values_list("pk", flat=True))
+        version_ids = set(NormativeDatasetVersion.objects.filter(
+            environment=NormativeDatasetVersion.Environment.PRODUCTION
+        ).values_list("pk", flat=True))
         membership_counts = {
             version.pk: version.memberships.count()
-            for version in NormativeDatasetVersion.objects.all()
+            for version in NormativeDatasetVersion.objects.filter(
+                environment=NormativeDatasetVersion.Environment.PRODUCTION
+            )
         }
         counts = (
-            NormativeParticipant.objects.count(),
-            NormativeAnswer.objects.count(),
-            NormativeScaleScore.objects.count(),
-            NormativeSpectrumScore.objects.count(),
+            NormativeParticipant.objects.filter(source="real").count(),
+            NormativeAnswer.objects.filter(participant__source="real").count(),
+            NormativeScaleScore.objects.filter(version__environment="production").count(),
+            NormativeSpectrumScore.objects.filter(version__environment="production").count(),
         )
+        with self.assertRaises(ProtectedError):
+            NormativeDatasetVersion.objects.filter(pk=self.test_version.pk).delete()
         self.post_reset()
 
         self.assertEqual(
-            set(NormativeDatasetVersion.objects.values_list("pk", flat=True)), version_ids
+            set(NormativeDatasetVersion.objects.filter(
+                environment=NormativeDatasetVersion.Environment.PRODUCTION
+            ).values_list("pk", flat=True)), version_ids
         )
+        self.assertFalse(NormativeDatasetVersion.objects.filter(
+            environment=NormativeDatasetVersion.Environment.TEST
+        ).exists())
         self.assertEqual(
             {
                 version.pk: version.memberships.count()
-                for version in NormativeDatasetVersion.objects.all()
+                for version in NormativeDatasetVersion.objects.filter(
+                    environment=NormativeDatasetVersion.Environment.PRODUCTION
+                )
             },
             membership_counts,
         )
@@ -287,6 +342,9 @@ class MasterResetTests(TestCase):
             ),
             counts,
         )
+        self.assertFalse(NormativeParticipant.objects.filter(source="synthetic").exists())
+        self.assertFalse(NormativeScaleScore.objects.filter(version__environment="test").exists())
+        self.assertFalse(NormativeSpectrumScore.objects.filter(version__environment="test").exists())
         self.v1.refresh_from_db()
         self.v2.refresh_from_db()
         self.v3.refresh_from_db()
@@ -308,6 +366,8 @@ class MasterResetTests(TestCase):
         self.assertEqual(reset_log.metadata["users_deleted"], 6)
         self.assertEqual(reset_log.metadata["submissions_deleted"], 3)
         self.assertEqual(reset_log.metadata["test_submissions_deleted"], 1)
+        self.assertEqual(reset_log.metadata["test_versions_deleted"], 1)
+        self.assertEqual(reset_log.metadata["synthetic_participants_deleted"], 1)
         self.assertEqual(reset_log.metadata["previous_active_normative_version"], "v3")
         self.assertEqual(reset_log.metadata["restored_normative_version"], "v1")
         self.assertNotIn("password", str(reset_log.metadata).lower())
@@ -337,14 +397,34 @@ class MasterResetTests(TestCase):
         self.assertEqual(self.v3.status, NormativeDatasetVersion.Status.ACTIVE)
 
     def test_failure_during_audit_rolls_back_everything(self):
-        before = (User.objects.count(), QuestionnaireSubmission.objects.count())
+        before = (
+            User.objects.count(),
+            QuestionnaireSubmission.objects.count(),
+            NormativeDatasetVersion.objects.count(),
+            NormativeDatasetMembership.objects.count(),
+            NormativeScaleScore.objects.count(),
+            NormativeSpectrumScore.objects.count(),
+            NormativeParticipant.objects.count(),
+            NormativeAnswer.objects.count(),
+        )
         with patch(
             "administration.master_reset.record_admin_action",
             side_effect=RuntimeError("forced test failure"),
         ):
             with self.assertRaises(MasterResetError):
                 perform_master_reset(self.actor)
-        self.assertEqual((User.objects.count(), QuestionnaireSubmission.objects.count()), before)
+        self.assertEqual((
+            User.objects.count(),
+            QuestionnaireSubmission.objects.count(),
+            NormativeDatasetVersion.objects.count(),
+            NormativeDatasetMembership.objects.count(),
+            NormativeScaleScore.objects.count(),
+            NormativeSpectrumScore.objects.count(),
+            NormativeParticipant.objects.count(),
+            NormativeAnswer.objects.count(),
+        ), before)
+        self.test_submission.refresh_from_db()
+        self.assertEqual(self.test_submission.report_normative_version, self.test_version)
         self.v1.refresh_from_db()
         self.v3.refresh_from_db()
         self.assertEqual(self.v1.status, NormativeDatasetVersion.Status.RETIRED)

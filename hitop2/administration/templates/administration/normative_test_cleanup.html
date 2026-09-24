@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="py-3">
+  <h1 class="h2">Limpar ambiente normativo de teste</h1>
+  <p>Esta ação elimina versões, scores e participantes sintéticos de teste. A produção e a auditoria são preservadas.</p>
+  <form method="post" class="border border-danger p-4">{% csrf_token %}
+    <label for="{{ form.confirmation.id_for_label }}">Escreva <strong>LIMPAR TESTE NORMATIVO</strong></label>
+    {{ form.confirmation }} {{ form.confirmation.errors }}
+    <button type="submit" class="btn btn-danger rounded-0 mt-3">Limpar ambiente de teste</button>
+  </form>
+</section>
+{% endblock %}

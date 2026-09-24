@@ -84,6 +84,8 @@ urlpatterns = [
         name="deactivate_professional",
     ),
     path("normative/", views.normative, name="normative"),
+    path("normative/test/create/", views.create_test_normative_version, name="create_test_normative_version"),
+    path("normative/test/clear/", views.clear_test_normative_environment, name="clear_test_normative_environment"),
     path(
         "normative/versions/",
         views.normative_versions,

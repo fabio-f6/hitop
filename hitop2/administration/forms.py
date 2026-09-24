@@ -39,3 +39,28 @@ class MasterResetConfirmationForm(forms.Form):
         if confirmation != "MASTER RESET":
             raise forms.ValidationError("A frase de confirmação não corresponde.")
         return confirmation
+
+
+class NormativeTestVersionCreateForm(NormativeVersionCreateForm):
+    baseline_version = forms.ModelChoiceField(
+        label="Baseline de produção",
+        queryset=None,
+        widget=forms.Select(attrs={"class": "form-select rounded-0"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        from polls.models import NormativeDatasetVersion
+        super().__init__(*args, **kwargs)
+        self.fields["baseline_version"].queryset = NormativeDatasetVersion.objects.filter(
+            environment=NormativeDatasetVersion.Environment.PRODUCTION
+        ).order_by("-created_at", "-id")
+
+
+class NormativeTestCleanupForm(forms.Form):
+    confirmation = forms.CharField(label="Confirmação")
+
+    def clean_confirmation(self):
+        value = self.cleaned_data["confirmation"]
+        if value != "LIMPAR TESTE NORMATIVO":
+            raise forms.ValidationError("A frase de confirmação não corresponde.")
+        return value

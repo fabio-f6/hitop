@@ -294,6 +294,15 @@
             qualificados, enquadrados nos manuais técnicos e integrados com outra informação clínica.
             Conteúdo confidencial.
 
+            <div style="margin-top:6px; text-align:right;">
+                Base normativa:
+                {% if normative_version %}
+                    {{ normative_version.name }} ({{ normative_version.get_environment_display }})
+                {% else %}
+                    ainda não atribuída
+                {% endif %}
+            </div>
+
         </div>
 
         <br><br>
@@ -372,6 +381,14 @@
             A discussão dos resultados e respetiva interpretação deve ser feita por profissionais
             qualificados, enquadrados nos manuais técnicos e integrados com outra informação clínica.
             Conteúdo confidencial.
+            <div style="margin-top:6px; text-align:right;">
+                Base normativa:
+                {% if normative_version %}
+                    {{ normative_version.name }} ({{ normative_version.get_environment_display }})
+                {% else %}
+                    ainda não atribuída
+                {% endif %}
+            </div>
         </div>
 
         <br><br>
@@ -796,6 +813,15 @@
             A discussão dos resultados e respetiva interpretação deve ser feita por profissionais
             qualificados, enquadrados nos manuais técnicos e integrados com outra informação clínica.
             Conteúdo confidencial.
+
+            <div style="margin-top:6px; text-align:right;">
+                Base normativa:
+                {% if normative_version %}
+                    {{ normative_version.name }} ({{ normative_version.get_environment_display }})
+                {% else %}
+                    ainda não atribuída
+                {% endif %}
+            </div>
 
         </div>
 

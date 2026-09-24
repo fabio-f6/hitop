@@ -140,6 +140,51 @@ def process_normative_eligibility(submission):
     return result
 
 
+@transaction.atomic
+def export_submission_to_test_normative(submission):
+    """Export an eligible simulated submission into the isolated test pool."""
+    locked_submission = (
+        QuestionnaireSubmission.objects.select_for_update()
+        .select_related("user")
+        .get(pk=submission.pk)
+    )
+    if not is_test_or_simulated_submission(locked_submission):
+        raise TestSubmissionExportBlocked(
+            "A exportação normativa sintética requer uma submissão de teste."
+        )
+    if not locked_submission.completed:
+        raise NormativeExportError("A submissão ainda não está concluída.")
+    eligibility = evaluate_normative_eligibility(locked_submission)
+    if eligibility["eligible"] is not True:
+        raise NormativeExportError("A submissão sintética não é elegível.")
+    existing = NormativeParticipant.objects.filter(
+        source_submission=locked_submission
+    ).first()
+    if existing is not None:
+        return existing
+
+    participant = NormativeParticipant.objects.create(
+        source=NormativeParticipant.Source.SYNTHETIC,
+        source_submission=locked_submission,
+        **_normative_demographics(locked_submission),
+    )
+    answers = UserAnswer.objects.filter(
+        submission=locked_submission, question__is_attention_check=False,
+    ).select_related("question")
+    NormativeAnswer.objects.bulk_create([
+        NormativeAnswer(
+            participant=participant, question=answer.question, answer=answer.answer,
+        )
+        for answer in answers
+    ])
+    # "exported" remains the completion state; source/source_submission make the
+    # destination unambiguous without expanding the legacy status vocabulary.
+    locked_submission.normative_status = QuestionnaireSubmission.NormativeStatus.EXPORTED
+    locked_submission.normative_exported_at = timezone.now()
+    locked_submission.save(update_fields=["normative_status", "normative_exported_at"])
+    return participant
+
+
 def _normative_demographics(submission):
     answers = dict(
         DynamicAnswer.objects.filter(
