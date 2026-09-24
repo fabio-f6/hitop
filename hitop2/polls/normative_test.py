@@ -169,7 +169,18 @@ def clear_normative_test_environment():
         NormativeDatasetMembership.objects.filter(
             version_id__in=test_version_ids
         ).delete()
-        NormativeDatasetVersion.objects.filter(pk__in=test_version_ids).delete()
+        # PROTECT applies even when parent and child are in the same delete
+        # queryset. Delete leaves first, retaining all baseline references
+        # until their dependent test versions have actually been removed.
+        remaining = {version.pk: version.baseline_version_id for version in test_versions}
+        while remaining:
+            referenced = set(remaining.values())
+            leaves = set(remaining) - referenced
+            if not leaves:
+                raise RuntimeError("Existe um ciclo nas versões normativas de teste.")
+            NormativeDatasetVersion.objects.filter(pk__in=leaves).delete()
+            for version_id in leaves:
+                del remaining[version_id]
         NormativeAnswer.objects.filter(participant_id__in=synthetic_ids).delete()
         NormativeParticipant.objects.filter(pk__in=synthetic_ids).delete()
 

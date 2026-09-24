@@ -396,6 +396,45 @@ class MasterResetTests(TestCase):
         self.v3.refresh_from_db()
         self.assertEqual(self.v3.status, NormativeDatasetVersion.Status.ACTIVE)
 
+    def test_reset_cleans_chained_test_versions(self):
+        child = NormativeDatasetVersion.objects.create(
+            name="test-derived-child", environment="test",
+            baseline_version=self.test_version,
+        )
+        entry = perform_master_reset(self.actor)
+        self.assertFalse(NormativeDatasetVersion.objects.filter(pk=child.pk).exists())
+        self.assertFalse(NormativeDatasetVersion.objects.filter(environment="test").exists())
+        self.assertEqual(entry.metadata["test_versions_deleted"], 2)
+        self.assertTrue(User.objects.filter(pk=self.actor.pk).exists())
+
+    def test_unexpected_failure_is_logged_without_sensitive_exception_text(self):
+        with patch("administration.views.perform_master_reset", side_effect=RuntimeError("private clinical value")):
+            with self.assertLogs("administration.views", level="ERROR") as captured:
+                response = self.post_reset()
+        self.assertContains(response, "Nenhuma alteração foi aplicada.")
+        self.assertIn("RuntimeError", " ".join(captured.output))
+        self.assertNotIn("private clinical value", " ".join(captured.output))
+        self.assertNotIn(PASSWORD, " ".join(captured.output))
+
+    def test_known_failure_explains_reason_on_page(self):
+        NormativeDatasetVersion.objects.filter(pk=self.v1.pk).update(name="legacy")
+        with self.assertLogs("administration.views", level="ERROR"):
+            response = self.post_reset()
+        self.assertContains(response, "A versão normativa original não é identificável.")
+        self.assertTrue(User.objects.filter(pk=self.patient.pk).exists())
+
+    def test_cyclic_test_versions_abort_and_restore_deleted_submissions(self):
+        child = NormativeDatasetVersion.objects.create(
+            name="test-cycle-child", environment="test", baseline_version=self.test_version,
+        )
+        NormativeDatasetVersion.objects.filter(pk=self.test_version.pk).update(baseline_version=child)
+        before = QuestionnaireSubmission.objects.count()
+        with self.assertRaisesRegex(RuntimeError, "ciclo"):
+            perform_master_reset(self.actor)
+        self.assertEqual(QuestionnaireSubmission.objects.count(), before)
+        self.assertTrue(User.objects.filter(pk=self.patient.pk).exists())
+        self.assertTrue(NormativeDatasetVersion.objects.filter(pk=child.pk).exists())
+
     def test_failure_during_audit_rolls_back_everything(self):
         before = (
             User.objects.count(),

@@ -151,7 +151,9 @@ def perform_master_reset(actor):
     }
 
     previous_active = next(
-        (item.name for item in locked_versions if item.status == item.Status.ACTIVE),
+        (item.name for item in locked_versions
+         if item.status == item.Status.ACTIVE
+         and item.environment == item.Environment.PRODUCTION),
         None,
     )
     users_deleted = User.objects.exclude(pk=actor_pk).count()

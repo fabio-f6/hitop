@@ -1,4 +1,6 @@
+import logging
 import re
+import traceback
 from datetime import timedelta
 
 from django.contrib import messages
@@ -56,6 +58,7 @@ from .health_checks import get_system_health_report
 from .models import AdministrativeAuditLog, MASTER_RESET_ACTION
 from .monitoring import get_questionnaire_monitoring_report
 from .master_reset import (
+    MasterResetError,
     get_master_reset_preview,
     perform_master_reset,
 )
@@ -70,6 +73,25 @@ from .services import (
     approve_professional as approve_professional_service,
     withdraw_professional_access,
 )
+
+
+logger = logging.getLogger(__name__)
+
+
+def _log_master_reset_failure(exception):
+    # Exception messages (including ProtectedError reprs) can contain clinical
+    # values. Record types and stack locations only, without request or locals.
+    diagnostics = []
+    seen = set()
+    while exception is not None and id(exception) not in seen:
+        seen.add(id(exception))
+        frames = traceback.extract_tb(exception.__traceback__)
+        diagnostics.append("%s: %s" % (
+            type(exception).__name__,
+            " -> ".join(f"{frame.filename}:{frame.lineno} ({frame.name})" for frame in frames),
+        ))
+        exception = exception.__cause__ or exception.__context__
+    logger.error("Master Reset abortado; rollback efetuado. %s", " | ".join(diagnostics))
 
 
 PROFESSIONALS_PER_PAGE = 10
@@ -178,7 +200,11 @@ def master_reset(request):
         else:
             try:
                 perform_master_reset(request.user)
-            except Exception:
+            except MasterResetError as exception:
+                _log_master_reset_failure(exception)
+                messages.error(request, f"Master Reset abortado: {exception} Nenhuma alteração foi aplicada.")
+            except Exception as exception:
+                _log_master_reset_failure(exception)
                 messages.error(
                     request,
                     "Não foi possível executar o Master Reset. Nenhuma alteração foi aplicada.",
