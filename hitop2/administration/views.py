@@ -12,8 +12,13 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST, require_http_methods
 
-from polls.models import NormativeDatasetVersion, NormativeParticipant
+from polls.models import NormativeDatasetVersion, NormativeParticipant, QuestionnaireSubmission
 from polls.normative_test import clear_normative_test_environment
+from polls.normative_export import (
+    NormativeExportError,
+    export_eligible_submissions_to_test_normative,
+    export_submission_to_test_normative,
+)
 from polls.normative_versions import (
     activate_normative_version as activate_normative_version_service,
     create_normative_version as create_normative_version_service,
@@ -45,13 +50,18 @@ from website.views import (
 
 from .audit import record_admin_action
 from .forms import (MasterResetConfirmationForm, NormativeVersionCreateForm,
-                    NormativeTestVersionCreateForm, NormativeTestCleanupForm)
+                    NormativeTestVersionCreateForm, NormativeTestCleanupForm,
+                    ProfessionalTestEnvironmentCleanupForm)
 from .health_checks import get_system_health_report
 from .models import AdministrativeAuditLog, MASTER_RESET_ACTION
 from .monitoring import get_questionnaire_monitoring_report
 from .master_reset import (
     get_master_reset_preview,
     perform_master_reset,
+)
+from .professional_test_cleanup import (
+    clear_professional_test_environment,
+    get_professional_test_cleanup_preview,
 )
 from .permissions import administrator_required, can_master_reset, master_reset_required
 from .questionnaire_map import build_questionnaire_structure
@@ -195,6 +205,45 @@ def professional_test_environment(request):
         request,
         ProfessionalEnvironment.test(request.user),
     )
+
+
+@administrator_required
+@require_POST
+def test_export_all_submissions_to_normative(request):
+    environment = ProfessionalEnvironment.test(request.user)
+    submissions = environment.submission_queryset().filter(
+        questionnaire_type="hitop",
+        completed=True,
+    )
+    with transaction.atomic():
+        result = export_eligible_submissions_to_test_normative(submissions)
+        if result.exported:
+            record_admin_action(
+                actor=request.user,
+                action=(
+                    AdministrativeAuditLog.Action
+                    .NORMATIVE_TEST_SUBMISSIONS_BULK_EXPORTED
+                ),
+                object_type=AdministrativeAuditLog.ObjectType.NORMATIVE_TEST,
+                object_id=f"owner-{request.user.pk}",
+                object_label="Reexportação em lote do Ambiente Profissional de Teste",
+                metadata={
+                    "submissions_exported": result.exported,
+                    "submissions_skipped": result.skipped,
+                },
+            )
+    if result.exported:
+        messages.success(
+            request,
+            f"{result.exported} submissão(ões) adicionada(s) à base normativa de teste; "
+            f"{result.skipped} ignorada(s) por não estar(em) elegível(eis) ou já exportada(s).",
+        )
+    else:
+        messages.info(
+            request,
+            "Não há submissões elegíveis novas para adicionar à base normativa de teste.",
+        )
+    return redirect("administration:professional_test_environment")
 
 
 @administrator_required
@@ -491,6 +540,7 @@ def normative(request):
             "test_versions": get_normative_versions(
                 NormativeDatasetVersion.Environment.TEST
             ).order_by("-created_at", "-id")[:10],
+            "can_clear_professional_test_environment": can_master_reset(request.user),
         },
     )
 
@@ -525,13 +575,21 @@ def create_test_normative_version(request):
         source=NormativeParticipant.Source.SYNTHETIC
     ).count()
     baseline = form["baseline_version"].value()
-    baseline_count = 0
+    baseline_participant_ids = set()
     if baseline:
         candidate = NormativeDatasetVersion.objects.filter(pk=baseline).first()
-        baseline_count = candidate.participant_count if candidate else 0
+        if candidate:
+            baseline_participant_ids = set(
+                candidate.memberships.values_list("participant_id", flat=True)
+            )
+    synthetic_participant_ids = set(
+        NormativeParticipant.objects.filter(
+            source=NormativeParticipant.Source.SYNTHETIC
+        ).values_list("pk", flat=True)
+    )
     return render(request, "administration/normative_test_version_create.html", {
         "form": form, "synthetic_count": synthetic_count,
-        "resulting_count": baseline_count + synthetic_count,
+        "resulting_count": len(baseline_participant_ids | synthetic_participant_ids),
     })
 
 
@@ -548,11 +606,99 @@ def clear_test_normative_environment(request):
                 object_type=AdministrativeAuditLog.ObjectType.NORMATIVE_TEST,
                 object_id="environment", object_label="Ambiente normativo de teste",
                 metadata={"versions_deleted": result.versions,
-                          "synthetic_participants_deleted": result.participants},
+                          "synthetic_participants_deleted": result.participants,
+                          "submissions_reset_for_reexport": result.submissions_reset},
             )
-        messages.success(request, "Ambiente normativo de teste limpo.")
+        messages.success(
+            request,
+            "Base normativa de teste limpa. Pacientes e respostas foram preservados; "
+            f"{result.submissions_reset} submissão(ões) exportada(s) pode(m) ser "
+            "reintroduzida(s) se continuar(em) elegível(eis).",
+        )
         return redirect("administration:normative")
     return render(request, "administration/normative_test_cleanup.html", {"form": form})
+
+
+@master_reset_required
+@require_http_methods(["GET", "POST"])
+def clear_professional_test_environment_view(request):
+    preview = get_professional_test_cleanup_preview()
+    form = ProfessionalTestEnvironmentCleanupForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        if not request.user.check_password(form.cleaned_data["password"]):
+            form.add_error("password", "A password atual está incorreta.")
+        else:
+            try:
+                with transaction.atomic():
+                    result = clear_professional_test_environment(request.user)
+                    record_admin_action(
+                        actor=request.user,
+                        action=(
+                            AdministrativeAuditLog.Action
+                            .PROFESSIONAL_TEST_ENVIRONMENT_CLEARED
+                        ),
+                        object_type=AdministrativeAuditLog.ObjectType.NORMATIVE_TEST,
+                        object_id="professional-test-environment",
+                        object_label="Ambiente Profissional de Teste",
+                        metadata={
+                            "patients_deleted": result.patients,
+                            "submissions_deleted": result.submissions,
+                            "test_versions_deleted": result.normative_test_versions,
+                            "synthetic_participants_deleted": result.synthetic_participants,
+                        },
+                    )
+            except Exception:
+                messages.error(
+                    request,
+                    "Não foi possível apagar o Ambiente Profissional de Teste. "
+                    "Nenhuma alteração foi aplicada.",
+                )
+            else:
+                messages.success(
+                    request,
+                    "Ambiente Profissional de Teste apagado. Os dados de produção "
+                    "e o histórico de auditoria foram preservados.",
+                )
+                return redirect("administration:normative")
+    return render(request, "administration/professional_test_cleanup.html", {
+        "form": form,
+        "preview": preview,
+    })
+
+
+@administrator_required
+@require_POST
+def test_export_submission_to_normative(request, submission_id):
+    environment = ProfessionalEnvironment.test(request.user)
+    submission = environment.get_submission(submission_id)
+    try:
+        with transaction.atomic():
+            locked_submission = QuestionnaireSubmission.objects.select_for_update().get(
+                pk=submission.pk,
+            )
+            already_exported = NormativeParticipant.objects.filter(
+                source_submission=locked_submission,
+            ).exists()
+            export_submission_to_test_normative(locked_submission)
+            if not already_exported:
+                record_admin_action(
+                    actor=request.user,
+                    action=(
+                        AdministrativeAuditLog.Action
+                        .NORMATIVE_TEST_SUBMISSION_EXPORTED
+                    ),
+                    object_type=AdministrativeAuditLog.ObjectType.NORMATIVE_TEST,
+                    object_id=locked_submission.pk,
+                    object_label="Submission exportada para normativa de teste",
+                )
+    except NormativeExportError as exception:
+        messages.error(request, str(exception))
+    else:
+        messages.success(request, "Submissão reintroduzida na base normativa de teste.")
+    return redirect(
+        "administration:test_patient_submissions",
+        patient_id=submission.user_id,
+    )
 
 
 @administrator_required

@@ -169,17 +169,19 @@
 
             </span>
 
-            {% if s.completed %}
             <br>
             <strong>Base normativa:</strong>
             <span style="float:right;">
-                {% if s.report_normative_version %}
-                    {{ s.report_normative_version.name }}{% if is_test_environment %} ({{ s.report_normative_version.get_environment_display }}){% endif %}
+                {% if s.normative_version_name %}
+                    {{ s.normative_version_name }}
+                    {% if is_test_environment or s.normative_version_environment == "test" %}
+                        ({{ s.normative_version_environment_display }})
+                    {% endif %}
+                    {% if s.normative_version_was_removed %}<span class="text-secondary"> — versão removida</span>{% endif %}
                 {% else %}
                     ainda não atribuída
                 {% endif %}
             </span>
-            {% endif %}
 
         </div>
 
@@ -252,6 +254,15 @@
         >
 
             {% if s.completed %}
+
+            {% if is_test_environment and s.can_export_to_test_normative %}
+            <form method="post" action="{% url 'administration:test_export_submission_to_normative' s.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-warning rounded-0">
+                    Adicionar à base normativa de teste
+                </button>
+            </form>
+            {% endif %}
 
             <a
                 href="{% url report_preview_url_name s.id %}"

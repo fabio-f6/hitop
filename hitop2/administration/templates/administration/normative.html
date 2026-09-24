@@ -93,6 +93,11 @@
     <section class="border border-warning bg-white p-4">
         <h2 class="h3 fw-bold">Ambiente normativo de teste</h2>
         <p class="text-danger fw-bold">DADOS SINTÉTICOS — NÃO UTILIZADOS EM PRODUÇÃO</p>
+        <p class="text-secondary">
+            Esta limpeza apaga a base normativa sintética e preserva os pacientes,
+            as submissions e as respostas do Ambiente Profissional de Teste.
+            Submissões exportadas podem ser reintroduzidas se continuarem elegíveis.
+        </p>
         <dl class="row">
             <dt class="col-sm-5">Participantes sintéticos disponíveis</dt>
             <dd class="col-sm-7">{{ synthetic_participant_count }}</dd>
@@ -102,6 +107,9 @@
         <div class="d-flex gap-2 flex-wrap mb-4">
             <a class="btn btn-warning rounded-0" href="{% url 'administration:create_test_normative_version' %}">Criar versão de teste</a>
             <a class="btn btn-outline-danger rounded-0" href="{% url 'administration:clear_test_normative_environment' %}">Limpar ambiente normativo de teste</a>
+            {% if can_clear_professional_test_environment %}
+                <a class="btn btn-danger rounded-0" href="{% url 'administration:clear_professional_test_environment' %}">Apagar todo o Ambiente Profissional de Teste</a>
+            {% endif %}
         </div>
         <h3 class="h5">Histórico de teste</h3>
         <ul class="mb-0">

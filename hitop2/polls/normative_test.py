@@ -19,6 +19,7 @@ from .models import (
 class NormativeTestCleanupResult:
     versions: int
     participants: int
+    submissions_reset: int
 
 
 def _production_snapshot():
@@ -107,6 +108,11 @@ def clear_normative_test_environment():
     )
     synthetic_ids = [participant.pk for participant in synthetic]
     participant_count = len(synthetic_ids)
+    source_submission_ids = [
+        participant.source_submission_id
+        for participant in synthetic
+        if participant.source_submission_id is not None
+    ]
 
     synthetic_in_production = (
         NormativeDatasetMembership.objects.filter(
@@ -127,6 +133,16 @@ def clear_normative_test_environment():
             "Um participante sintético está associado a uma versão de produção."
         )
 
+    real_synthetic_source = QuestionnaireSubmission.objects.filter(
+        pk__in=source_submission_ids,
+        is_test_data=False,
+        simulation_mode="normal",
+    )
+    if real_synthetic_source.exists():
+        raise RuntimeError(
+            "Um participante sintético está associado a uma submissão clínica real."
+        )
+
     production_snapshot = _production_snapshot()
     pinned_test_submissions = QuestionnaireSubmission.objects.select_for_update().filter(
         report_normative_version_id__in=test_version_ids,
@@ -134,6 +150,18 @@ def clear_normative_test_environment():
     # Only TEST/simulated records can refer to TEST versions. The guard above
     # aborts if a clinical submission violates that invariant.
     pinned_test_submissions.update(report_normative_version=None)
+
+    submissions_to_reset = QuestionnaireSubmission.objects.filter(
+        Q(is_test_data=True) | ~Q(simulation_mode="normal"),
+    ).filter(
+        Q(normative_status=QuestionnaireSubmission.NormativeStatus.EXPORTED)
+        | Q(normative_exported_at__isnull=False)
+    )
+    submissions_reset = submissions_to_reset.count()
+    submissions_to_reset.update(
+        normative_status=QuestionnaireSubmission.NormativeStatus.PENDING,
+        normative_exported_at=None,
+    )
 
     with normative_test_cleanup_boundary():
         NormativeScaleScore.objects.filter(version_id__in=test_version_ids).delete()
@@ -146,4 +174,8 @@ def clear_normative_test_environment():
         NormativeParticipant.objects.filter(pk__in=synthetic_ids).delete()
 
     _validate_cleanup_result(production_snapshot)
-    return NormativeTestCleanupResult(version_count, participant_count)
+    return NormativeTestCleanupResult(
+        version_count,
+        participant_count,
+        submissions_reset,
+    )

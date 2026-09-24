@@ -109,8 +109,16 @@ def create_normative_version(
             source=NormativeParticipant.Source.REAL
         )
     elif environment == NormativeDatasetVersion.Environment.TEST:
-        if baseline_version is None or baseline_version.environment != NormativeDatasetVersion.Environment.PRODUCTION:
-            raise NormativeVersionError("Uma versão de teste requer um baseline de produção.")
+        if baseline_version is None or baseline_version.environment not in {
+            NormativeDatasetVersion.Environment.PRODUCTION,
+            NormativeDatasetVersion.Environment.TEST,
+        }:
+            raise NormativeVersionError(
+                "Uma versão de teste requer um baseline de produção ou de teste."
+            )
+        baseline_version = NormativeDatasetVersion.objects.select_for_update().get(
+            pk=baseline_version.pk,
+        )
         baseline_ids = baseline_version.memberships.values_list("participant_id", flat=True)
         participants = NormativeParticipant.objects.filter(
             Q(pk__in=baseline_ids) | Q(source=NormativeParticipant.Source.SYNTHETIC)
@@ -251,7 +259,7 @@ def activate_normative_version(version):
 
 @transaction.atomic
 def get_or_assign_report_normative_version(submission):
-    """Pin a submission's reports to the active version on first generation."""
+    """Pin a submission once, retaining the existing pin on later calls."""
     locked_submission = QuestionnaireSubmission.objects.select_for_update().get(
         pk=submission.pk
     )

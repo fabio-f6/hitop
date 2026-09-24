@@ -178,6 +178,22 @@ class QuestionnaireSubmission(models.Model):
         related_name="report_submissions",
     )
 
+    report_normative_version_name = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+    )
+
+    report_normative_version_environment = models.CharField(
+        max_length=12,
+        choices=(
+            ("production", "Produção"),
+            ("test", "Teste"),
+        ),
+        blank=True,
+        default="",
+    )
+
     is_open = models.BooleanField(
         default=True
     )
@@ -225,6 +241,15 @@ class QuestionnaireSubmission(models.Model):
         Spectra,
         blank=True
     )
+
+    def save(self, *args, **kwargs):
+        update_fields = kwargs.get("update_fields")
+        if update_fields is not None and "report_normative_version" in update_fields:
+            kwargs["update_fields"] = set(update_fields) | {
+                "report_normative_version_name",
+                "report_normative_version_environment",
+            }
+        return super().save(*args, **kwargs)
 
     @property
     def effective_simulation_missing_percentage(self):
@@ -443,8 +468,13 @@ class NormativeDatasetVersion(models.Model):
         if self.baseline_version_id:
             if self.environment != self.Environment.TEST:
                 raise ValidationError({"baseline_version": "Apenas versões de teste têm baseline."})
-            if self.baseline_version.environment != self.Environment.PRODUCTION:
-                raise ValidationError({"baseline_version": "O baseline deve ser uma versão de produção."})
+            if self.baseline_version.environment not in {
+                self.Environment.PRODUCTION,
+                self.Environment.TEST,
+            }:
+                raise ValidationError({
+                    "baseline_version": "O baseline deve ser uma versão de produção ou de teste."
+                })
         if self.status == self.Status.DRAFT and self.activated_at is not None:
             raise ValidationError({
                 "activated_at": "Uma versão draft não pode ter data de ativação."
@@ -731,14 +761,16 @@ def _version_is_immutable(version_or_id):
 def protect_report_normative_environment(sender, instance, **kwargs):
     if not instance.report_normative_version_id:
         return
-    environment = NormativeDatasetVersion.objects.values_list(
-        "environment", flat=True
+    name, environment = NormativeDatasetVersion.objects.values_list(
+        "name", "environment"
     ).get(pk=instance.report_normative_version_id)
     is_test_submission = instance.is_test_data or instance.simulation_mode != "normal"
     if not is_test_submission and environment != NormativeDatasetVersion.Environment.PRODUCTION:
         raise ValidationError(
             "Uma submissão clínica real não pode usar uma versão normativa de teste."
         )
+    instance.report_normative_version_name = name
+    instance.report_normative_version_environment = environment
 
 
 @receiver(m2m_changed, sender=NormativeDatasetMembership)

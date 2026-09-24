@@ -10,6 +10,16 @@ urlpatterns = [
     path("system/", views.system, name="system"),
     path("system/master-reset/", views.master_reset, name="master_reset"),
     path(
+        "test-environment/clear/",
+        views.clear_professional_test_environment_view,
+        name="clear_professional_test_environment",
+    ),
+    path(
+        "test-environment/export-normative/",
+        views.test_export_all_submissions_to_normative,
+        name="test_export_all_submissions_to_normative",
+    ),
+    path(
         "test-environment/",
         views.professional_test_environment,
         name="professional_test_environment",
@@ -48,6 +58,11 @@ urlpatterns = [
         "test-environment/submissions/<int:submission_id>/answers/",
         views.test_patient_answers,
         name="test_patient_answers",
+    ),
+    path(
+        "test-environment/submissions/<int:submission_id>/export-normative/",
+        views.test_export_submission_to_normative,
+        name="test_export_submission_to_normative",
     ),
     path(
         "test-environment/reports/<int:submission_id>/preview/",

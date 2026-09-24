@@ -2,7 +2,13 @@
 
 {% block content %}
 <section class="py-3">
-    <a href="{% url 'administration:system' %}" class="btn btn-link px-0 mb-3">← Zona de perigo</a>
+    <a
+        href="{% url 'administration:system' %}"
+        class="btn rounded-0 mb-3"
+        style="background:#e2f0ff; border:1px solid #9ec9ff; color:black; padding:8px 16px;"
+    >
+        ← Zona de perigo
+    </a>
     <div class="border border-danger bg-white p-4 p-lg-5">
         <p class="text-uppercase fw-bold text-danger mb-2">Zona de perigo</p>
         <h1 class="h2 fw-bold mb-3">Confirmar Master Reset</h1>

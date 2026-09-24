@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.utils import timezone
+from dataclasses import dataclass
 
 from .models import (
     DynamicAnswer,
@@ -20,6 +21,12 @@ class SubmissionAlreadyExported(NormativeExportError):
 
 class TestSubmissionExportBlocked(NormativeExportError):
     """Raised when test or simulated data reaches the real export boundary."""
+
+
+@dataclass(frozen=True)
+class TestNormativeBulkExportResult:
+    exported: int
+    skipped: int
 
 
 SEX_LABELS = {
@@ -183,6 +190,37 @@ def export_submission_to_test_normative(submission):
     locked_submission.normative_exported_at = timezone.now()
     locked_submission.save(update_fields=["normative_status", "normative_exported_at"])
     return participant
+
+
+@transaction.atomic
+def export_eligible_submissions_to_test_normative(submissions):
+    """Export every eligible TEST submission in a scoped queryset, once each."""
+    exported = 0
+    skipped = 0
+    locked_submissions = (
+        submissions.select_for_update()
+        .select_related("user")
+        .order_by("pk")
+    )
+    for submission in locked_submissions:
+        if not submission.completed or not is_test_or_simulated_submission(submission):
+            skipped += 1
+            continue
+        if NormativeParticipant.objects.filter(source_submission=submission).exists():
+            skipped += 1
+            continue
+        if evaluate_normative_eligibility(submission)["eligible"] is not True:
+            skipped += 1
+            continue
+        try:
+            export_submission_to_test_normative(submission)
+        except NormativeExportError:
+            # One malformed record should not prevent the other eligible test
+            # submissions from being reintroduced into the test pool.
+            skipped += 1
+            continue
+        exported += 1
+    return TestNormativeBulkExportResult(exported=exported, skipped=skipped)
 
 
 def _normative_demographics(submission):

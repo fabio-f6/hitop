@@ -1,12 +1,40 @@
 {% extends "base.html" %}
+
 {% block content %}
 <section class="py-3">
-  <h1 class="h2">Limpar ambiente normativo de teste</h1>
-  <p>Esta ação elimina versões, scores e participantes sintéticos de teste. A produção e a auditoria são preservadas.</p>
-  <form method="post" class="border border-danger p-4">{% csrf_token %}
-    <label for="{{ form.confirmation.id_for_label }}">Escreva <strong>LIMPAR TESTE NORMATIVO</strong></label>
-    {{ form.confirmation }} {{ form.confirmation.errors }}
-    <button type="submit" class="btn btn-danger rounded-0 mt-3">Limpar ambiente de teste</button>
-  </form>
+    <a
+        href="{% url 'administration:normative' %}"
+        class="btn rounded-0 mb-3"
+        style="background:#e2f0ff; border:1px solid #9ec9ff; color:black; padding:8px 16px;"
+    >
+        ← Base normativa
+    </a>
+
+    <div class="border border-danger bg-white p-4 p-lg-5">
+        <p class="text-uppercase fw-bold text-danger mb-2">Ambiente de teste</p>
+        <h1 class="h2 fw-bold mb-3">Limpar ambiente normativo de teste</h1>
+        <p>
+            Esta ação elimina versões, memberships, scores e participantes sintéticos
+            da base normativa de teste. Pacientes, submissions e respostas do Ambiente
+            Profissional de Teste serão preservados. Submissões que tinham sido
+            exportadas voltam a poder ser exportadas se ainda forem elegíveis.
+            Pins para versões apagadas são removidos, mas o nome e o ambiente da
+            versão usada continuam registados na submission. Relatórios antigos
+            continuam a identificar essa versão como removida e não recalculam
+            percentis sem os scores apagados. Produção e auditoria são preservadas.
+        </p>
+
+        <form method="post" class="mt-4" novalidate>
+            {% csrf_token %}
+            <div class="mb-4">
+                <label for="{{ form.confirmation.id_for_label }}" class="form-label fw-semibold">
+                    Escreva exatamente LIMPAR TESTE NORMATIVO
+                </label>
+                {{ form.confirmation }}
+                {% for error in form.confirmation.errors %}<div class="text-danger mt-1">{{ error }}</div>{% endfor %}
+            </div>
+            <button type="submit" class="btn btn-danger rounded-0">Limpar ambiente de teste</button>
+        </form>
+    </div>
 </section>
 {% endblock %}

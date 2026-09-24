@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from polls.attention_checks import evaluate_attention_checks
 from polls.models import (
     DynamicAnswer,
+    NormativeDatasetVersion,
     QuestionnaireSubmission,
     SociodemographicAnswer,
     UserAnswer,
@@ -21,7 +22,6 @@ from polls.percentiles import (
 )
 from polls.questions import get_questions_for_submission
 from polls.normative_export import evaluate_normative_eligibility
-from polls.normative_versions import get_or_assign_report_normative_version
 from polls.report_constants import SPECTRUM_KEYS
 from polls.report_interpretation import build_report_analysis
 from polls.scoring import calculate_scale_scores_from_answers
@@ -372,7 +372,29 @@ def _report_sociodemographics(submission):
 
 def _build_report_context(submission):
     patient = submission.user
-    normative_version = get_or_assign_report_normative_version(submission)
+    normative_version = submission.report_normative_version
+    normative_version_name = (
+        submission.report_normative_version_name
+        or (normative_version.name if normative_version else "")
+    )
+    normative_version_environment = (
+        submission.report_normative_version_environment
+        or (normative_version.environment if normative_version else "")
+    )
+    normative_environment_display = dict(
+        NormativeDatasetVersion.Environment.choices
+    ).get(normative_version_environment, "")
+    normative_version_was_removed = bool(
+        normative_version_name and normative_version is None
+    )
+    if normative_version_name:
+        normative_version_display = (
+            f"{normative_version_name} ({normative_environment_display})"
+        )
+        if normative_version_was_removed:
+            normative_version_display += " — versão removida"
+    else:
+        normative_version_display = "ainda não atribuída"
 
     answers = UserAnswer.objects.filter(
         submission=submission,
@@ -705,6 +727,8 @@ def _build_report_context(submission):
     return {
             "submission": submission,
             "normative_version": normative_version,
+            "normative_version_display": normative_version_display,
+            "normative_version_was_removed": normative_version_was_removed,
             "report": report_data,
             "scale_scores": scale_scores,
             "attention_checks": attention_checks,

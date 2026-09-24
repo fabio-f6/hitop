@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-3">
+    <a
+        href="{% url 'administration:normative' %}"
+        class="btn rounded-0 mb-3"
+        style="background:#e2f0ff; border:1px solid #9ec9ff; color:black; padding:8px 16px;"
+    >
+        ← Base normativa
+    </a>
+
+    <div class="border border-danger bg-white p-4 p-lg-5">
+        <p class="text-uppercase fw-bold text-danger mb-2">Ação irreversível</p>
+        <h1 class="h2 fw-bold mb-3">Apagar todo o Ambiente Profissional de Teste</h1>
+        <p>
+            Esta ação elimina os pacientes de teste, todas as suas submissions e
+            respostas, as versões e scores normativos de teste e os participantes
+            sintéticos. Os utilizadores clínicos, os dados de produção e o histórico
+            de auditoria serão preservados.
+        </p>
+
+        <dl class="row border-top border-bottom py-3">
+            <dt class="col-sm-8">Pacientes de teste</dt>
+            <dd class="col-sm-4">{{ preview.patients }}</dd>
+            <dt class="col-sm-8">Submissões de teste/simulação</dt>
+            <dd class="col-sm-4">{{ preview.submissions }}</dd>
+            <dt class="col-sm-8">Versões normativas TEST</dt>
+            <dd class="col-sm-4">{{ preview.normative_test_versions }}</dd>
+            <dt class="col-sm-8">Participantes normativos sintéticos</dt>
+            <dd class="col-sm-4 mb-0">{{ preview.synthetic_participants }}</dd>
+        </dl>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="{{ form.confirmation.id_for_label }}" class="form-label fw-semibold">
+                    Escreva exatamente APAGAR AMBIENTE PROFISSIONAL DE TESTE
+                </label>
+                {{ form.confirmation }}
+                {% for error in form.confirmation.errors %}<div class="text-danger mt-1">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="mb-4">
+                <label for="{{ form.password.id_for_label }}" class="form-label fw-semibold">
+                    {{ form.password.label }}
+                </label>
+                {{ form.password }}
+                {% for error in form.password.errors %}<div class="text-danger mt-1">{{ error }}</div>{% endfor %}
+            </div>
+            <button type="submit" class="btn btn-danger rounded-0">
+                Apagar pacientes e dados de teste
+            </button>
+        </form>
+    </div>
+</section>
+{% endblock %}

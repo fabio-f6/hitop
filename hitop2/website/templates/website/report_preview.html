@@ -296,11 +296,7 @@
 
             <div style="margin-top:6px; text-align:right;">
                 Base normativa:
-                {% if normative_version %}
-                    {{ normative_version.name }} ({{ normative_version.get_environment_display }})
-                {% else %}
-                    ainda não atribuída
-                {% endif %}
+                {{ normative_version_display }}
             </div>
 
         </div>
@@ -382,12 +378,8 @@
             qualificados, enquadrados nos manuais técnicos e integrados com outra informação clínica.
             Conteúdo confidencial.
             <div style="margin-top:6px; text-align:right;">
-                Base normativa:
-                {% if normative_version %}
-                    {{ normative_version.name }} ({{ normative_version.get_environment_display }})
-                {% else %}
-                    ainda não atribuída
-                {% endif %}
+            Base normativa:
+            {{ normative_version_display }}
             </div>
         </div>
 
@@ -816,11 +808,7 @@
 
             <div style="margin-top:6px; text-align:right;">
                 Base normativa:
-                {% if normative_version %}
-                    {{ normative_version.name }} ({{ normative_version.get_environment_display }})
-                {% else %}
-                    ainda não atribuída
-                {% endif %}
+                {{ normative_version_display }}
             </div>
 
         </div>

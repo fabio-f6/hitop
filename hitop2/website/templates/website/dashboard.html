@@ -41,6 +41,18 @@
             {% endif %}
         </p>
 
+        {% if is_test_environment %}
+        <form method="post" action="{% url 'administration:test_export_all_submissions_to_normative' %}" class="mt-3">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-warning rounded-0">
+                Adicionar todas as submissões elegíveis à base normativa de teste
+            </button>
+            <span class="text-secondary small ms-2">
+                Percorre os pacientes deste ambiente e evita duplicar submissões já exportadas.
+            </span>
+        </form>
+        {% endif %}
+
     </div>
 
     <!-- ESTATÍSTICAS -->

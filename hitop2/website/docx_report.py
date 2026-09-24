@@ -397,14 +397,8 @@ def _configure_document(document):
         style.font.color.rgb = RGBColor(0, 0, 0)
 
 
-def _configure_normative_footer(document, normative_version):
-    if normative_version is None:
-        label = "Base normativa: ainda não atribuída"
-    else:
-        label = (
-            f"Base normativa: {normative_version.name} "
-            f"({normative_version.get_environment_display()})"
-        )
+def _configure_normative_footer(document, normative_version_display):
+    label = f"Base normativa: {normative_version_display or 'ainda não atribuída'}"
 
     for section in document.sections:
         paragraph = section.footer.paragraphs[0]
@@ -418,7 +412,7 @@ def _configure_normative_footer(document, normative_version):
 def build_report_docx(context):
     document = Document()
     _configure_document(document)
-    _configure_normative_footer(document, context.get("normative_version"))
+    _configure_normative_footer(document, context.get("normative_version_display"))
     report = context["report"]
 
     logo_path = Path(settings.BASE_DIR) / "static" / "images" / "hitop_logo.png"

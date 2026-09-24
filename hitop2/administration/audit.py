@@ -38,6 +38,18 @@ _ALLOWED_METADATA_KEYS = {
     },
     AdministrativeAuditLog.Action.NORMATIVE_TEST_CLEARED: {
         "versions_deleted", "synthetic_participants_deleted",
+        "submissions_reset_for_reexport",
+    },
+    AdministrativeAuditLog.Action.NORMATIVE_TEST_SUBMISSION_EXPORTED: set(),
+    AdministrativeAuditLog.Action.NORMATIVE_TEST_SUBMISSIONS_BULK_EXPORTED: {
+        "submissions_exported",
+        "submissions_skipped",
+    },
+    AdministrativeAuditLog.Action.PROFESSIONAL_TEST_ENVIRONMENT_CLEARED: {
+        "patients_deleted",
+        "submissions_deleted",
+        "test_versions_deleted",
+        "synthetic_participants_deleted",
     },
     MASTER_RESET_ACTION: {
         "users_deleted",

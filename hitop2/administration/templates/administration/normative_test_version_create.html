@@ -1,13 +1,49 @@
 {% extends "base.html" %}
+
 {% block content %}
 <section class="py-3">
-  <a href="{% url 'administration:normative' %}">← Base normativa</a>
-  <h1 class="h2 mt-4">Criar versão normativa de teste</h1>
-  <p class="text-danger fw-bold">DADOS SINTÉTICOS — NÃO UTILIZADOS EM PRODUÇÃO</p>
-  <form method="post" class="border bg-white p-4">{% csrf_token %}
-    {{ form.as_p }}
-    <p>Serão incluídos os participantes do baseline e todos os {{ synthetic_count }} participantes sintéticos disponíveis. Contagem prevista: <strong>{{ resulting_count }}</strong>.</p>
-    <button class="btn btn-warning rounded-0" type="submit">Criar versão de teste</button>
-  </form>
+    <a
+        href="{% url 'administration:normative' %}"
+        class="btn rounded-0"
+        style="background:#e2f0ff; border:1px solid #9ec9ff; color:black; padding:8px 16px;"
+    >
+        ← Base normativa
+    </a>
+    <h1 class="h2 fw-bold mt-4 mb-2">Criar versão normativa de teste</h1>
+    <p class="text-secondary mb-2">
+        Escolha um snapshot de produção ou de teste. A nova versão herdará os seus participantes
+        e incluirá também os participantes sintéticos atualmente disponíveis.
+    </p>
+    <p class="text-danger fw-bold mb-4">DADOS SINTÉTICOS — NÃO UTILIZADOS EM PRODUÇÃO</p>
+
+    <form method="post" class="border border-warning bg-white p-4">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="{{ form.name.id_for_label }}" class="form-label fw-semibold">
+                {{ form.name.label }}
+            </label>
+            {{ form.name }}
+            {% for error in form.name.errors %}
+                <div class="text-danger small mt-2">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-4">
+            <label for="{{ form.baseline_version.id_for_label }}" class="form-label fw-semibold">
+                {{ form.baseline_version.label }}
+            </label>
+            {{ form.baseline_version }}
+            {% for error in form.baseline_version.errors %}
+                <div class="text-danger small mt-2">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <p class="mb-4">
+            Serão incluídos os participantes da versão de base e todos os
+            {{ synthetic_count }} participantes sintéticos disponíveis.
+            Contagem prevista: <strong>{{ resulting_count }}</strong>.
+        </p>
+        <button class="btn btn-warning rounded-0" type="submit">Criar versão de teste</button>
+    </form>
 </section>
 {% endblock %}

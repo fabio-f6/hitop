@@ -35,6 +35,18 @@ class AdministrativeAuditLog(models.Model):
         NORMATIVE_TEST_CLEARED = (
             "normative_test.cleared", "Ambiente normativo de teste limpo",
         )
+        NORMATIVE_TEST_SUBMISSION_EXPORTED = (
+            "normative_test.submission_exported",
+            "Submissão exportada para a base normativa de teste",
+        )
+        NORMATIVE_TEST_SUBMISSIONS_BULK_EXPORTED = (
+            "normative_test.submissions_bulk_exported",
+            "Submissões reexportadas para a base normativa de teste",
+        )
+        PROFESSIONAL_TEST_ENVIRONMENT_CLEARED = (
+            "professional_test.cleared",
+            "Ambiente Profissional de Teste limpo",
+        )
 
     class ObjectType(models.TextChoices):
         PROFESSIONAL = "professional", "Profissional"

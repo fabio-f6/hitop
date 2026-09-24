@@ -3,12 +3,17 @@ from dataclasses import dataclass
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db import transaction
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
-from polls.models import QuestionnaireSubmission, UserAnswer
+from polls.models import NormativeParticipant, QuestionnaireSubmission, UserAnswer
 from polls.normative_export import evaluate_normative_eligibility
+from polls.normative_versions import (
+    NormativeVersionError,
+    get_or_assign_report_normative_version,
+)
 from polls.simulation import SimulationConfigurationError, simulate_submission_batch
 from administration.audit import record_admin_action
 from administration.models import AdministrativeAuditLog
@@ -105,13 +110,24 @@ class ProfessionalEnvironment:
 
     def submission_queryset(self):
         submissions = QuestionnaireSubmission.objects.filter(
-            is_test_data=self.is_test_environment,
             user__userprofile__in=self.patient_profiles(),
         )
-        if not self.is_test_environment:
+        if self.is_test_environment:
+            # Include legacy test submissions created before the submission-level
+            # marker was consistently set, while remaining scoped to this owner's
+            # test patient profiles.
+            submissions = submissions.filter(
+                Q(is_test_data=True)
+                | Q(user__userprofile__is_test_data=True)
+                | ~Q(simulation_mode="normal")
+            )
+        else:
             # Legacy simulated records are structurally identifiable through
             # simulation_mode even though they predate the is_test_data field.
-            submissions = submissions.filter(simulation_mode="normal")
+            submissions = submissions.filter(
+                is_test_data=False,
+                simulation_mode="normal",
+            )
         return submissions
 
     def get_submission(self, submission_id):
@@ -191,6 +207,11 @@ def _create_submission(form, patient_profile, environment):
             completed=False, is_open=True,
             is_test_data=environment.is_test_environment, **configuration,
         )
+        if get_or_assign_report_normative_version(submission) is None:
+            raise NormativeVersionError(
+                "Não existe uma versão normativa ativa aplicável. "
+                "Ative uma versão antes de criar novas submissões."
+            )
         submission.spectra.set(form.cleaned_data["spectra"])
         submissions.append(submission)
 
@@ -268,8 +289,9 @@ def create_patient_response(request, environment):
                     form,
                     environment,
                 )
-            except SimulationConfigurationError as error:
-                form.add_error(None, str(error))
+            except (SimulationConfigurationError, NormativeVersionError) as error:
+                message = error.messages[0] if isinstance(error, NormativeVersionError) else str(error)
+                form.add_error(None, message)
             else:
                 summary = getattr(submission, "simulation_batch_summary", None)
                 if summary:
@@ -305,8 +327,9 @@ def new_questionnaire_response(request, environment, patient_id):
         if form.is_valid():
             try:
                 submission = _create_submission(form, patient_profile, environment)
-            except SimulationConfigurationError as error:
-                form.add_error(None, str(error))
+            except (SimulationConfigurationError, NormativeVersionError) as error:
+                message = error.messages[0] if isinstance(error, NormativeVersionError) else str(error)
+                form.add_error(None, message)
             else:
                 summary = getattr(submission, "simulation_batch_summary", None)
                 if summary:
@@ -367,6 +390,23 @@ def patient_submissions_response(request, environment, patient_id):
         ).select_related("report_normative_version").order_by("-started_at")
     )
     for submission in submissions:
+        pinned_version = submission.report_normative_version
+        submission.normative_version_name = (
+            submission.report_normative_version_name
+            or (pinned_version.name if pinned_version else "")
+        )
+        submission.normative_version_environment = (
+            submission.report_normative_version_environment
+            or (pinned_version.environment if pinned_version else "")
+        )
+        submission.normative_version_environment_display = {
+            "production": "Produção",
+            "test": "Teste",
+        }.get(submission.normative_version_environment, "")
+        submission.normative_version_was_removed = bool(
+            submission.normative_version_name and pinned_version is None
+        )
+        submission.can_export_to_test_normative = False
         submission.access_link = request.build_absolute_uri(
             reverse("polls:questionnaire_by_token", args=[submission.access_token])
         )
@@ -376,6 +416,11 @@ def patient_submissions_response(request, environment, patient_id):
             submission.normative_eligibility = eligibility
             if eligibility["eligible"] is True:
                 submission.normative_eligibility_state = "eligible"
+                submission.can_export_to_test_normative = not (
+                    NormativeParticipant.objects.filter(
+                        source_submission=submission,
+                    ).exists()
+                )
             elif eligibility["eligible"] is False:
                 submission.normative_eligibility_state = "ineligible"
             else:
