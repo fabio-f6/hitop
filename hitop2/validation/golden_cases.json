@@ -1,0 +1,12 @@
+[
+  {"name":"normal", "answers":["1","2","3","4"], "scored":[1,2,3,4], "sum":10, "denominator":4, "score":2.5, "distribution":[1,2,2.5,3,4], "percentile":60},
+  {"name":"hypothetical_reverse_not_current_key", "answers":["1","2","3","4"], "reverse_indices":[0,1], "scored":[4,3,3,4], "sum":14, "denominator":4, "score":3.5, "distribution":[1,2,2.5,3,4], "percentile":80},
+  {"name":"missing_below_threshold", "answers":["1","2","3","4",null], "scored":[1,2,3,4], "sum":10, "denominator":4, "score":2.5, "distribution":[1,2,2.5,3,4], "percentile":60},
+  {"name":"exactly_25_percent", "answers":["1","2","3",null], "scored":[1,2,3], "sum":6, "denominator":3, "score":null, "distribution":[1,2,2.5,3,4], "percentile":null},
+  {"name":"answer_5", "answers":["1","2","3","4","5"], "scored":[1,2,3,4], "sum":10, "denominator":4, "score":2.5, "distribution":[1,2,2.5,3,4], "percentile":60},
+  {"name":"minimum_score_and_percentile", "answers":["1","1"], "scored":[1,1], "sum":2, "denominator":2, "score":1.0, "distribution":[2,3,4], "percentile":0},
+  {"name":"maximum", "answers":["4","4"], "scored":[4,4], "sum":8, "denominator":2, "score":4.0, "distribution":[1,2,3,4], "percentile":100},
+  {"name":"median", "answers":["2","2"], "scored":[2,2], "sum":4, "denominator":2, "score":2.0, "distribution":[1,2,3,4], "percentile":50},
+  {"name":"ties", "answers":["2","2"], "scored":[2,2], "sum":4, "denominator":2, "score":2.0, "distribution":[1,2,2,2,4], "percentile":80},
+  {"name":"zero_valid", "answers":["5","5"], "scored":[], "sum":0, "denominator":0, "score":null, "distribution":[1,2,3,4], "percentile":null}
+]

@@ -1,0 +1,320 @@
+{
+  "runtime": {
+    "python": "3.13.5",
+    "django": "6.0.1"
+  },
+  "version": {
+    "id": 8,
+    "name": "v1",
+    "status": "active",
+    "environment": "production"
+  },
+  "csv": {
+    "rows": 255,
+    "columns": 503,
+    "encoding": "UTF-8 (BOM allowed)",
+    "has_bom": false,
+    "question_columns": 436,
+    "non_question_columns": [
+      "ATTENTION CHECK",
+      "Age",
+      "country_born",
+      "country_residence",
+      "PT_residence_years",
+      "PT_lang",
+      "PT_residence_region",
+      "freguesia",
+      "urbanicity",
+      "race_1",
+      "race_2",
+      "race_3",
+      "race_4",
+      "race_5",
+      "race_6",
+      "race_9",
+      "gender",
+      "sex",
+      "education",
+      "employment",
+      "socioeconomic",
+      "income",
+      "marital_status",
+      "household_adults",
+      "household_children",
+      "spirituality",
+      "mental_diagnosis",
+      "mental_diagnosis_conv",
+      "mental_treatment_1",
+      "mental_treatment_2",
+      "mental_treatment_3",
+      "mental_treatment_4",
+      "mental_treatment_5",
+      "mental_treatment_9",
+      "mental_med",
+      "treatment_access",
+      "insurance",
+      "absenteeism",
+      "presenteeism",
+      "life_events_1",
+      "life_events_2",
+      "life_events_3",
+      "life_events_4",
+      "life_events_5",
+      "life_events_6",
+      "life_events_7",
+      "life_events_8",
+      "life_events_10",
+      "life_events_11",
+      "life_events_12",
+      "life_events_13",
+      "life_events_9",
+      "life_events_0",
+      "social_support",
+      "alc",
+      "can",
+      "nic",
+      "stimulant",
+      "inal",
+      "aluc",
+      "opiod",
+      "medicines",
+      "life_alc",
+      "life_can",
+      "life_nic",
+      "life_ilicdrugs",
+      "life_medicines"
+    ],
+    "missing_key_columns": [],
+    "duplicate_headers": 0,
+    "duplicate_response_vectors": 0,
+    "malformed_rows": 0,
+    "tokens": {
+      "1": 66561,
+      "2": 28939,
+      "3": 11202,
+      "4": 4470,
+      "0": 8
+    },
+    "scientific_tokens": {
+      "1": 64784,
+      "2": 28939,
+      "3": 11202,
+      "4": 4470
+    },
+    "out_of_range_cells": [
+      {
+        "csv_row": 60,
+        "item_code": "catch_7",
+        "value": "0",
+        "attention_check": true
+      },
+      {
+        "csv_row": 75,
+        "item_code": "catch_5",
+        "value": "0",
+        "attention_check": true
+      },
+      {
+        "csv_row": 172,
+        "item_code": "catch_5",
+        "value": "0",
+        "attention_check": true
+      },
+      {
+        "csv_row": 174,
+        "item_code": "catch_2",
+        "value": "0",
+        "attention_check": true
+      },
+      {
+        "csv_row": 196,
+        "item_code": "catch_4",
+        "value": "0",
+        "attention_check": true
+      },
+      {
+        "csv_row": 228,
+        "item_code": "catch_7",
+        "value": "0",
+        "attention_check": true
+      },
+      {
+        "csv_row": 241,
+        "item_code": "catch_2",
+        "value": "0",
+        "attention_check": true
+      },
+      {
+        "csv_row": 242,
+        "item_code": "catch_4",
+        "value": "0",
+        "attention_check": true
+      }
+    ],
+    "duplicate_full_rows": 0
+  },
+  "import_comparison": {
+    "participants": 255,
+    "answers": 111180,
+    "safe_links": 255,
+    "unique_csv_rows_linked": 255,
+    "unlinked": 0,
+    "cell_differences": 0,
+    "duplicate_answers": 0,
+    "metadata_differences": 0
+  },
+  "normative_attention": {
+    "passed": 0,
+    "failed": 255,
+    "correct_counts": {
+      "2": 255
+    },
+    "csv_attention_summary_counts": {
+      "": 247,
+      "1": 8
+    }
+  },
+  "mapping": {
+    "script_questions": 436,
+    "db_questions": 436,
+    "differences": 0,
+    "duplicate_scale_names": 0,
+    "empty_scales": [],
+    "script_duplicate_codes": 0,
+    "attention_checks": 7,
+    "catch_scored": 0,
+    "official_key_available": false,
+    "reverse_configuration_available": false
+  },
+  "scale_recomputation": {
+    "expected": 23715,
+    "existing": 23715,
+    "matches": 23715,
+    "mismatches": 0,
+    "max_absolute_difference": 0.0,
+    "mean_absolute_difference": 0.0
+  },
+  "spectrum_recomputation": {
+    "expected": 1275,
+    "existing": 1275,
+    "matches": 1275,
+    "mismatches": 0,
+    "max_absolute_difference": 4.440892098500626e-16,
+    "mean_absolute_difference": 5.4858078863831267e-17
+  },
+  "csv_scale_recomputation": {
+    "expected": 23715,
+    "existing": 23715,
+    "matches": 23715,
+    "mismatches": 0,
+    "max_absolute_difference": 0.0,
+    "mean_absolute_difference": 0.0
+  },
+  "csv_spectrum_recomputation": {
+    "expected": 1275,
+    "existing": 1275,
+    "matches": 1275,
+    "mismatches": 0,
+    "max_absolute_difference": 4.440892098500626e-16,
+    "mean_absolute_difference": 5.4858078863831267e-17
+  },
+  "production_engine_mismatches": 0,
+  "percentile_mismatches": 0,
+  "floating_point_percentile_differences": 75,
+  "production_answer_order_percentile_differences": 0,
+  "golden_checks": {
+    "golden_cases": 10,
+    "invariants": "PASS"
+  },
+  "current_engine_vs_stored_percentile_differences": 0,
+  "simulation": {
+    "n_per_profile": 1000,
+    "seed": 20260928,
+    "frequencies": {
+      "random": {
+        "3": 107078,
+        "4": 107420,
+        "1": 107361,
+        "2": 107141
+      },
+      "low": {
+        "1": 193412,
+        "2": 149945,
+        "3": 64104,
+        "4": 21539
+      },
+      "medium": {
+        "4": 42825,
+        "2": 171236,
+        "3": 172088,
+        "1": 42851
+      },
+      "high": {
+        "3": 149931,
+        "4": 193181,
+        "2": 64321,
+        "1": 21567
+      }
+    },
+    "engine_differences": 0,
+    "note": "Uses production pure profile sampler; independent scoring. No DB submissions created."
+  },
+  "omitted_row_probe": {
+    "actual": {
+      "score": 4.0,
+      "missing_answers": 0,
+      "missing_percentage": 0.0,
+      "total_items": 1,
+      "is_valid": true
+    },
+    "expected": {
+      "score": null,
+      "is_valid": false,
+      "total_items": 5,
+      "missing_answers": 4,
+      "missing_percentage": 80.0,
+      "scored": [
+        4
+      ],
+      "numerator": 4,
+      "denominator": 1
+    }
+  },
+  "incomplete_completed_submissions": [],
+  "report_state": {
+    "completed_submissions": 4,
+    "completed_without_pin": 0,
+    "completed_clinical_with_test_pin": 0,
+    "user_answer_invalid_tokens": 0
+  },
+  "snapshot": {
+    "csv_sha256": "1f6651e8b01310cd1c0dd0530bda45f36e7a24c02e08ee7ab11a257af255c978",
+    "key_sha256": "131a5b49905581a1740a30f24906fddf021dd77e1b3f49b0070c91f21de6793f",
+    "participant_count": 255,
+    "scale_score_count": 23715,
+    "spectrum_score_count": 1275,
+    "normalized_scale_hash": "011f4c439fd6535e5ad2c80e8f7d68a403a8757ea744368d6324c3edf631a417",
+    "normalized_spectrum_hash": "27a23f8dd344301cd7c8082b0bf9ef3f6adee9d55edf06c329c5ff47673f1480",
+    "mapping_hash": "c251ca9e4d11f0dbcbe770c65adc219b3ac9dd3487c97fbc6fb23ec3e5a5be4c"
+  },
+  "checks": {
+    "v1_count": "PASS",
+    "csv_database": "PASS",
+    "mapping_repository": "PASS",
+    "scale_recomputation": "PASS",
+    "spectrum_recomputation": "PASS",
+    "production_engine": "PASS",
+    "percentile_oracle": "PASS",
+    "golden_cases_and_invariants": "PASS",
+    "simulation_engine": "PASS",
+    "numerical_percentile_stability": "FAIL",
+    "production_membership": "PASS",
+    "completed_report_state": "PASS",
+    "range": "PASS",
+    "answer_choice_domain": "FAIL",
+    "omitted_rows_contract": "FAIL",
+    "v1_snapshot": "PASS",
+    "scientific_validity": "BLOCKED (official key / normative protocol unavailable)"
+  },
+  "database_transaction_read_only": "on"
+}

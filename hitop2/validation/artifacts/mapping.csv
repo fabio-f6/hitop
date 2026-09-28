@@ -1,0 +1,437 @@
+item_code,scale,subfactor,spectrum,is_attention_check
+hitop_156,Agoraphobia,Fear,Internalizing,False
+hitop_157,Agoraphobia,Fear,Internalizing,False
+hitop_158,Agoraphobia,Fear,Internalizing,False
+hitop_160,Agoraphobia,Fear,Internalizing,False
+hitop_161,Agoraphobia,Fear,Internalizing,False
+ext_154,Antisocial Behavior,Antisocial,Externalizing,False
+ext_227,Antisocial Behavior,Antisocial,Externalizing,False
+ext_263,Antisocial Behavior,Antisocial,Externalizing,False
+ext_308,Antisocial Behavior,Antisocial,Externalizing,False
+ext_369,Antisocial Behavior,Antisocial,Externalizing,False
+ext_37,Antisocial Behavior,Antisocial,Externalizing,False
+ext_415,Antisocial Behavior,Antisocial,Externalizing,False
+ext_488,Antisocial Behavior,Antisocial,Externalizing,False
+hitop_197,Appetite Loss,Eating Pathology,Internalizing,False
+hitop_198,Appetite Loss,Eating Pathology,Internalizing,False
+hitop_199,Appetite Loss,Eating Pathology,Internalizing,False
+hitop_87,Binge Eating,Eating Pathology,Internalizing,False
+hitop_92,Binge Eating,Eating Pathology,Internalizing,False
+hitop_93,Binge Eating,Eating Pathology,Internalizing,False
+hitop_449,Bodily Distress,Somatoform,Somatoform,False
+hitop_450,Bodily Distress,Somatoform,Somatoform,False
+hitop_451,Bodily Distress,Somatoform,Somatoform,False
+hitop_452,Bodily Distress,Somatoform,Somatoform,False
+hitop_455,Bodily Distress,Somatoform,Somatoform,False
+hitop_456,Bodily Distress,Somatoform,Somatoform,False
+hitop_105,Body Dissatisfaction,Eating Pathology,Internalizing,False
+hitop_206,Body Dissatisfaction,Eating Pathology,Internalizing,False
+hitop_96,Body Dissatisfaction,Eating Pathology,Internalizing,False
+hitop_99,Body Dissatisfaction,Eating Pathology,Internalizing,False
+hitop_208,Body Focus,Eating Pathology,Internalizing,False
+hitop_210,Body Focus,Eating Pathology,Internalizing,False
+hitop_211,Body Focus,Eating Pathology,Internalizing,False
+hitop_212,Body Focus,Eating Pathology,Internalizing,False
+hitop_213,Body Focus,Eating Pathology,Internalizing,False
+ext_103,Callousness,Antagonism,Externalizing,False
+ext_127,Callousness,Antagonism,Externalizing,False
+ext_212,Callousness,Antagonism,Externalizing,False
+ext_367,Callousness,Antagonism,Externalizing,False
+ext_402,Callousness,Antagonism,Externalizing,False
+ext_5,Callousness,Antagonism,Externalizing,False
+hitop_214,Checking,Fear,Internalizing,False
+hitop_215,Checking,Fear,Internalizing,False
+hitop_216,Checking,Fear,Internalizing,False
+hitop_218,Checking,Fear,Internalizing,False
+hitop_219,Checking,Fear,Internalizing,False
+hitop_221,Cleaning,Fear,Internalizing,False
+hitop_222,Cleaning,Fear,Internalizing,False
+hitop_223,Cleaning,Fear,Internalizing,False
+hitop_224,Cleaning,Fear,Internalizing,False
+hitop_226,Cleaning,Fear,Internalizing,False
+hitop_228,Cleaning,Fear,Internalizing,False
+ext_300,Cognitive Problems,Distress,Internalizing,False
+ext_64,Cognitive Problems,Distress,Internalizing,False
+hitop_230,Cognitive Problems,Distress,Internalizing,False
+hitop_231,Cognitive Problems,Distress,Internalizing,False
+hitop_543,Cognitive Problems,Distress,Internalizing,False
+hitop_458,Conversion Symptoms,Somatoform,Somatoform,False
+hitop_460,Conversion Symptoms,Somatoform,Somatoform,False
+hitop_461,Conversion Symptoms,Somatoform,Somatoform,False
+hitop_462,Conversion Symptoms,Somatoform,Somatoform,False
+hitop_463,Conversion Symptoms,Somatoform,Somatoform,False
+hitop_464,Conversion Symptoms,Somatoform,Somatoform,False
+hitop_467,Conversion Symptoms,Somatoform,Somatoform,False
+hitop_233,Counting,Fear,Internalizing,False
+hitop_234,Counting,Fear,Internalizing,False
+hitop_235,Counting,Fear,Internalizing,False
+hitop_237,Counting,Fear,Internalizing,False
+hitop_238,Counting,Fear,Internalizing,False
+hitop_107,Dietary Restraint,Eating Pathology,Internalizing,False
+hitop_109,Dietary Restraint,Eating Pathology,Internalizing,False
+hitop_110,Dietary Restraint,Eating Pathology,Internalizing,False
+hitop_111,Dietary Restraint,Eating Pathology,Internalizing,False
+hitop_114,Dietary Restraint,Eating Pathology,Internalizing,False
+hitop_397,Difficulties Reaching Orgasm,Sexual Problems,Internalizing,False
+hitop_398,Difficulties Reaching Orgasm,Sexual Problems,Internalizing,False
+hitop_442,Difficulties Reaching Orgasm,Sexual Problems,Internalizing,False
+hitop_471,Disease Conviction,Somatoform,Somatoform,False
+hitop_474,Disease Conviction,Somatoform,Somatoform,False
+hitop_478,Disease Conviction,Somatoform,Somatoform,False
+hitop_479,Disease Conviction,Somatoform,Somatoform,False
+ext_303,Dishonesty - Deceitfulness,Antagonism,Externalizing,False
+ext_395,Dishonesty - Deceitfulness,Antagonism,Externalizing,False
+ext_432,Dishonesty - Deceitfulness,Antagonism,Externalizing,False
+ext_444,Dishonesty - Deceitfulness,Antagonism,Externalizing,False
+ext_101,Dishonesty - Manipulativeness,Antagonism,Externalizing,False
+ext_22,Dishonesty - Manipulativeness,Antagonism,Externalizing,False
+ext_262,Dishonesty - Manipulativeness,Antagonism,Externalizing,False
+ext_38,Dishonesty - Manipulativeness,Antagonism,Externalizing,False
+ext_13,Disorganization,Disinhibition,Externalizing,False
+ext_320,Disorganization,Disinhibition,Externalizing,False
+ext_361,Disorganization,Disinhibition,Externalizing,False
+ext_374,Disorganization,Disinhibition,Externalizing,False
+ext_429,Disorganization,Disinhibition,Externalizing,False
+ext_442,Disorganization,Disinhibition,Externalizing,False
+ext_97,Disorganization,Disinhibition,Externalizing,False
+hitop_469,Dissociation,Thought Disorder,Thought Disorder,False
+hitop_547,Dissociation,Thought Disorder,Thought Disorder,False
+hitop_552,Dissociation,Thought Disorder,Thought Disorder,False
+hitop_554,Dissociation,Thought Disorder,Thought Disorder,False
+hitop_557,Dissociation,Thought Disorder,Thought Disorder,False
+hitop_558,Dissociation,Thought Disorder,Thought Disorder,False
+hitop_173,Distress - Dysphoria (Anhedonia),Distress,Internalizing,False
+hitop_508,Distress - Dysphoria (Anhedonia),Distress,Internalizing,False
+hitop_8,Distress - Dysphoria (Anhedonia),Distress,Internalizing,False
+hitop_187,Distress - Dysphoria (Anxious Worry),Distress,Internalizing,False
+hitop_190,Distress - Dysphoria (Anxious Worry),Distress,Internalizing,False
+hitop_191,Distress - Dysphoria (Anxious Worry),Distress,Internalizing,False
+exp12,Distress - Dysphoria (Depressed Mood),Distress,Internalizing,False
+exp14,Distress - Dysphoria (Depressed Mood),Distress,Internalizing,False
+exp8,Distress - Dysphoria (Depressed Mood),Distress,Internalizing,False
+exp9,Distress - Dysphoria (Depressed Mood),Distress,Internalizing,False
+exp17,Distress - Dysphoria (Lassitude),Distress,Internalizing,False
+exp18,Distress - Dysphoria (Lassitude),Distress,Internalizing,False
+exp19,Distress - Dysphoria (Lassitude),Distress,Internalizing,False
+hitop_333,Distress - Dysphoria (Shame/Guilt),Distress,Internalizing,False
+hitop_334,Distress - Dysphoria (Shame/Guilt),Distress,Internalizing,False
+hitop_336,Distress - Dysphoria (Shame/Guilt),Distress,Internalizing,False
+ext_50,Domineering,Antagonism,Externalizing,False
+hitop_17,Domineering,Antagonism,Externalizing,False
+hitop_18,Domineering,Antagonism,Externalizing,False
+hitop_19,Domineering,Antagonism,Externalizing,False
+hitop_21,Domineering,Antagonism,Externalizing,False
+hitop_23,Domineering,Antagonism,Externalizing,False
+hitop_560,Eccentricity,Thought Disorder,Thought Disorder,False
+hitop_562,Eccentricity,Thought Disorder,Thought Disorder,False
+hitop_564,Eccentricity,Thought Disorder,Thought Disorder,False
+hitop_566,Eccentricity,Thought Disorder,Thought Disorder,False
+hitop_567,Eccentricity,Thought Disorder,Thought Disorder,False
+hitop_570,Emotionality (Affective Lability),Distress,Internalizing,False
+hitop_571,Emotionality (Affective Lability),Distress,Internalizing,False
+hitop_572,Emotionality (Affective Lability),Distress,Internalizing,False
+ext_193,Emotionality (Angry Hostility),Distress,Internalizing,False
+ext_323,Emotionality (Angry Hostility),Distress,Internalizing,False
+ext_514,Emotionality (Angry Hostility),Distress,Internalizing,False
+ext_89,Emotionality (Angry Hostility),Distress,Internalizing,False
+exp4,Emotionality (Irritability),Distress,Internalizing,False
+exp5,Emotionality (Irritability),Distress,Internalizing,False
+exp6,Emotionality (Irritability),Distress,Internalizing,False
+exp7,Emotionality (Irritability),Distress,Internalizing,False
+ext_136,Entitlement,Antagonism,Externalizing,False
+ext_175,Entitlement,Antagonism,Externalizing,False
+ext_216,Entitlement,Antagonism,Externalizing,False
+ext_255,Entitlement,Antagonism,Externalizing,False
+ext_370,Entitlement,Antagonism,Externalizing,False
+ext_381,Entitlement,Antagonism,Externalizing,False
+hitop_115,Excessive Exercise,Eating Pathology,Internalizing,False
+hitop_116,Excessive Exercise,Eating Pathology,Internalizing,False
+hitop_120,Excessive Exercise,Eating Pathology,Internalizing,False
+hitop_121,Excessive Exercise,Eating Pathology,Internalizing,False
+hitop_123,Excessive Exercise,Eating Pathology,Internalizing,False
+hitop_246,Excoriation,Fear,Internalizing,False
+hitop_247,Excoriation,Fear,Internalizing,False
+hitop_248,Excoriation,Fear,Internalizing,False
+hitop_11,Exhibitionism,Antagonism,Externalizing,False
+hitop_16,Exhibitionism,Antagonism,Externalizing,False
+hitop_577,Exhibitionism,Antagonism,Externalizing,False
+hitop_581,Exhibitionism,Antagonism,Externalizing,False
+hitop_9,Exhibitionism,Antagonism,Externalizing,False
+hitop_582,Fantasy Proneness,Thought Disorder,Thought Disorder,False
+hitop_583,Fantasy Proneness,Thought Disorder,Thought Disorder,False
+hitop_584,Fantasy Proneness,Thought Disorder,Thought Disorder,False
+hitop_585,Fantasy Proneness,Thought Disorder,Thought Disorder,False
+hitop_586,Fantasy Proneness,Thought Disorder,Thought Disorder,False
+hitop_588,Fantasy Proneness,Thought Disorder,Thought Disorder,False
+hitop_77,Food Selectivity,Eating Pathology,Internalizing,False
+hitop_78,Food Selectivity,Eating Pathology,Internalizing,False
+hitop_81,Food Selectivity,Eating Pathology,Internalizing,False
+hitop_85,Food Selectivity,Eating Pathology,Internalizing,False
+ext_20,Gambling,Disinhibition,Externalizing,False
+ext_210,Gambling,Disinhibition,Externalizing,False
+ext_26,Gambling,Disinhibition,Externalizing,False
+ext_261,Gambling,Disinhibition,Externalizing,False
+ext_269,Gambling,Disinhibition,Externalizing,False
+ext_135,Gaming,Disinhibition,Externalizing,False
+ext_350,Gaming,Disinhibition,Externalizing,False
+ext_45,Gaming,Disinhibition,Externalizing,False
+ext_65,Gaming,Disinhibition,Externalizing,False
+ext_219,Grandiosity,Antagonism,Externalizing,False
+ext_380,Grandiosity,Antagonism,Externalizing,False
+ext_41,Grandiosity,Antagonism,Externalizing,False
+catch_1,Catch,Catch,Catch,True
+catch_2,Catch,Catch,Catch,True
+catch_3,Catch,Catch,Catch,True
+ext_43,Grandiosity,Antagonism,Externalizing,False
+ext_441,Grandiosity,Antagonism,Externalizing,False
+ext_498,Grandiosity,Antagonism,Externalizing,False
+hitop_483,Health Anxiety,Somatoform,Somatoform,False
+hitop_487,Health Anxiety,Somatoform,Somatoform,False
+hitop_488,Health Anxiety,Somatoform,Somatoform,False
+hitop_490,Health Anxiety,Somatoform,Somatoform,False
+exp24,Hoarding,Fear,Internalizing,False
+exp25,Hoarding,Fear,Internalizing,False
+hitop_256,Hoarding,Fear,Internalizing,False
+hitop_258,Hoarding,Fear,Internalizing,False
+hitop_259,Hoarding,Fear,Internalizing,False
+hitop_261,Hoarding,Fear,Internalizing,False
+ext_145,Hyperdeliberation,Anankastia,Externalizing,False
+ext_189,Hyperdeliberation,Anankastia,Externalizing,False
+ext_291,Hyperdeliberation,Anankastia,Externalizing,False
+ext_35,Hyperdeliberation,Anankastia,Externalizing,False
+ext_438,Hyperdeliberation,Anankastia,Externalizing,False
+ext_457,Hyperdeliberation,Anankastia,Externalizing,False
+hitop_367,Hypervigilance,Fear,Internalizing,False
+hitop_368,Hypervigilance,Fear,Internalizing,False
+hitop_369,Hypervigilance,Fear,Internalizing,False
+hitop_371,Hypervigilance,Fear,Internalizing,False
+hitop_372,Hypervigilance,Fear,Internalizing,False
+hitop_54,Hypervigilance,Fear,Internalizing,False
+hitop_270,Insomnia,Distress,Internalizing,False
+hitop_271,Insomnia,Distress,Internalizing,False
+hitop_273,Insomnia,Distress,Internalizing,False
+hitop_274,Insomnia,Distress,Internalizing,False
+hitop_403,Low Sexual Arousal,Sexual Problems,Internalizing,False
+hitop_404,Low Sexual Arousal,Sexual Problems,Internalizing,False
+hitop_406,Low Sexual Arousal,Sexual Problems,Internalizing,False
+hitop_399,Low Sexual Interest,Sexual Problems,Internalizing,False
+hitop_400,Low Sexual Interest,Sexual Problems,Internalizing,False
+hitop_432,Low Sexual Interest,Sexual Problems,Internalizing,False
+hitop_239,Manic Energy,Mania,Thought Disorder,False
+hitop_241,Manic Energy,Mania,Thought Disorder,False
+hitop_243,Manic Energy,Mania,Thought Disorder,False
+hitop_244,Manic Energy,Mania,Thought Disorder,False
+hitop_262,Manic Energy,Mania,Thought Disorder,False
+hitop_265,Manic Energy,Mania,Thought Disorder,False
+hitop_645,Manic Energy,Mania,Thought Disorder,False
+ext_198,Mistrust (Cynicism),Thought Disorder,Thought Disorder,False
+ext_279,Mistrust (Cynicism),Thought Disorder,Thought Disorder,False
+ext_448,Mistrust (Cynicism),Thought Disorder,Thought Disorder,False
+ext_79,Mistrust (Cynicism),Thought Disorder,Thought Disorder,False
+ext_58,Mistrust (Suspiciousness),Thought Disorder,Thought Disorder,False
+hitop_56,Mistrust (Suspiciousness),Thought Disorder,Thought Disorder,False
+hitop_661,Mistrust (Suspiciousness),Thought Disorder,Thought Disorder,False
+hitop_662,Mistrust (Suspiciousness),Thought Disorder,Thought Disorder,False
+hitop_128,Muscle Building,Eating Pathology,Internalizing,False
+hitop_129,Muscle Building,Eating Pathology,Internalizing,False
+hitop_131,Muscle Building,Eating Pathology,Internalizing,False
+hitop_132,Muscle Building,Eating Pathology,Internalizing,False
+hitop_133,Muscle Building,Eating Pathology,Internalizing,False
+hitop_275,Nightmares,Distress,Internalizing,False
+hitop_278,Nightmares,Distress,Internalizing,False
+hitop_279,Nightmares,Distress,Internalizing,False
+ext_11,Non-persistence,Disinhibition,Externalizing,False
+ext_197,Non-persistence,Disinhibition,Externalizing,False
+ext_256,Non-persistence,Disinhibition,Externalizing,False
+ext_257,Non-persistence,Disinhibition,Externalizing,False
+ext_297,Non-persistence,Disinhibition,Externalizing,False
+ext_102,Non-planfulness,Disinhibition,Externalizing,False
+ext_166,Non-planfulness,Disinhibition,Externalizing,False
+ext_264,Non-planfulness,Disinhibition,Externalizing,False
+ext_476,Non-planfulness,Disinhibition,Externalizing,False
+ext_56,Non-planfulness,Disinhibition,Externalizing,False
+ext_152,NSSI,Distress,Internalizing,False
+ext_266,NSSI,Distress,Internalizing,False
+ext_468,NSSI,Distress,Internalizing,False
+hitop_281,NSSI,Distress,Internalizing,False
+hitop_282,NSSI,Distress,Internalizing,False
+hitop_286,NSSI,Distress,Internalizing,False
+ext_121,Oppositionality,Antisocial,Externalizing,False
+ext_230,Oppositionality,Antisocial,Externalizing,False
+ext_280,Oppositionality,Antisocial,Externalizing,False
+ext_310,Oppositionality,Antisocial,Externalizing,False
+ext_396,Oppositionality,Antisocial,Externalizing,False
+ext_512,Oppositionality,Antisocial,Externalizing,False
+hitop_288,Panic,Fear,Internalizing,False
+hitop_289,Panic,Fear,Internalizing,False
+hitop_290,Panic,Fear,Internalizing,False
+hitop_295,Panic,Fear,Internalizing,False
+hitop_299,Panic,Fear,Internalizing,False
+ext_205,Paraphilias,Sexual Problems,Internalizing,False
+hitop_407,Paraphilias,Sexual Problems,Internalizing,False
+hitop_408,Paraphilias,Sexual Problems,Internalizing,False
+hitop_409,Paraphilias,Sexual Problems,Internalizing,False
+hitop_410,Paraphilias,Sexual Problems,Internalizing,False
+ext_104,Perfectionism,Anankastia,Externalizing,False
+ext_500,Perfectionism,Anankastia,Externalizing,False
+hitop_300,Perfectionism,Anankastia,Externalizing,False
+hitop_301,Perfectionism,Anankastia,Externalizing,False
+hitop_302,Perfectionism,Anankastia,Externalizing,False
+exp22,Premature Orgasm,Sexual Problems,Internalizing,False
+exp23,Premature Orgasm,Sexual Problems,Internalizing,False
+hitop_414,Premature Orgasm,Sexual Problems,Internalizing,False
+hitop_415,Premature Orgasm,Sexual Problems,Internalizing,False
+ext_238,Problematic Shopping,Disinhibition,Externalizing,False
+ext_281,Problematic Shopping,Disinhibition,Externalizing,False
+ext_384,Problematic Shopping,Disinhibition,Externalizing,False
+ext_407,Problematic Shopping,Disinhibition,Externalizing,False
+hitop_153,Purging,Eating Pathology,Internalizing,False
+hitop_154,Purging,Eating Pathology,Internalizing,False
+hitop_155,Purging,Eating Pathology,Internalizing,False
+hitop_527,Reality Distortion (Delusions),Thought Disorder,Thought Disorder,False
+hitop_531,Reality Distortion (Delusions),Thought Disorder,Thought Disorder,False
+hitop_532,Reality Distortion (Delusions),Thought Disorder,Thought Disorder,False
+hitop_533,Reality Distortion (Delusions),Thought Disorder,Thought Disorder,False
+hitop_534,Reality Distortion (Delusions),Thought Disorder,Thought Disorder,False
+hitop_594,Reality Distortion (Hallucinations),Thought Disorder,Thought Disorder,False
+catch_4,Catch,Catch,Catch,True
+catch_5,Catch,Catch,Catch,True
+hitop_595,Reality Distortion (Hallucinations),Thought Disorder,Thought Disorder,False
+hitop_596,Reality Distortion (Hallucinations),Thought Disorder,Thought Disorder,False
+hitop_601,Reality Distortion (Hallucinations),Thought Disorder,Thought Disorder,False
+hitop_606,Reality Distortion (Hallucinations),Thought Disorder,Thought Disorder,False
+hitop_608,Reality Distortion (Hallucinations),Thought Disorder,Thought Disorder,False
+ext_229,Restlessness,Disinhibition,Externalizing,False
+ext_352,Restlessness,Disinhibition,Externalizing,False
+ext_418,Restlessness,Disinhibition,Externalizing,False
+ext_460,Restlessness,Disinhibition,Externalizing,False
+hitop_310,Restlessness,Disinhibition,Externalizing,False
+ext_403,Restricted Affectivity,Detachment,Detachment,False
+hitop_29,Restricted Affectivity,Detachment,Detachment,False
+hitop_31,Restricted Affectivity,Detachment,Detachment,False
+hitop_610,Restricted Affectivity,Detachment,Detachment,False
+hitop_618,Restricted Affectivity,Detachment,Detachment,False
+hitop_147,Restricted Eating,Eating Pathology,Internalizing,False
+hitop_148,Restricted Eating,Eating Pathology,Internalizing,False
+hitop_150,Restricted Eating,Eating Pathology,Internalizing,False
+hitop_151,Restricted Eating,Eating Pathology,Internalizing,False
+ext_73,Rigidity,Anankastia,Externalizing,False
+hitop_305,Rigidity,Anankastia,Externalizing,False
+hitop_306,Rigidity,Anankastia,Externalizing,False
+hitop_307,Rigidity,Anankastia,Externalizing,False
+hitop_309,Rigidity,Anankastia,Externalizing,False
+ext_165,Risk Aversion,Anankastia,Externalizing,False
+ext_515,Risk Aversion,Anankastia,Externalizing,False
+hitop_34,Risk Aversion,Anankastia,Externalizing,False
+hitop_35,Risk Aversion,Anankastia,Externalizing,False
+hitop_37,Risk Aversion,Anankastia,Externalizing,False
+hitop_39,Risk Aversion,Anankastia,Externalizing,False
+ext_425,Risk Taking,Disinhibition,Externalizing,False
+ext_495,Risk Taking,Disinhibition,Externalizing,False
+hitop_62,Risk Taking,Disinhibition,Externalizing,False
+hitop_63,Risk Taking,Disinhibition,Externalizing,False
+ext_114,Risky Sex,Sexual Problems,Internalizing,False
+ext_172,Risky Sex,Sexual Problems,Internalizing,False
+ext_70,Risky Sex,Sexual Problems,Internalizing,False
+hitop_322,Risky Sex,Sexual Problems,Internalizing,False
+hitop_42,Romantic Disinterest,Detachment,Detachment,False
+hitop_44,Romantic Disinterest,Detachment,Detachment,False
+hitop_624,Romantic Disinterest,Detachment,Detachment,False
+hitop_625,Romantic Disinterest,Detachment,Detachment,False
+hitop_634,Romantic Disinterest,Detachment,Detachment,False
+hitop_419,Sex-Related Substance Use,Sexual Problems,Internalizing,False
+hitop_424,Sex-Related Substance Use,Sexual Problems,Internalizing,False
+hitop_426,Sex-Related Substance Use,Sexual Problems,Internalizing,False
+hitop_427,Sex-Related Substance Use,Sexual Problems,Internalizing,False
+hitop_428,Sexual Distress,Sexual Problems,Internalizing,False
+hitop_429,Sexual Distress,Sexual Problems,Internalizing,False
+hitop_430,Sexual Distress,Sexual Problems,Internalizing,False
+hitop_431,Sexual Distress,Sexual Problems,Internalizing,False
+hitop_433,Sexual Pain,Sexual Problems,Internalizing,False
+hitop_444,Sexual Pain,Sexual Problems,Internalizing,False
+hitop_445,Sexual Pain,Sexual Problems,Internalizing,False
+ext_171,Social Aggression,Antagonism,Externalizing,False
+ext_173,Social Aggression,Antagonism,Externalizing,False
+ext_400,Social Aggression,Antagonism,Externalizing,False
+ext_420,Social Aggression,Antagonism,Externalizing,False
+ext_67,Social Aggression,Antagonism,Externalizing,False
+ext_74,Social Aggression,Antagonism,Externalizing,False
+hitop_50,Social Aloofness,Detachment,Detachment,False
+hitop_626,Social Aloofness,Detachment,Detachment,False
+hitop_649,Social Aloofness,Detachment,Detachment,False
+hitop_657,Social Aloofness,Detachment,Detachment,False
+hitop_659,Social Aloofness,Detachment,Detachment,False
+hitop_344,Social Anxiety,Detachment,Detachment,False
+hitop_345,Social Anxiety,Detachment,Detachment,False
+hitop_348,Social Anxiety,Detachment,Detachment,False
+hitop_349,Social Anxiety,Detachment,Detachment,False
+hitop_355,Social Anxiety,Detachment,Detachment,False
+hitop_491,Somatic Preoccupation,Somatoform,Somatoform,False
+hitop_492,Somatic Preoccupation,Somatoform,Somatoform,False
+hitop_493,Somatic Preoccupation,Somatoform,Somatoform,False
+hitop_494,Somatic Preoccupation,Somatoform,Somatoform,False
+hitop_498,Somatic Preoccupation,Somatoform,Somatoform,False
+hitop_181,Specific Phobia (Animal-insect),Fear,Internalizing,False
+hitop_182,Specific Phobia (Animal-insect),Fear,Internalizing,False
+hitop_183,Specific Phobia (Animal-insect),Fear,Internalizing,False
+hitop_184,Specific Phobia (Animal-insect),Fear,Internalizing,False
+hitop_185,Specific Phobia (Animal-insect),Fear,Internalizing,False
+hitop_200,Specific Phobia (Blood-Injection),Fear,Internalizing,False
+hitop_201,Specific Phobia (Blood-Injection),Fear,Internalizing,False
+hitop_202,Specific Phobia (Blood-Injection),Fear,Internalizing,False
+hitop_339,Specific Phobia (situational),Fear,Internalizing,False
+hitop_340,Specific Phobia (situational),Fear,Internalizing,False
+hitop_341,Specific Phobia (situational),Fear,Internalizing,False
+hitop_342,Specific Phobia (situational),Fear,Internalizing,False
+exp26,Submissiveness,Detachment,Detachment,False
+exp27,Submissiveness,Detachment,Detachment,False
+hitop_69,Submissiveness,Detachment,Detachment,False
+hitop_71,Submissiveness,Detachment,Detachment,False
+hitop_356,Suicidality,Distress,Internalizing,False
+hitop_358,Suicidality,Distress,Internalizing,False
+hitop_360,Suicidality,Distress,Internalizing,False
+hitop_361,Suicidality,Distress,Internalizing,False
+hitop_364,Trauma Reactions,Fear,Internalizing,False
+hitop_365,Trauma Reactions,Fear,Internalizing,False
+hitop_374,Trauma Reactions,Fear,Internalizing,False
+hitop_375,Trauma Reactions,Fear,Internalizing,False
+hitop_378,Trauma Reactions,Fear,Internalizing,False
+hitop_383,Trichotillomania,Fear,Internalizing,False
+hitop_384,Trichotillomania,Fear,Internalizing,False
+hitop_385,Trichotillomania,Fear,Internalizing,False
+hitop_389,Well-being,Detachment,Detachment,False
+hitop_392,Well-being,Detachment,Detachment,False
+hitop_393,Well-being,Detachment,Detachment,False
+hitop_395,Well-being,Detachment,Detachment,False
+hitop_632,Well-being,Detachment,Detachment,False
+ext_131,Workaholism,Anankastia,Externalizing,False
+ext_278,Workaholism,Anankastia,Externalizing,False
+ext_371,Workaholism,Anankastia,Externalizing,False
+ext_397,Workaholism,Anankastia,Externalizing,False
+ext_99,Workaholism,Anankastia,Externalizing,False
+sud012,Craving,Harmful Substance Use,Externalizing,False
+sud018,Craving,Harmful Substance Use,Externalizing,False
+sud020,Craving,Harmful Substance Use,Externalizing,False
+sud013,Craving,Harmful Substance Use,Externalizing,False
+exp30,Craving,Harmful Substance Use,Externalizing,False
+exp31,Craving,Harmful Substance Use,Externalizing,False
+exp32,Craving,Harmful Substance Use,Externalizing,False
+sud040,Hazardous Use,Harmful Substance Use,Externalizing,False
+sud041,Hazardous Use,Harmful Substance Use,Externalizing,False
+sud043,Hazardous Use,Harmful Substance Use,Externalizing,False
+sud044,Hazardous Use,Harmful Substance Use,Externalizing,False
+sud058,Impaired Control,Harmful Substance Use,Externalizing,False
+sud084,Impaired Control,Harmful Substance Use,Externalizing,False
+sud096,Impaired Control,Harmful Substance Use,Externalizing,False
+sud100,Impaired Control,Harmful Substance Use,Externalizing,False
+sud035,Role Interference,Harmful Substance Use,Externalizing,False
+sud047,Role Interference,Harmful Substance Use,Externalizing,False
+sud049,Role Interference,Harmful Substance Use,Externalizing,False
+exp33,Role Interference,Harmful Substance Use,Externalizing,False
+sud070,Tolerance,Harmful Substance Use,Externalizing,False
+sud071,Tolerance,Harmful Substance Use,Externalizing,False
+sud072,Tolerance,Harmful Substance Use,Externalizing,False
+exp28,Withdrawal,Harmful Substance Use,Externalizing,False
+exp29,Withdrawal,Harmful Substance Use,Externalizing,False
+catch_6,Catch,Catch,Catch,True
+catch_7,Catch,Catch,Catch,True

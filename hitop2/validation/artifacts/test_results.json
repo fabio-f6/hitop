@@ -1,0 +1,13 @@
+{
+  "database": "SQLite :memory: (validation.test_settings), no development database access",
+  "new_validation_suite": {"tests": 11, "passed": 11, "failed": 0},
+  "related_suite": {"tests": 82, "passed": 78, "failed": 4},
+  "related_suite_labels": ["validation", "polls.test_normative_versions", "polls.test_normative_environments", "polls.test_simulation", "polls.test_simulation_normative_isolation", "website.test_normative_traceability"],
+  "existing_failing_tests": [
+    "website.test_normative_traceability.NormativeTraceabilityTests.test_card_uses_pinned_version_and_unassigned_card_is_read_only",
+    "website.test_normative_traceability.NormativeTraceabilityTests.test_production_report_rejects_structurally_test_version",
+    "website.test_normative_traceability.NormativeTraceabilityTests.test_report_generation_keeps_using_existing_pinning_mechanism",
+    "website.test_normative_traceability.NormativeTraceabilityTests.test_test_report_production_fallback_is_labelled_production_and_pinned"
+  ],
+  "note": "Defect-characterization tests pass when reproducing a known defect; management command retains explicit contract FAIL categories. No production correction applied."
+}

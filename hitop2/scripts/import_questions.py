@@ -593,10 +593,10 @@ questions_data =[
     {"scale": "Impaired Control", "item_code": "sud084", "question_text": "Consumi substâncias em excesso (álcool, nicotina, drogas ilícitas, medicamentos fora da indicação médica)."},
     {"scale": "Impaired Control", "item_code": "sud096", "question_text": "Tentei consumir substâncias (álcool, nicotina, drogas ilícitas, medicamentos fora da indicação médica) apenas em certos momentos, mas isso não funcionou durante muito tempo."},
     {"scale": "Impaired Control", "item_code": "sud100", "question_text": "Fiquei embriegado(a), ganzado(a) ou mocado(a), embora tivesse decidido previamente que não o iria fazer."},
-    {"scale": "Impaired Control", "item_code": "sud035", "question_text": "Continuei a consumir (álcool, nicotina, drogas ilícitas, medicamentos fora da indicação médica) apesar de isso prejudicar o meu desempenho no trabalho, escola ou outras atividades."},
-    {"scale": "Impaired Control", "item_code": "sud047", "question_text": "Consumir (álcool, nicotina, drogas ilícitas, medicamentos fora da indicação médica), ou sentir-me indisposto devido a este consumo, impediu-me de cuidar de mim, da minha casa ou da minha família."},
-    {"scale": "Impaired Control", "item_code": "sud049", "question_text": "Faltei ao trabalho, à escola ou a outras obrigações por estar a recuperar dos efeitos de ter consumido substâncias (ex.: ressaca, efeitos físicos ou psicológicos)."},
-    {"scale": "Impaired Control", "item_code": "exp33", "question_text": "Consumir (álcool, nicotina, drogas ilícitas ou medicamentos fora da indicação médica) interferiu com as minhas relações."},
+    {"scale": "Role Interference", "item_code": "sud035", "question_text": "Continuei a consumir (álcool, nicotina, drogas ilícitas, medicamentos fora da indicação médica) apesar de isso prejudicar o meu desempenho no trabalho, escola ou outras atividades."},
+    {"scale": "Role Interference", "item_code": "sud047", "question_text": "Consumir (álcool, nicotina, drogas ilícitas, medicamentos fora da indicação médica), ou sentir-me indisposto devido a este consumo, impediu-me de cuidar de mim, da minha casa ou da minha família."},
+    {"scale": "Role Interference", "item_code": "sud049", "question_text": "Faltei ao trabalho, à escola ou a outras obrigações por estar a recuperar dos efeitos de ter consumido substâncias (ex.: ressaca, efeitos físicos ou psicológicos)."},
+    {"scale": "Role Interference", "item_code": "exp33", "question_text": "Consumir (álcool, nicotina, drogas ilícitas ou medicamentos fora da indicação médica) interferiu com as minhas relações."},
     {"scale": "Tolerance", "item_code": "sud070", "question_text": "Com o tempo, precisei de aumentar a quantidade do que consumia (por exemplo, álcool, nicotina, drogas ilícitas ou medicamentos fora da indicação médica) para sentir o mesmo efeito."},
     {"scale": "Tolerance", "item_code": "sud071", "question_text": "Consumi (álcool, nicotina, drogas ilícitas, medicamentos fora da indicação médica ou outras substâncias) numa quantidade significativa, antes que as outras pessoas se apercebessem de que eu tinha consumido."},
     {"scale": "Tolerance", "item_code": "sud072", "question_text": "Precisei de consumir muito mais - por exemplo, álcool, nicotina, drogas ilícitas, medicamentos fora da indicação médica - do que as outras pessoas para sentir algum efeito."},
@@ -615,9 +615,9 @@ for q in questions_data:
     scale_obj = scale[q["scale"]]
 
     question_obj, created = Question.objects.update_or_create(
-        scale=scale_obj,
         item_code=q["item_code"],
         defaults={
+            "scale": scale_obj,
             "question_text": q["question_text"],
             "is_attention_check": q.get("is_attention_check", False),
             "expected_answer": q.get("expected_answer", ""),

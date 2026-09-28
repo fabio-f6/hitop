@@ -1,0 +1,652 @@
+requested_percentage,scale,n,actual_missing,actual_percentage,is_valid
+0,Agoraphobia,5,0,0.0,True
+0,Antisocial Behavior,8,0,0.0,True
+0,Appetite Loss,3,0,0.0,True
+0,Binge Eating,3,0,0.0,True
+0,Bodily Distress,6,0,0.0,True
+0,Body Dissatisfaction,4,0,0.0,True
+0,Body Focus,5,0,0.0,True
+0,Callousness,6,0,0.0,True
+0,Checking,5,0,0.0,True
+0,Cleaning,6,0,0.0,True
+0,Cognitive Problems,5,0,0.0,True
+0,Conversion Symptoms,7,0,0.0,True
+0,Counting,5,0,0.0,True
+0,Craving,7,0,0.0,True
+0,Dietary Restraint,5,0,0.0,True
+0,Difficulties Reaching Orgasm,3,0,0.0,True
+0,Disease Conviction,4,0,0.0,True
+0,Dishonesty - Deceitfulness,4,0,0.0,True
+0,Dishonesty - Manipulativeness,4,0,0.0,True
+0,Disorganization,7,0,0.0,True
+0,Dissociation,6,0,0.0,True
+0,Distress - Dysphoria (Anhedonia),3,0,0.0,True
+0,Distress - Dysphoria (Anxious Worry),3,0,0.0,True
+0,Distress - Dysphoria (Depressed Mood),4,0,0.0,True
+0,Distress - Dysphoria (Lassitude),3,0,0.0,True
+0,Distress - Dysphoria (Shame/Guilt),3,0,0.0,True
+0,Domineering,6,0,0.0,True
+0,Eccentricity,5,0,0.0,True
+0,Emotionality (Affective Lability),3,0,0.0,True
+0,Emotionality (Angry Hostility),4,0,0.0,True
+0,Emotionality (Irritability),4,0,0.0,True
+0,Entitlement,6,0,0.0,True
+0,Excessive Exercise,5,0,0.0,True
+0,Excoriation,3,0,0.0,True
+0,Exhibitionism,5,0,0.0,True
+0,Fantasy Proneness,6,0,0.0,True
+0,Food Selectivity,4,0,0.0,True
+0,Gambling,5,0,0.0,True
+0,Gaming,4,0,0.0,True
+0,Grandiosity,6,0,0.0,True
+0,Hazardous Use,4,0,0.0,True
+0,Health Anxiety,4,0,0.0,True
+0,Hoarding,6,0,0.0,True
+0,Hyperdeliberation,6,0,0.0,True
+0,Hypervigilance,6,0,0.0,True
+0,Impaired Control,4,0,0.0,True
+0,Insomnia,4,0,0.0,True
+0,Low Sexual Arousal,3,0,0.0,True
+0,Low Sexual Interest,3,0,0.0,True
+0,Manic Energy,7,0,0.0,True
+0,Mistrust (Cynicism),4,0,0.0,True
+0,Mistrust (Suspiciousness),4,0,0.0,True
+0,Muscle Building,5,0,0.0,True
+0,NSSI,6,0,0.0,True
+0,Nightmares,3,0,0.0,True
+0,Non-persistence,5,0,0.0,True
+0,Non-planfulness,5,0,0.0,True
+0,Oppositionality,6,0,0.0,True
+0,Panic,5,0,0.0,True
+0,Paraphilias,5,0,0.0,True
+0,Perfectionism,5,0,0.0,True
+0,Premature Orgasm,4,0,0.0,True
+0,Problematic Shopping,4,0,0.0,True
+0,Purging,3,0,0.0,True
+0,Reality Distortion (Delusions),5,0,0.0,True
+0,Reality Distortion (Hallucinations),6,0,0.0,True
+0,Restlessness,5,0,0.0,True
+0,Restricted Affectivity,5,0,0.0,True
+0,Restricted Eating,4,0,0.0,True
+0,Rigidity,5,0,0.0,True
+0,Risk Aversion,6,0,0.0,True
+0,Risk Taking,4,0,0.0,True
+0,Risky Sex,4,0,0.0,True
+0,Role Interference,4,0,0.0,True
+0,Romantic Disinterest,5,0,0.0,True
+0,Sex-Related Substance Use,4,0,0.0,True
+0,Sexual Distress,4,0,0.0,True
+0,Sexual Pain,3,0,0.0,True
+0,Social Aggression,6,0,0.0,True
+0,Social Aloofness,5,0,0.0,True
+0,Social Anxiety,5,0,0.0,True
+0,Somatic Preoccupation,5,0,0.0,True
+0,Specific Phobia (Animal-insect),5,0,0.0,True
+0,Specific Phobia (Blood-Injection),3,0,0.0,True
+0,Specific Phobia (situational),4,0,0.0,True
+0,Submissiveness,4,0,0.0,True
+0,Suicidality,4,0,0.0,True
+0,Tolerance,3,0,0.0,True
+0,Trauma Reactions,5,0,0.0,True
+0,Trichotillomania,3,0,0.0,True
+0,Well-being,5,0,0.0,True
+0,Withdrawal,2,0,0.0,True
+0,Workaholism,5,0,0.0,True
+10,Agoraphobia,5,1,20.0,True
+10,Antisocial Behavior,8,1,12.5,True
+10,Appetite Loss,3,0,0.0,True
+10,Binge Eating,3,0,0.0,True
+10,Bodily Distress,6,1,16.666666666666668,True
+10,Body Dissatisfaction,4,0,0.0,True
+10,Body Focus,5,1,20.0,True
+10,Callousness,6,1,16.666666666666668,True
+10,Checking,5,1,20.0,True
+10,Cleaning,6,1,16.666666666666668,True
+10,Cognitive Problems,5,1,20.0,True
+10,Conversion Symptoms,7,1,14.285714285714286,True
+10,Counting,5,1,20.0,True
+10,Craving,7,1,14.285714285714286,True
+10,Dietary Restraint,5,1,20.0,True
+10,Difficulties Reaching Orgasm,3,0,0.0,True
+10,Disease Conviction,4,0,0.0,True
+10,Dishonesty - Deceitfulness,4,0,0.0,True
+10,Dishonesty - Manipulativeness,4,0,0.0,True
+10,Disorganization,7,1,14.285714285714286,True
+10,Dissociation,6,1,16.666666666666668,True
+10,Distress - Dysphoria (Anhedonia),3,0,0.0,True
+10,Distress - Dysphoria (Anxious Worry),3,0,0.0,True
+10,Distress - Dysphoria (Depressed Mood),4,0,0.0,True
+10,Distress - Dysphoria (Lassitude),3,0,0.0,True
+10,Distress - Dysphoria (Shame/Guilt),3,0,0.0,True
+10,Domineering,6,1,16.666666666666668,True
+10,Eccentricity,5,1,20.0,True
+10,Emotionality (Affective Lability),3,0,0.0,True
+10,Emotionality (Angry Hostility),4,0,0.0,True
+10,Emotionality (Irritability),4,0,0.0,True
+10,Entitlement,6,1,16.666666666666668,True
+10,Excessive Exercise,5,1,20.0,True
+10,Excoriation,3,0,0.0,True
+10,Exhibitionism,5,1,20.0,True
+10,Fantasy Proneness,6,1,16.666666666666668,True
+10,Food Selectivity,4,0,0.0,True
+10,Gambling,5,1,20.0,True
+10,Gaming,4,0,0.0,True
+10,Grandiosity,6,1,16.666666666666668,True
+10,Hazardous Use,4,0,0.0,True
+10,Health Anxiety,4,0,0.0,True
+10,Hoarding,6,1,16.666666666666668,True
+10,Hyperdeliberation,6,1,16.666666666666668,True
+10,Hypervigilance,6,1,16.666666666666668,True
+10,Impaired Control,4,0,0.0,True
+10,Insomnia,4,0,0.0,True
+10,Low Sexual Arousal,3,0,0.0,True
+10,Low Sexual Interest,3,0,0.0,True
+10,Manic Energy,7,1,14.285714285714286,True
+10,Mistrust (Cynicism),4,0,0.0,True
+10,Mistrust (Suspiciousness),4,0,0.0,True
+10,Muscle Building,5,1,20.0,True
+10,NSSI,6,1,16.666666666666668,True
+10,Nightmares,3,0,0.0,True
+10,Non-persistence,5,1,20.0,True
+10,Non-planfulness,5,1,20.0,True
+10,Oppositionality,6,1,16.666666666666668,True
+10,Panic,5,1,20.0,True
+10,Paraphilias,5,1,20.0,True
+10,Perfectionism,5,1,20.0,True
+10,Premature Orgasm,4,0,0.0,True
+10,Problematic Shopping,4,0,0.0,True
+10,Purging,3,0,0.0,True
+10,Reality Distortion (Delusions),5,1,20.0,True
+10,Reality Distortion (Hallucinations),6,1,16.666666666666668,True
+10,Restlessness,5,1,20.0,True
+10,Restricted Affectivity,5,1,20.0,True
+10,Restricted Eating,4,0,0.0,True
+10,Rigidity,5,1,20.0,True
+10,Risk Aversion,6,1,16.666666666666668,True
+10,Risk Taking,4,0,0.0,True
+10,Risky Sex,4,0,0.0,True
+10,Role Interference,4,0,0.0,True
+10,Romantic Disinterest,5,1,20.0,True
+10,Sex-Related Substance Use,4,0,0.0,True
+10,Sexual Distress,4,0,0.0,True
+10,Sexual Pain,3,0,0.0,True
+10,Social Aggression,6,1,16.666666666666668,True
+10,Social Aloofness,5,1,20.0,True
+10,Social Anxiety,5,1,20.0,True
+10,Somatic Preoccupation,5,1,20.0,True
+10,Specific Phobia (Animal-insect),5,1,20.0,True
+10,Specific Phobia (Blood-Injection),3,0,0.0,True
+10,Specific Phobia (situational),4,0,0.0,True
+10,Submissiveness,4,0,0.0,True
+10,Suicidality,4,0,0.0,True
+10,Tolerance,3,0,0.0,True
+10,Trauma Reactions,5,1,20.0,True
+10,Trichotillomania,3,0,0.0,True
+10,Well-being,5,1,20.0,True
+10,Withdrawal,2,0,0.0,True
+10,Workaholism,5,1,20.0,True
+24.99,Agoraphobia,5,1,20.0,True
+24.99,Antisocial Behavior,8,2,25.0,False
+24.99,Appetite Loss,3,1,33.333333333333336,False
+24.99,Binge Eating,3,1,33.333333333333336,False
+24.99,Bodily Distress,6,1,16.666666666666668,True
+24.99,Body Dissatisfaction,4,1,25.0,False
+24.99,Body Focus,5,1,20.0,True
+24.99,Callousness,6,1,16.666666666666668,True
+24.99,Checking,5,1,20.0,True
+24.99,Cleaning,6,1,16.666666666666668,True
+24.99,Cognitive Problems,5,1,20.0,True
+24.99,Conversion Symptoms,7,2,28.571428571428573,False
+24.99,Counting,5,1,20.0,True
+24.99,Craving,7,2,28.571428571428573,False
+24.99,Dietary Restraint,5,1,20.0,True
+24.99,Difficulties Reaching Orgasm,3,1,33.333333333333336,False
+24.99,Disease Conviction,4,1,25.0,False
+24.99,Dishonesty - Deceitfulness,4,1,25.0,False
+24.99,Dishonesty - Manipulativeness,4,1,25.0,False
+24.99,Disorganization,7,2,28.571428571428573,False
+24.99,Dissociation,6,1,16.666666666666668,True
+24.99,Distress - Dysphoria (Anhedonia),3,1,33.333333333333336,False
+24.99,Distress - Dysphoria (Anxious Worry),3,1,33.333333333333336,False
+24.99,Distress - Dysphoria (Depressed Mood),4,1,25.0,False
+24.99,Distress - Dysphoria (Lassitude),3,1,33.333333333333336,False
+24.99,Distress - Dysphoria (Shame/Guilt),3,1,33.333333333333336,False
+24.99,Domineering,6,1,16.666666666666668,True
+24.99,Eccentricity,5,1,20.0,True
+24.99,Emotionality (Affective Lability),3,1,33.333333333333336,False
+24.99,Emotionality (Angry Hostility),4,1,25.0,False
+24.99,Emotionality (Irritability),4,1,25.0,False
+24.99,Entitlement,6,1,16.666666666666668,True
+24.99,Excessive Exercise,5,1,20.0,True
+24.99,Excoriation,3,1,33.333333333333336,False
+24.99,Exhibitionism,5,1,20.0,True
+24.99,Fantasy Proneness,6,1,16.666666666666668,True
+24.99,Food Selectivity,4,1,25.0,False
+24.99,Gambling,5,1,20.0,True
+24.99,Gaming,4,1,25.0,False
+24.99,Grandiosity,6,1,16.666666666666668,True
+24.99,Hazardous Use,4,1,25.0,False
+24.99,Health Anxiety,4,1,25.0,False
+24.99,Hoarding,6,1,16.666666666666668,True
+24.99,Hyperdeliberation,6,1,16.666666666666668,True
+24.99,Hypervigilance,6,1,16.666666666666668,True
+24.99,Impaired Control,4,1,25.0,False
+24.99,Insomnia,4,1,25.0,False
+24.99,Low Sexual Arousal,3,1,33.333333333333336,False
+24.99,Low Sexual Interest,3,1,33.333333333333336,False
+24.99,Manic Energy,7,2,28.571428571428573,False
+24.99,Mistrust (Cynicism),4,1,25.0,False
+24.99,Mistrust (Suspiciousness),4,1,25.0,False
+24.99,Muscle Building,5,1,20.0,True
+24.99,NSSI,6,1,16.666666666666668,True
+24.99,Nightmares,3,1,33.333333333333336,False
+24.99,Non-persistence,5,1,20.0,True
+24.99,Non-planfulness,5,1,20.0,True
+24.99,Oppositionality,6,1,16.666666666666668,True
+24.99,Panic,5,1,20.0,True
+24.99,Paraphilias,5,1,20.0,True
+24.99,Perfectionism,5,1,20.0,True
+24.99,Premature Orgasm,4,1,25.0,False
+24.99,Problematic Shopping,4,1,25.0,False
+24.99,Purging,3,1,33.333333333333336,False
+24.99,Reality Distortion (Delusions),5,1,20.0,True
+24.99,Reality Distortion (Hallucinations),6,1,16.666666666666668,True
+24.99,Restlessness,5,1,20.0,True
+24.99,Restricted Affectivity,5,1,20.0,True
+24.99,Restricted Eating,4,1,25.0,False
+24.99,Rigidity,5,1,20.0,True
+24.99,Risk Aversion,6,1,16.666666666666668,True
+24.99,Risk Taking,4,1,25.0,False
+24.99,Risky Sex,4,1,25.0,False
+24.99,Role Interference,4,1,25.0,False
+24.99,Romantic Disinterest,5,1,20.0,True
+24.99,Sex-Related Substance Use,4,1,25.0,False
+24.99,Sexual Distress,4,1,25.0,False
+24.99,Sexual Pain,3,1,33.333333333333336,False
+24.99,Social Aggression,6,1,16.666666666666668,True
+24.99,Social Aloofness,5,1,20.0,True
+24.99,Social Anxiety,5,1,20.0,True
+24.99,Somatic Preoccupation,5,1,20.0,True
+24.99,Specific Phobia (Animal-insect),5,1,20.0,True
+24.99,Specific Phobia (Blood-Injection),3,1,33.333333333333336,False
+24.99,Specific Phobia (situational),4,1,25.0,False
+24.99,Submissiveness,4,1,25.0,False
+24.99,Suicidality,4,1,25.0,False
+24.99,Tolerance,3,1,33.333333333333336,False
+24.99,Trauma Reactions,5,1,20.0,True
+24.99,Trichotillomania,3,1,33.333333333333336,False
+24.99,Well-being,5,1,20.0,True
+24.99,Withdrawal,2,0,0.0,True
+24.99,Workaholism,5,1,20.0,True
+25,Agoraphobia,5,1,20.0,True
+25,Antisocial Behavior,8,2,25.0,False
+25,Appetite Loss,3,1,33.333333333333336,False
+25,Binge Eating,3,1,33.333333333333336,False
+25,Bodily Distress,6,2,33.333333333333336,False
+25,Body Dissatisfaction,4,1,25.0,False
+25,Body Focus,5,1,20.0,True
+25,Callousness,6,2,33.333333333333336,False
+25,Checking,5,1,20.0,True
+25,Cleaning,6,2,33.333333333333336,False
+25,Cognitive Problems,5,1,20.0,True
+25,Conversion Symptoms,7,2,28.571428571428573,False
+25,Counting,5,1,20.0,True
+25,Craving,7,2,28.571428571428573,False
+25,Dietary Restraint,5,1,20.0,True
+25,Difficulties Reaching Orgasm,3,1,33.333333333333336,False
+25,Disease Conviction,4,1,25.0,False
+25,Dishonesty - Deceitfulness,4,1,25.0,False
+25,Dishonesty - Manipulativeness,4,1,25.0,False
+25,Disorganization,7,2,28.571428571428573,False
+25,Dissociation,6,2,33.333333333333336,False
+25,Distress - Dysphoria (Anhedonia),3,1,33.333333333333336,False
+25,Distress - Dysphoria (Anxious Worry),3,1,33.333333333333336,False
+25,Distress - Dysphoria (Depressed Mood),4,1,25.0,False
+25,Distress - Dysphoria (Lassitude),3,1,33.333333333333336,False
+25,Distress - Dysphoria (Shame/Guilt),3,1,33.333333333333336,False
+25,Domineering,6,2,33.333333333333336,False
+25,Eccentricity,5,1,20.0,True
+25,Emotionality (Affective Lability),3,1,33.333333333333336,False
+25,Emotionality (Angry Hostility),4,1,25.0,False
+25,Emotionality (Irritability),4,1,25.0,False
+25,Entitlement,6,2,33.333333333333336,False
+25,Excessive Exercise,5,1,20.0,True
+25,Excoriation,3,1,33.333333333333336,False
+25,Exhibitionism,5,1,20.0,True
+25,Fantasy Proneness,6,2,33.333333333333336,False
+25,Food Selectivity,4,1,25.0,False
+25,Gambling,5,1,20.0,True
+25,Gaming,4,1,25.0,False
+25,Grandiosity,6,2,33.333333333333336,False
+25,Hazardous Use,4,1,25.0,False
+25,Health Anxiety,4,1,25.0,False
+25,Hoarding,6,2,33.333333333333336,False
+25,Hyperdeliberation,6,2,33.333333333333336,False
+25,Hypervigilance,6,2,33.333333333333336,False
+25,Impaired Control,4,1,25.0,False
+25,Insomnia,4,1,25.0,False
+25,Low Sexual Arousal,3,1,33.333333333333336,False
+25,Low Sexual Interest,3,1,33.333333333333336,False
+25,Manic Energy,7,2,28.571428571428573,False
+25,Mistrust (Cynicism),4,1,25.0,False
+25,Mistrust (Suspiciousness),4,1,25.0,False
+25,Muscle Building,5,1,20.0,True
+25,NSSI,6,2,33.333333333333336,False
+25,Nightmares,3,1,33.333333333333336,False
+25,Non-persistence,5,1,20.0,True
+25,Non-planfulness,5,1,20.0,True
+25,Oppositionality,6,2,33.333333333333336,False
+25,Panic,5,1,20.0,True
+25,Paraphilias,5,1,20.0,True
+25,Perfectionism,5,1,20.0,True
+25,Premature Orgasm,4,1,25.0,False
+25,Problematic Shopping,4,1,25.0,False
+25,Purging,3,1,33.333333333333336,False
+25,Reality Distortion (Delusions),5,1,20.0,True
+25,Reality Distortion (Hallucinations),6,2,33.333333333333336,False
+25,Restlessness,5,1,20.0,True
+25,Restricted Affectivity,5,1,20.0,True
+25,Restricted Eating,4,1,25.0,False
+25,Rigidity,5,1,20.0,True
+25,Risk Aversion,6,2,33.333333333333336,False
+25,Risk Taking,4,1,25.0,False
+25,Risky Sex,4,1,25.0,False
+25,Role Interference,4,1,25.0,False
+25,Romantic Disinterest,5,1,20.0,True
+25,Sex-Related Substance Use,4,1,25.0,False
+25,Sexual Distress,4,1,25.0,False
+25,Sexual Pain,3,1,33.333333333333336,False
+25,Social Aggression,6,2,33.333333333333336,False
+25,Social Aloofness,5,1,20.0,True
+25,Social Anxiety,5,1,20.0,True
+25,Somatic Preoccupation,5,1,20.0,True
+25,Specific Phobia (Animal-insect),5,1,20.0,True
+25,Specific Phobia (Blood-Injection),3,1,33.333333333333336,False
+25,Specific Phobia (situational),4,1,25.0,False
+25,Submissiveness,4,1,25.0,False
+25,Suicidality,4,1,25.0,False
+25,Tolerance,3,1,33.333333333333336,False
+25,Trauma Reactions,5,1,20.0,True
+25,Trichotillomania,3,1,33.333333333333336,False
+25,Well-being,5,1,20.0,True
+25,Withdrawal,2,1,50.0,False
+25,Workaholism,5,1,20.0,True
+30,Agoraphobia,5,2,40.0,False
+30,Antisocial Behavior,8,2,25.0,False
+30,Appetite Loss,3,1,33.333333333333336,False
+30,Binge Eating,3,1,33.333333333333336,False
+30,Bodily Distress,6,2,33.333333333333336,False
+30,Body Dissatisfaction,4,1,25.0,False
+30,Body Focus,5,2,40.0,False
+30,Callousness,6,2,33.333333333333336,False
+30,Checking,5,2,40.0,False
+30,Cleaning,6,2,33.333333333333336,False
+30,Cognitive Problems,5,2,40.0,False
+30,Conversion Symptoms,7,2,28.571428571428573,False
+30,Counting,5,2,40.0,False
+30,Craving,7,2,28.571428571428573,False
+30,Dietary Restraint,5,2,40.0,False
+30,Difficulties Reaching Orgasm,3,1,33.333333333333336,False
+30,Disease Conviction,4,1,25.0,False
+30,Dishonesty - Deceitfulness,4,1,25.0,False
+30,Dishonesty - Manipulativeness,4,1,25.0,False
+30,Disorganization,7,2,28.571428571428573,False
+30,Dissociation,6,2,33.333333333333336,False
+30,Distress - Dysphoria (Anhedonia),3,1,33.333333333333336,False
+30,Distress - Dysphoria (Anxious Worry),3,1,33.333333333333336,False
+30,Distress - Dysphoria (Depressed Mood),4,1,25.0,False
+30,Distress - Dysphoria (Lassitude),3,1,33.333333333333336,False
+30,Distress - Dysphoria (Shame/Guilt),3,1,33.333333333333336,False
+30,Domineering,6,2,33.333333333333336,False
+30,Eccentricity,5,2,40.0,False
+30,Emotionality (Affective Lability),3,1,33.333333333333336,False
+30,Emotionality (Angry Hostility),4,1,25.0,False
+30,Emotionality (Irritability),4,1,25.0,False
+30,Entitlement,6,2,33.333333333333336,False
+30,Excessive Exercise,5,2,40.0,False
+30,Excoriation,3,1,33.333333333333336,False
+30,Exhibitionism,5,2,40.0,False
+30,Fantasy Proneness,6,2,33.333333333333336,False
+30,Food Selectivity,4,1,25.0,False
+30,Gambling,5,2,40.0,False
+30,Gaming,4,1,25.0,False
+30,Grandiosity,6,2,33.333333333333336,False
+30,Hazardous Use,4,1,25.0,False
+30,Health Anxiety,4,1,25.0,False
+30,Hoarding,6,2,33.333333333333336,False
+30,Hyperdeliberation,6,2,33.333333333333336,False
+30,Hypervigilance,6,2,33.333333333333336,False
+30,Impaired Control,4,1,25.0,False
+30,Insomnia,4,1,25.0,False
+30,Low Sexual Arousal,3,1,33.333333333333336,False
+30,Low Sexual Interest,3,1,33.333333333333336,False
+30,Manic Energy,7,2,28.571428571428573,False
+30,Mistrust (Cynicism),4,1,25.0,False
+30,Mistrust (Suspiciousness),4,1,25.0,False
+30,Muscle Building,5,2,40.0,False
+30,NSSI,6,2,33.333333333333336,False
+30,Nightmares,3,1,33.333333333333336,False
+30,Non-persistence,5,2,40.0,False
+30,Non-planfulness,5,2,40.0,False
+30,Oppositionality,6,2,33.333333333333336,False
+30,Panic,5,2,40.0,False
+30,Paraphilias,5,2,40.0,False
+30,Perfectionism,5,2,40.0,False
+30,Premature Orgasm,4,1,25.0,False
+30,Problematic Shopping,4,1,25.0,False
+30,Purging,3,1,33.333333333333336,False
+30,Reality Distortion (Delusions),5,2,40.0,False
+30,Reality Distortion (Hallucinations),6,2,33.333333333333336,False
+30,Restlessness,5,2,40.0,False
+30,Restricted Affectivity,5,2,40.0,False
+30,Restricted Eating,4,1,25.0,False
+30,Rigidity,5,2,40.0,False
+30,Risk Aversion,6,2,33.333333333333336,False
+30,Risk Taking,4,1,25.0,False
+30,Risky Sex,4,1,25.0,False
+30,Role Interference,4,1,25.0,False
+30,Romantic Disinterest,5,2,40.0,False
+30,Sex-Related Substance Use,4,1,25.0,False
+30,Sexual Distress,4,1,25.0,False
+30,Sexual Pain,3,1,33.333333333333336,False
+30,Social Aggression,6,2,33.333333333333336,False
+30,Social Aloofness,5,2,40.0,False
+30,Social Anxiety,5,2,40.0,False
+30,Somatic Preoccupation,5,2,40.0,False
+30,Specific Phobia (Animal-insect),5,2,40.0,False
+30,Specific Phobia (Blood-Injection),3,1,33.333333333333336,False
+30,Specific Phobia (situational),4,1,25.0,False
+30,Submissiveness,4,1,25.0,False
+30,Suicidality,4,1,25.0,False
+30,Tolerance,3,1,33.333333333333336,False
+30,Trauma Reactions,5,2,40.0,False
+30,Trichotillomania,3,1,33.333333333333336,False
+30,Well-being,5,2,40.0,False
+30,Withdrawal,2,1,50.0,False
+30,Workaholism,5,2,40.0,False
+50,Agoraphobia,5,3,60.0,False
+50,Antisocial Behavior,8,4,50.0,False
+50,Appetite Loss,3,2,66.66666666666667,False
+50,Binge Eating,3,2,66.66666666666667,False
+50,Bodily Distress,6,3,50.0,False
+50,Body Dissatisfaction,4,2,50.0,False
+50,Body Focus,5,3,60.0,False
+50,Callousness,6,3,50.0,False
+50,Checking,5,3,60.0,False
+50,Cleaning,6,3,50.0,False
+50,Cognitive Problems,5,3,60.0,False
+50,Conversion Symptoms,7,4,57.142857142857146,False
+50,Counting,5,3,60.0,False
+50,Craving,7,4,57.142857142857146,False
+50,Dietary Restraint,5,3,60.0,False
+50,Difficulties Reaching Orgasm,3,2,66.66666666666667,False
+50,Disease Conviction,4,2,50.0,False
+50,Dishonesty - Deceitfulness,4,2,50.0,False
+50,Dishonesty - Manipulativeness,4,2,50.0,False
+50,Disorganization,7,4,57.142857142857146,False
+50,Dissociation,6,3,50.0,False
+50,Distress - Dysphoria (Anhedonia),3,2,66.66666666666667,False
+50,Distress - Dysphoria (Anxious Worry),3,2,66.66666666666667,False
+50,Distress - Dysphoria (Depressed Mood),4,2,50.0,False
+50,Distress - Dysphoria (Lassitude),3,2,66.66666666666667,False
+50,Distress - Dysphoria (Shame/Guilt),3,2,66.66666666666667,False
+50,Domineering,6,3,50.0,False
+50,Eccentricity,5,3,60.0,False
+50,Emotionality (Affective Lability),3,2,66.66666666666667,False
+50,Emotionality (Angry Hostility),4,2,50.0,False
+50,Emotionality (Irritability),4,2,50.0,False
+50,Entitlement,6,3,50.0,False
+50,Excessive Exercise,5,3,60.0,False
+50,Excoriation,3,2,66.66666666666667,False
+50,Exhibitionism,5,3,60.0,False
+50,Fantasy Proneness,6,3,50.0,False
+50,Food Selectivity,4,2,50.0,False
+50,Gambling,5,3,60.0,False
+50,Gaming,4,2,50.0,False
+50,Grandiosity,6,3,50.0,False
+50,Hazardous Use,4,2,50.0,False
+50,Health Anxiety,4,2,50.0,False
+50,Hoarding,6,3,50.0,False
+50,Hyperdeliberation,6,3,50.0,False
+50,Hypervigilance,6,3,50.0,False
+50,Impaired Control,4,2,50.0,False
+50,Insomnia,4,2,50.0,False
+50,Low Sexual Arousal,3,2,66.66666666666667,False
+50,Low Sexual Interest,3,2,66.66666666666667,False
+50,Manic Energy,7,4,57.142857142857146,False
+50,Mistrust (Cynicism),4,2,50.0,False
+50,Mistrust (Suspiciousness),4,2,50.0,False
+50,Muscle Building,5,3,60.0,False
+50,NSSI,6,3,50.0,False
+50,Nightmares,3,2,66.66666666666667,False
+50,Non-persistence,5,3,60.0,False
+50,Non-planfulness,5,3,60.0,False
+50,Oppositionality,6,3,50.0,False
+50,Panic,5,3,60.0,False
+50,Paraphilias,5,3,60.0,False
+50,Perfectionism,5,3,60.0,False
+50,Premature Orgasm,4,2,50.0,False
+50,Problematic Shopping,4,2,50.0,False
+50,Purging,3,2,66.66666666666667,False
+50,Reality Distortion (Delusions),5,3,60.0,False
+50,Reality Distortion (Hallucinations),6,3,50.0,False
+50,Restlessness,5,3,60.0,False
+50,Restricted Affectivity,5,3,60.0,False
+50,Restricted Eating,4,2,50.0,False
+50,Rigidity,5,3,60.0,False
+50,Risk Aversion,6,3,50.0,False
+50,Risk Taking,4,2,50.0,False
+50,Risky Sex,4,2,50.0,False
+50,Role Interference,4,2,50.0,False
+50,Romantic Disinterest,5,3,60.0,False
+50,Sex-Related Substance Use,4,2,50.0,False
+50,Sexual Distress,4,2,50.0,False
+50,Sexual Pain,3,2,66.66666666666667,False
+50,Social Aggression,6,3,50.0,False
+50,Social Aloofness,5,3,60.0,False
+50,Social Anxiety,5,3,60.0,False
+50,Somatic Preoccupation,5,3,60.0,False
+50,Specific Phobia (Animal-insect),5,3,60.0,False
+50,Specific Phobia (Blood-Injection),3,2,66.66666666666667,False
+50,Specific Phobia (situational),4,2,50.0,False
+50,Submissiveness,4,2,50.0,False
+50,Suicidality,4,2,50.0,False
+50,Tolerance,3,2,66.66666666666667,False
+50,Trauma Reactions,5,3,60.0,False
+50,Trichotillomania,3,2,66.66666666666667,False
+50,Well-being,5,3,60.0,False
+50,Withdrawal,2,1,50.0,False
+50,Workaholism,5,3,60.0,False
+100,Agoraphobia,5,5,100.0,False
+100,Antisocial Behavior,8,8,100.0,False
+100,Appetite Loss,3,3,100.0,False
+100,Binge Eating,3,3,100.0,False
+100,Bodily Distress,6,6,100.0,False
+100,Body Dissatisfaction,4,4,100.0,False
+100,Body Focus,5,5,100.0,False
+100,Callousness,6,6,100.0,False
+100,Checking,5,5,100.0,False
+100,Cleaning,6,6,100.0,False
+100,Cognitive Problems,5,5,100.0,False
+100,Conversion Symptoms,7,7,100.0,False
+100,Counting,5,5,100.0,False
+100,Craving,7,7,100.0,False
+100,Dietary Restraint,5,5,100.0,False
+100,Difficulties Reaching Orgasm,3,3,100.0,False
+100,Disease Conviction,4,4,100.0,False
+100,Dishonesty - Deceitfulness,4,4,100.0,False
+100,Dishonesty - Manipulativeness,4,4,100.0,False
+100,Disorganization,7,7,100.0,False
+100,Dissociation,6,6,100.0,False
+100,Distress - Dysphoria (Anhedonia),3,3,100.0,False
+100,Distress - Dysphoria (Anxious Worry),3,3,100.0,False
+100,Distress - Dysphoria (Depressed Mood),4,4,100.0,False
+100,Distress - Dysphoria (Lassitude),3,3,100.0,False
+100,Distress - Dysphoria (Shame/Guilt),3,3,100.0,False
+100,Domineering,6,6,100.0,False
+100,Eccentricity,5,5,100.0,False
+100,Emotionality (Affective Lability),3,3,100.0,False
+100,Emotionality (Angry Hostility),4,4,100.0,False
+100,Emotionality (Irritability),4,4,100.0,False
+100,Entitlement,6,6,100.0,False
+100,Excessive Exercise,5,5,100.0,False
+100,Excoriation,3,3,100.0,False
+100,Exhibitionism,5,5,100.0,False
+100,Fantasy Proneness,6,6,100.0,False
+100,Food Selectivity,4,4,100.0,False
+100,Gambling,5,5,100.0,False
+100,Gaming,4,4,100.0,False
+100,Grandiosity,6,6,100.0,False
+100,Hazardous Use,4,4,100.0,False
+100,Health Anxiety,4,4,100.0,False
+100,Hoarding,6,6,100.0,False
+100,Hyperdeliberation,6,6,100.0,False
+100,Hypervigilance,6,6,100.0,False
+100,Impaired Control,4,4,100.0,False
+100,Insomnia,4,4,100.0,False
+100,Low Sexual Arousal,3,3,100.0,False
+100,Low Sexual Interest,3,3,100.0,False
+100,Manic Energy,7,7,100.0,False
+100,Mistrust (Cynicism),4,4,100.0,False
+100,Mistrust (Suspiciousness),4,4,100.0,False
+100,Muscle Building,5,5,100.0,False
+100,NSSI,6,6,100.0,False
+100,Nightmares,3,3,100.0,False
+100,Non-persistence,5,5,100.0,False
+100,Non-planfulness,5,5,100.0,False
+100,Oppositionality,6,6,100.0,False
+100,Panic,5,5,100.0,False
+100,Paraphilias,5,5,100.0,False
+100,Perfectionism,5,5,100.0,False
+100,Premature Orgasm,4,4,100.0,False
+100,Problematic Shopping,4,4,100.0,False
+100,Purging,3,3,100.0,False
+100,Reality Distortion (Delusions),5,5,100.0,False
+100,Reality Distortion (Hallucinations),6,6,100.0,False
+100,Restlessness,5,5,100.0,False
+100,Restricted Affectivity,5,5,100.0,False
+100,Restricted Eating,4,4,100.0,False
+100,Rigidity,5,5,100.0,False
+100,Risk Aversion,6,6,100.0,False
+100,Risk Taking,4,4,100.0,False
+100,Risky Sex,4,4,100.0,False
+100,Role Interference,4,4,100.0,False
+100,Romantic Disinterest,5,5,100.0,False
+100,Sex-Related Substance Use,4,4,100.0,False
+100,Sexual Distress,4,4,100.0,False
+100,Sexual Pain,3,3,100.0,False
+100,Social Aggression,6,6,100.0,False
+100,Social Aloofness,5,5,100.0,False
+100,Social Anxiety,5,5,100.0,False
+100,Somatic Preoccupation,5,5,100.0,False
+100,Specific Phobia (Animal-insect),5,5,100.0,False
+100,Specific Phobia (Blood-Injection),3,3,100.0,False
+100,Specific Phobia (situational),4,4,100.0,False
+100,Submissiveness,4,4,100.0,False
+100,Suicidality,4,4,100.0,False
+100,Tolerance,3,3,100.0,False
+100,Trauma Reactions,5,5,100.0,False
+100,Trichotillomania,3,3,100.0,False
+100,Well-being,5,5,100.0,False
+100,Withdrawal,2,2,100.0,False
+100,Workaholism,5,5,100.0,False

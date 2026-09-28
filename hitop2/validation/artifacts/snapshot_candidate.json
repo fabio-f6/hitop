@@ -1,0 +1,10 @@
+{
+  "csv_sha256": "1f6651e8b01310cd1c0dd0530bda45f36e7a24c02e08ee7ab11a257af255c978",
+  "key_sha256": "131a5b49905581a1740a30f24906fddf021dd77e1b3f49b0070c91f21de6793f",
+  "participant_count": 255,
+  "scale_score_count": 23715,
+  "spectrum_score_count": 1275,
+  "normalized_scale_hash": "011f4c439fd6535e5ad2c80e8f7d68a403a8757ea744368d6324c3edf631a417",
+  "normalized_spectrum_hash": "27a23f8dd344301cd7c8082b0bf9ef3f6adee9d55edf06c329c5ff47673f1480",
+  "mapping_hash": "c251ca9e4d11f0dbcbe770c65adc219b3ac9dd3487c97fbc6fb23ec3e5a5be4c"
+}
