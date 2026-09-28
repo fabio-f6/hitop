@@ -341,6 +341,36 @@ class SystemHealthTests(MonitoringHealthTestMixin, TestCase):
         self.assertIn("question_empty_item_code", problem_codes)
         self.assertIn("question_empty_text", problem_codes)
 
+    def test_problem_identifies_each_affected_scale_with_its_context(self):
+        empty_scale = Scale.objects.create(
+            name="Escala sem itens",
+            subfactor=self.subfactor,
+        )
+
+        problem = next(
+            item
+            for item in get_system_health_report()["problems"]
+            if item["code"] == "scale_without_questions"
+        )
+
+        self.assertEqual(problem["count"], 1)
+        self.assertEqual(
+            problem["details"],
+            [
+                f"{empty_scale.name} — Subfator: {self.subfactor.name}; "
+                f"Spectrum: {self.spectrum.name}"
+            ],
+        )
+
+    def test_system_health_page_displays_affected_items(self):
+        Scale.objects.create(name="Escala identificável", subfactor=self.subfactor)
+
+        response = self.client.get(reverse("administration:system_health"))
+
+        self.assertContains(response, "Itens afetados")
+        self.assertContains(response, "Escala identificável")
+        self.assertContains(response, f"Subfator: {self.subfactor.name}")
+
     def test_attention_check_without_expected_answer_is_detected(self):
         Question.objects.create(
             scale=self.scale,

@@ -145,6 +145,16 @@
                         </div>
                         <strong>{{ problem.title }}</strong>
                         <p class="mb-0 mt-1">{{ problem.description }}</p>
+                        {% if problem.details %}
+                            <div class="mt-3 pt-3 border-top">
+                                <div class="small fw-bold mb-2">Itens afetados</div>
+                                <ul class="mb-0 ps-4">
+                                    {% for detail in problem.details %}
+                                        <li{% if not forloop.last %} class="mb-1"{% endif %}>{{ detail }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
                     </div>
                     {% if problem.count %}
                         <span class="fw-bold text-nowrap">{{ problem.count }}</span>
