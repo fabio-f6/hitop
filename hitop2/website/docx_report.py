@@ -3,18 +3,39 @@ from pathlib import Path
 
 from django.conf import settings
 from docx import Document
-from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.table import (
+    WD_CELL_VERTICAL_ALIGNMENT,
+    WD_ROW_HEIGHT_RULE,
+    WD_TABLE_ALIGNMENT,
+)
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageChops, ImageDraw, ImageFont
 
 
 BLUE = "DBE7F5"
 LIGHT_GRAY = "F2F2F2"
 BORDER_GRAY = "D9D9D9"
 TEXT_GRAY = RGBColor(120, 120, 120)
+
+# One shared layout grid. The default document is US Letter (8.5") and the
+# horizontal margins are 0.7", leaving exactly 7.1" of usable width.
+PAGE_MARGIN_HORIZONTAL = Inches(0.7)
+CONTENT_WIDTH = Inches(7.1)
+CHART_WIDTH = CONTENT_WIDTH
+SECTION_HEADER_PADDING = 100
+CONTENT_BOX_PADDING_VERTICAL = 130
+CONTENT_BOX_PADDING_HORIZONTAL = 150
+EDITABLE_FIELD_MIN_HEIGHT = Inches(0.55)
+HEADING_1_SPACE_AFTER = Pt(10)
+HEADING_2_SPACE_BEFORE = Pt(10)
+HEADING_2_SPACE_AFTER = Pt(8)
+CHART_SPACE_BEFORE = Pt(8)
+CHART_SPACE_AFTER = Pt(4)
+CLINICAL_NOTE_SPACE_BEFORE = Pt(3)
+CLINICAL_NOTE_SPACE_AFTER = Pt(12)
 
 DISCLAIMER = (
     "Este relatório é gerado automaticamente, sendo os seus resultados "
@@ -139,26 +160,58 @@ def _set_cell_margins(cell, top=100, start=120, bottom=100, end=120):
         node.set(qn("w:type"), "dxa")
 
 
+def _set_table_width(table, width=CONTENT_WIDTH):
+    """Place a fixed-width table on the common, non-indented content grid."""
+    table.alignment = WD_TABLE_ALIGNMENT.LEFT
+    table.autofit = False
+    width_twips = str(round(width.inches * 1440))
+    properties = table._tbl.tblPr
+
+    table_width = properties.find(qn("w:tblW"))
+    if table_width is None:
+        table_width = OxmlElement("w:tblW")
+        properties.append(table_width)
+    table_width.set(qn("w:w"), width_twips)
+    table_width.set(qn("w:type"), "dxa")
+
+    indentation = properties.find(qn("w:tblInd"))
+    if indentation is None:
+        indentation = OxmlElement("w:tblInd")
+        properties.append(indentation)
+    indentation.set(qn("w:w"), "0")
+    indentation.set(qn("w:type"), "dxa")
+
+    column_width = int(width / len(table.columns))
+    for column in table.columns:
+        column.width = column_width
+    for row in table.rows:
+        for cell in row.cells:
+            cell.width = column_width
+
+
 def _keep_with_next(paragraph):
     paragraph.paragraph_format.keep_with_next = True
 
 
 def _add_section_banner(document, text):
     table = document.add_table(rows=1, cols=1)
-    table.alignment = WD_TABLE_ALIGNMENT.CENTER
-    table.autofit = False
-    table.columns[0].width = Inches(7.1)
+    _set_table_width(table)
     cell = table.cell(0, 0)
-    cell.width = Inches(7.1)
     _set_cell_fill(cell, BLUE)
     _set_cell_border(cell, BLUE)
-    _set_cell_margins(cell, top=110, bottom=110)
+    _set_cell_margins(
+        cell,
+        top=SECTION_HEADER_PADDING,
+        bottom=SECTION_HEADER_PADDING,
+        start=CONTENT_BOX_PADDING_HORIZONTAL,
+        end=CONTENT_BOX_PADDING_HORIZONTAL,
+    )
     paragraph = cell.paragraphs[0]
+    paragraph.paragraph_format.space_before = Pt(0)
+    paragraph.paragraph_format.space_after = Pt(0)
     run = paragraph.add_run(text)
     run.bold = True
     run.font.size = Pt(16)
-    paragraph.paragraph_format.space_after = Pt(0)
-    document.add_paragraph().paragraph_format.space_after = Pt(2)
 
 
 def _add_analysis(document, analysis):
@@ -166,14 +219,26 @@ def _add_analysis(document, analysis):
     if not paragraphs:
         return
     table = document.add_table(rows=1, cols=1)
+    _set_table_width(table)
     cell = table.cell(0, 0)
     _set_cell_fill(cell, LIGHT_GRAY)
     _set_cell_border(cell, LIGHT_GRAY)
-    _set_cell_margins(cell, top=140, bottom=140, start=160, end=160)
+    _set_cell_margins(
+        cell,
+        top=CONTENT_BOX_PADDING_VERTICAL,
+        bottom=CONTENT_BOX_PADDING_VERTICAL,
+        start=CONTENT_BOX_PADDING_HORIZONTAL,
+        end=CONTENT_BOX_PADDING_HORIZONTAL,
+    )
     cell.paragraphs[0]._element.getparent().remove(cell.paragraphs[0]._element)
-    for text in paragraphs:
+    for index, text in enumerate(paragraphs):
         paragraph = cell.add_paragraph(text)
-        paragraph.paragraph_format.space_after = Pt(6)
+        paragraph.paragraph_format.left_indent = Pt(0)
+        paragraph.paragraph_format.right_indent = Pt(0)
+        paragraph.paragraph_format.space_before = Pt(0)
+        paragraph.paragraph_format.space_after = (
+            Pt(6) if index < len(paragraphs) - 1 else Pt(0)
+        )
 
 
 def _chart_font(size, bold=False):
@@ -193,6 +258,24 @@ def _centered_text(draw, position, text, font, fill="#222222"):
     box = draw.textbbox((0, 0), text, font=font)
     width = box[2] - box[0]
     draw.text((position[0] - width / 2, position[1]), text, font=font, fill=fill)
+
+
+def _center_nonwhite_content(image):
+    """Center the chart's visible pixels, not merely its white PNG canvas."""
+    background = Image.new(image.mode, image.size, "white")
+    bounds = ImageChops.difference(image, background).getbbox()
+    if bounds is None:
+        return image
+
+    visual_center = (bounds[0] + bounds[2]) / 2
+    canvas_center = image.width / 2
+    horizontal_offset = round(canvas_center - visual_center)
+    if horizontal_offset == 0:
+        return image
+
+    centered = Image.new(image.mode, image.size, "white")
+    centered.paste(image, (horizontal_offset, 0))
+    return centered
 
 
 def _gradient_color(percentile):
@@ -312,6 +395,7 @@ def _render_chart_png(chart):
                 width=sx(3),
             )
 
+    image = _center_nonwhite_content(image)
     output = BytesIO()
     image.save(output, format="PNG", optimize=True, dpi=(192, 192))
     output.seek(0)
@@ -322,55 +406,75 @@ def _add_chart(document, chart):
     for fragment in _split_chart(chart):
         paragraph = document.add_paragraph()
         paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        paragraph.paragraph_format.space_before = Pt(4)
-        paragraph.paragraph_format.space_after = Pt(4)
+        paragraph.paragraph_format.left_indent = Pt(0)
+        paragraph.paragraph_format.right_indent = Pt(0)
+        paragraph.paragraph_format.space_before = CHART_SPACE_BEFORE
+        paragraph.paragraph_format.space_after = CHART_SPACE_AFTER
         paragraph.add_run().add_picture(
             _render_chart_png(fragment),
-            width=Inches(7.05),
+            width=CHART_WIDTH,
         )
 
 
-def _add_disclaimer(document):
-    paragraph = document.add_paragraph(DISCLAIMER)
-    paragraph.paragraph_format.space_before = Pt(18)
-    paragraph.paragraph_format.space_after = Pt(12)
-    for run in paragraph.runs:
-        run.font.size = Pt(8)
-        run.font.color.rgb = RGBColor(70, 70, 70)
+def _mark_cell_editable(cell, permission_id):
+    """Allow editing of a cell's contents in an otherwise protected document."""
+    permission_start = OxmlElement("w:permStart")
+    permission_start.set(qn("w:id"), str(permission_id))
+    permission_start.set(qn("w:edGrp"), "everyone")
+    cell._tc.insert(1, permission_start)
+
+    permission_end = OxmlElement("w:permEnd")
+    permission_end.set(qn("w:id"), str(permission_id))
+    cell._tc.append(permission_end)
 
 
-def _add_editable_field(document, title, guidance, lines):
+def _add_editable_field(document, title, guidance, permission_id):
     heading = document.add_table(rows=1, cols=1)
-    heading.alignment = WD_TABLE_ALIGNMENT.CENTER
-    heading.autofit = False
-    heading.columns[0].width = Inches(7.1)
+    _set_table_width(heading)
     heading_cell = heading.cell(0, 0)
-    heading_cell.width = Inches(7.1)
     _set_cell_fill(heading_cell, BLUE)
     _set_cell_border(heading_cell, BLUE)
-    _set_cell_margins(heading_cell, top=80, bottom=80)
-    heading_run = heading_cell.paragraphs[0].add_run(title)
+    _set_cell_margins(
+        heading_cell,
+        top=SECTION_HEADER_PADDING,
+        bottom=SECTION_HEADER_PADDING,
+        start=CONTENT_BOX_PADDING_HORIZONTAL,
+        end=CONTENT_BOX_PADDING_HORIZONTAL,
+    )
+    heading_paragraph = heading_cell.paragraphs[0]
+    heading_paragraph.paragraph_format.space_before = Pt(0)
+    heading_paragraph.paragraph_format.space_after = Pt(0)
+    heading_run = heading_paragraph.add_run(title)
     heading_run.bold = True
-    _keep_with_next(heading_cell.paragraphs[0])
+    _keep_with_next(heading_paragraph)
 
     field = document.add_table(rows=1, cols=1)
-    field.alignment = WD_TABLE_ALIGNMENT.CENTER
-    field.autofit = False
-    field.columns[0].width = Inches(7.1)
+    _set_table_width(field)
+    field.rows[0].height = EDITABLE_FIELD_MIN_HEIGHT
+    field.rows[0].height_rule = WD_ROW_HEIGHT_RULE.AT_LEAST
     cell = field.cell(0, 0)
-    cell.width = Inches(7.1)
+    cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.TOP
     _set_cell_border(cell)
-    _set_cell_margins(cell, top=150, bottom=150, start=150, end=150)
+    _set_cell_margins(
+        cell,
+        top=CONTENT_BOX_PADDING_VERTICAL,
+        bottom=CONTENT_BOX_PADDING_VERTICAL,
+        start=CONTENT_BOX_PADDING_HORIZONTAL,
+        end=CONTENT_BOX_PADDING_HORIZONTAL,
+    )
     paragraph = cell.paragraphs[0]
+    paragraph.paragraph_format.space_before = Pt(0)
+    paragraph.paragraph_format.space_after = Pt(0)
     placeholder = paragraph.add_run("Clique aqui e escreva a informação clínica.")
     placeholder.italic = True
     placeholder.font.color.rgb = TEXT_GRAY
-    for _ in range(lines - 1):
-        cell.add_paragraph("")
+    _mark_cell_editable(cell, permission_id)
 
     note = document.add_paragraph(f"Exemplo: {guidance}")
-    note.paragraph_format.space_before = Pt(3)
-    note.paragraph_format.space_after = Pt(14)
+    note.paragraph_format.left_indent = Pt(0)
+    note.paragraph_format.right_indent = Pt(0)
+    note.paragraph_format.space_before = CLINICAL_NOTE_SPACE_BEFORE
+    note.paragraph_format.space_after = CLINICAL_NOTE_SPACE_AFTER
     for run in note.runs:
         run.italic = True
         run.font.size = Pt(8)
@@ -380,9 +484,11 @@ def _add_editable_field(document, title, guidance, lines):
 def _configure_document(document):
     section = document.sections[0]
     section.top_margin = Inches(0.65)
-    section.bottom_margin = Inches(0.65)
-    section.left_margin = Inches(0.7)
-    section.right_margin = Inches(0.7)
+    # Reserve enough physical footer space for the disclaimer and normative
+    # traceability label without allowing either to overlap the body.
+    section.bottom_margin = Inches(0.95)
+    section.left_margin = PAGE_MARGIN_HORIZONTAL
+    section.right_margin = PAGE_MARGIN_HORIZONTAL
 
     styles = document.styles
     normal = styles["Normal"]
@@ -390,29 +496,55 @@ def _configure_document(document):
     normal.font.size = Pt(10)
     normal.paragraph_format.space_after = Pt(7)
     normal.paragraph_format.line_spacing = 1.15
+    normal.paragraph_format.left_indent = Pt(0)
+    normal.paragraph_format.right_indent = Pt(0)
     for style_name, size in (("Title", 24), ("Heading 1", 19), ("Heading 2", 15)):
         style = styles[style_name]
         style.font.name = "Arial"
         style.font.size = Pt(size)
         style.font.color.rgb = RGBColor(0, 0, 0)
+    styles["Heading 1"].paragraph_format.space_before = Pt(0)
+    styles["Heading 1"].paragraph_format.space_after = HEADING_1_SPACE_AFTER
+    styles["Heading 2"].paragraph_format.space_before = HEADING_2_SPACE_BEFORE
+    styles["Heading 2"].paragraph_format.space_after = HEADING_2_SPACE_AFTER
 
 
-def _configure_normative_footer(document, normative_version_display):
+def _configure_footer(document, normative_version_display):
     label = f"Base normativa: {normative_version_display or 'ainda não atribuída'}"
 
     for section in document.sections:
-        paragraph = section.footer.paragraphs[0]
-        paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-        run = paragraph.add_run(label)
-        run.font.name = "Arial"
-        run.font.size = Pt(8)
-        run.font.color.rgb = TEXT_GRAY
+        footer = section.footer
+        disclaimer = footer.paragraphs[0]
+        disclaimer.paragraph_format.space_after = Pt(2)
+        disclaimer_run = disclaimer.add_run(DISCLAIMER)
+        disclaimer_run.font.name = "Arial"
+        disclaimer_run.font.size = Pt(7)
+        disclaimer_run.font.color.rgb = TEXT_GRAY
+
+        normative = footer.add_paragraph()
+        normative.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        normative.paragraph_format.space_after = Pt(0)
+        normative_run = normative.add_run(label)
+        normative_run.font.name = "Arial"
+        normative_run.font.size = Pt(8)
+        normative_run.font.color.rgb = TEXT_GRAY
+
+
+def _protect_document(document):
+    """Protect generated content while honoring explicit permission ranges."""
+    settings = document.settings.element
+    protection = settings.find(qn("w:documentProtection"))
+    if protection is None:
+        protection = OxmlElement("w:documentProtection")
+        settings.insert(0, protection)
+    protection.set(qn("w:edit"), "readOnly")
+    protection.set(qn("w:enforcement"), "1")
 
 
 def build_report_docx(context):
     document = Document()
     _configure_document(document)
-    _configure_normative_footer(document, context.get("normative_version_display"))
+    _configure_footer(document, context.get("normative_version_display"))
     report = context["report"]
 
     logo_path = Path(settings.BASE_DIR) / "static" / "images" / "hitop_logo.png"
@@ -423,7 +555,7 @@ def build_report_docx(context):
 
     if context.get("is_test_environment"):
         test_banner = document.add_table(rows=1, cols=1)
-        test_banner.alignment = WD_TABLE_ALIGNMENT.CENTER
+        _set_table_width(test_banner)
         test_cell = test_banner.cell(0, 0)
         _set_cell_fill(test_cell, "FFF4CC")
         _set_cell_border(test_cell, "C8A94F", "16")
@@ -454,7 +586,7 @@ def build_report_docx(context):
     run.italic = True
 
     details = document.add_table(rows=5, cols=2)
-    details.alignment = WD_TABLE_ALIGNMENT.LEFT
+    _set_table_width(details)
     for row, (label, value) in zip(
         details.rows,
         (
@@ -479,6 +611,7 @@ def build_report_docx(context):
     paragraph.add_run(date_value)
 
     intro = document.add_table(rows=1, cols=1)
+    _set_table_width(intro)
     intro_cell = intro.cell(0, 0)
     _set_cell_fill(intro_cell, BLUE)
     _set_cell_border(intro_cell, BLUE)
@@ -491,6 +624,8 @@ def build_report_docx(context):
         "informação e acompanhamento profissional."
     )
 
+    # The cover is structurally separated from all report results.
+    document.add_page_break()
     document.add_heading("Resultados", level=1)
     attention = context["attention_checks"]
     if attention["incorrect"]:
@@ -503,23 +638,21 @@ def build_report_docx(context):
 
     _add_section_banner(document, "Perfil Global")
     document.add_paragraph(
-        "O quadro abaixo apresenta a pontuação bruta e o percentil para cada "
+        "\nO quadro abaixo apresenta a pontuação bruta e o percentil para cada "
         "dimensão avaliada. O percentil compara os valores individuais com os "
         "valores de referência."
     )
     _add_analysis(document, context["global_analysis"])
     _add_chart(document, context["global_chart_data"])
-    _add_disclaimer(document)
 
-    _add_section_banner(document, "Perfil Detalhado")
-    for index, section_data in enumerate(context["detailed_sections"]):
-        if index:
-            document.add_page_break()
+    for section_data in context["detailed_sections"]:
+        # Every detailed module starts on its own page, including the first.
+        document.add_page_break()
+        _add_section_banner(document, "Perfil Detalhado")
         heading = document.add_heading(section_data["title"], level=2)
         _keep_with_next(heading)
         _add_analysis(document, section_data["analysis"])
         _add_chart(document, section_data["chart"])
-        _add_disclaimer(document)
 
     document.add_page_break()
     document.add_heading("Anamnese e Informação Clínica Complementar", level=1)
@@ -527,21 +660,23 @@ def build_report_docx(context):
         "Preencha os campos abaixo diretamente no Word. As caixas aumentam "
         "automaticamente à medida que o texto é introduzido."
     )
-    for field in EDITABLE_FIELDS:
-        _add_editable_field(document, *field)
+    permission_id = 1
+    for title, guidance, _legacy_lines in EDITABLE_FIELDS:
+        _add_editable_field(document, title, guidance, permission_id)
+        permission_id += 1
 
+    document.add_page_break()
     document.add_heading("Conclusão e Recomendações", level=1)
     _add_editable_field(
         document,
         "Síntese Clínica",
         "Síntese integrativa, intervenção aconselhada, frequência, objetivos "
         "iniciais, necessidades específicas e encaminhamentos.",
-        8,
+        permission_id,
     )
 
-    document.add_paragraph("\n\n")
     signature = document.add_table(rows=1, cols=2)
-    signature.alignment = WD_TABLE_ALIGNMENT.CENTER
+    _set_table_width(signature)
     for cell in signature.row_cells(0):
         _set_cell_fill(cell, LIGHT_GRAY)
         _set_cell_border(cell, LIGHT_GRAY)
@@ -559,7 +694,7 @@ def build_report_docx(context):
             f'\nNº CÉDULA PROFISSIONAL: {report["professional_license"]}'
             "\nNº CERTIFICAÇÃO HITOP"
         )
-    _add_disclaimer(document)
+    _protect_document(document)
 
     output = BytesIO()
     document.save(output)

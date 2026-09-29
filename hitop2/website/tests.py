@@ -1,8 +1,11 @@
 from unittest.mock import patch
 from io import BytesIO
 from zipfile import ZipFile
+from xml.etree import ElementTree
 
 from django.test import TestCase, override_settings
+from docx import Document
+from PIL import Image, ImageChops
 
 from django.contrib.auth.models import User
 from django.urls import reverse
@@ -30,7 +33,16 @@ from polls.models import (
 
 from .models import UserProfile
 from .patient_deletion import permanently_delete_patient
-from .docx_report import _split_chart
+from .docx_report import (
+    CHART_WIDTH,
+    CONTENT_WIDTH,
+    DISCLAIMER,
+    EDITABLE_FIELD_MIN_HEIGHT,
+    EDITABLE_FIELDS,
+    _render_chart_png,
+    _split_chart,
+    build_report_docx,
+)
 from .views import _report_sociodemographics
 
 
@@ -708,6 +720,219 @@ class ReportPreviewSpectrumTests(TestCase):
 
 
 class ReportDocxLayoutTests(TestCase):
+    WORD_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+
+    def _report_context(self):
+        def chart(name, item_count=1):
+            return {
+                "height": 55 + item_count * 28,
+                "items": [
+                    {
+                        "name": name if item_count == 1 else f"{name} {index + 1}",
+                        "score": 2.0,
+                        "percentile": 50,
+                        "is_valid": True,
+                        "x": 905,
+                        "y": 55 + index * 28,
+                    }
+                    for index in range(item_count)
+                ],
+            }
+
+        return {
+            "normative_version_display": "fixture-v7 (Produção)",
+            "is_test_environment": False,
+            "report": {
+                "professional_name": "Profissional Teste",
+                "professional_area": "Psicologia",
+                "professional_license": "TEST-1",
+                "patient_name": "Utente Teste",
+                "age": 30,
+                "sex": "Não indicado",
+                "gender": "Não indicado",
+                "education": "Não indicado",
+                "submission_date": None,
+            },
+            "attention_checks": {"incorrect": 0, "total": 0},
+            "global_analysis": {"paragraphs": ["Análise global de teste."]},
+            "global_chart_data": chart("Global fixture"),
+            "detailed_sections": [
+                {
+                    "title": "Internalização",
+                    "analysis": {"paragraphs": ["Análise interna."]},
+                    "chart": chart("Escala interna"),
+                },
+                {
+                    "title": "Externalização",
+                    "analysis": {"paragraphs": ["Análise externa."]},
+                    "chart": chart("Escala externa", item_count=5),
+                },
+            ],
+        }
+
+    def _explicit_pages(self, document_xml):
+        namespace = {"w": self.WORD_NS}
+        root = ElementTree.fromstring(document_xml)
+        pages = [[]]
+        for child in root.find("w:body", namespace):
+            if child.findall('.//w:br[@w:type="page"]', namespace):
+                pages.append([])
+                continue
+            pages[-1].extend(child.itertext())
+        return ["".join(page) for page in pages]
+
+    def test_report_has_structural_pagination_footer_and_editing_permissions(self):
+        output = build_report_docx(self._report_context())
+
+        # A protected file must remain a valid OPC/ZIP package reopenable by
+        # python-docx, in addition to having the expected XML structures.
+        Document(BytesIO(output.getvalue()))
+        with ZipFile(BytesIO(output.getvalue())) as archive:
+            document_xml = archive.read("word/document.xml")
+            settings_xml = archive.read("word/settings.xml")
+            footer_xml = b" ".join(
+                archive.read(name)
+                for name in archive.namelist()
+                if name.startswith("word/footer") and name.endswith(".xml")
+            )
+
+        pages = self._explicit_pages(document_xml)
+        self.assertIn("Relatório Clínico", pages[0])
+        self.assertNotIn("Resultados", pages[0])
+        self.assertIn("Resultados", pages[1])
+        self.assertIn("Perfil Global", pages[1])
+        self.assertNotIn("Perfil Detalhado", pages[1])
+        self.assertIn("Perfil Detalhado", pages[2])
+        self.assertLess(
+            pages[2].index("Perfil Detalhado"),
+            pages[2].index("Internalização"),
+        )
+        self.assertIn("Perfil Detalhado", pages[3])
+        self.assertLess(
+            pages[3].index("Perfil Detalhado"),
+            pages[3].index("Externalização"),
+        )
+        self.assertIn("Anamnese e Informação Clínica Complementar", pages[4])
+        self.assertIn("Conclusão e Recomendações", pages[5])
+        self.assertEqual(
+            document_xml.decode().count("Perfil Detalhado"),
+            2,
+        )
+
+        self.assertNotIn(DISCLAIMER, document_xml.decode())
+        self.assertEqual(footer_xml.decode().count(DISCLAIMER), 1)
+        self.assertIn("Base normativa: fixture-v7 (Produção)", footer_xml.decode())
+
+        namespace = {"w": self.WORD_NS}
+        settings = ElementTree.fromstring(settings_xml)
+        protection = settings.find("w:documentProtection", namespace)
+        self.assertIsNotNone(protection)
+        self.assertEqual(
+            protection.get(f"{{{self.WORD_NS}}}edit"),
+            "readOnly",
+        )
+        self.assertEqual(
+            protection.get(f"{{{self.WORD_NS}}}enforcement"),
+            "1",
+        )
+
+        document = ElementTree.fromstring(document_xml)
+        editable_cells = [
+            cell for cell in document.findall(".//w:tc", namespace)
+            if cell.find("w:permStart", namespace) is not None
+        ]
+        self.assertEqual(len(editable_cells), len(EDITABLE_FIELDS) + 1)
+        self.assertTrue(all(
+            "Clique aqui e escreva a informação clínica." in "".join(cell.itertext())
+            and cell.find("w:permEnd", namespace) is not None
+            for cell in editable_cells
+        ))
+
+    def test_equivalent_components_share_grid_and_expandable_field_dimensions(self):
+        output = build_report_docx(self._report_context())
+        with ZipFile(BytesIO(output.getvalue())) as archive:
+            document = ElementTree.fromstring(archive.read("word/document.xml"))
+
+        namespace = {
+            "w": self.WORD_NS,
+            "wp": "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing",
+        }
+        content_width_twips = str(round(CONTENT_WIDTH.inches * 1440))
+        min_height_twips = str(round(EDITABLE_FIELD_MIN_HEIGHT.inches * 1440))
+
+        editable_tables = [
+            table for table in document.findall(".//w:tbl", namespace)
+            if "Clique aqui e escreva a informação clínica." in "".join(table.itertext())
+        ]
+        self.assertEqual(len(editable_tables), len(EDITABLE_FIELDS) + 1)
+        for table in editable_tables:
+            table_width = table.find("w:tblPr/w:tblW", namespace)
+            indentation = table.find("w:tblPr/w:tblInd", namespace)
+            row_height = table.find("w:tr/w:trPr/w:trHeight", namespace)
+            self.assertEqual(
+                table_width.get(f"{{{self.WORD_NS}}}w"),
+                content_width_twips,
+            )
+            self.assertEqual(indentation.get(f"{{{self.WORD_NS}}}w"), "0")
+            self.assertEqual(
+                row_height.get(f"{{{self.WORD_NS}}}val"),
+                min_height_twips,
+            )
+            self.assertEqual(
+                row_height.get(f"{{{self.WORD_NS}}}hRule"),
+                "atLeast",
+            )
+            self.assertEqual(len(table.findall(".//w:p", namespace)), 1)
+
+        clinical_titles = {title for title, _guidance, _lines in EDITABLE_FIELDS}
+        clinical_titles.add("Síntese Clínica")
+        header_tables = [
+            table for table in document.findall(".//w:tbl", namespace)
+            if "".join(table.itertext()) in clinical_titles
+        ]
+        self.assertEqual(len(header_tables), len(clinical_titles))
+        self.assertEqual(
+            {
+                table.find("w:tblPr/w:tblW", namespace).get(
+                    f"{{{self.WORD_NS}}}w"
+                )
+                for table in header_tables
+            },
+            {content_width_twips},
+        )
+
+        chart_width_emu = str(int(CHART_WIDTH))
+        chart_extents = [
+            extent for extent in document.findall(".//wp:extent", namespace)
+            if extent.get("cx") == chart_width_emu
+        ]
+        self.assertEqual(chart_width_emu, str(round(CONTENT_WIDTH.inches * 914400)))
+        self.assertEqual(len(chart_extents), 3)
+
+    def test_chart_visible_pixels_are_centered_for_different_row_counts(self):
+        for item_count in (1, 3, 8):
+            chart = {
+                "height": 55 + item_count * 28,
+                "items": [
+                    {
+                        "name": f"Escala de teste {index}",
+                        "score": 2.0,
+                        "percentile": 50,
+                        "is_valid": True,
+                        "x": 905,
+                        "y": 55 + index * 28,
+                    }
+                    for index in range(item_count)
+                ],
+            }
+            image = Image.open(_render_chart_png(chart)).convert("RGB")
+            bounds = ImageChops.difference(
+                image,
+                Image.new("RGB", image.size, "white"),
+            ).getbbox()
+            visual_center = (bounds[0] + bounds[2]) / 2
+            self.assertAlmostEqual(visual_center, image.width / 2, delta=1)
+
     def test_long_charts_are_split_only_between_complete_rows(self):
         chart = {
             "height": 55 + 19 * 28,
