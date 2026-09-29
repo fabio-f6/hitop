@@ -41,6 +41,12 @@ class Command(BaseCommand):
                 }
             )
 
+            configured_choice_values = [
+                value for value, _label in q.get("choices", [])
+            ]
+            question.choices.exclude(
+                value__in=configured_choice_values
+            ).delete()
             for choice_index, (value, label) in enumerate(q.get("choices", [])):
                 DynamicChoice.objects.update_or_create(
                     question=question,

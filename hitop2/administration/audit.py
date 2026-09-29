@@ -53,6 +53,9 @@ _ALLOWED_METADATA_KEYS = {
     },
     MASTER_RESET_ACTION: {
         "users_deleted",
+        "approved_professionals_preserved",
+        "unapproved_professionals_deleted",
+        "patients_deleted",
         "submissions_deleted",
         "test_submissions_deleted",
         "previous_active_normative_version",

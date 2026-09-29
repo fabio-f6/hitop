@@ -451,6 +451,7 @@ def _dynamic_questionnaire_response(
         "section_index": section_index,
         "section_total": len(section_names),
         "previous_index": section_index - 1,
+        "progress": round(((section_index + 1) / len(section_names)) * 100, 2),
         "require_answers": require_answers,
         "submit_label": (
             "Concluir" if section_index == len(section_names) - 1

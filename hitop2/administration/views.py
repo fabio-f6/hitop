@@ -212,9 +212,9 @@ def master_reset(request):
             else:
                 messages.success(
                     request,
-                    "Master Reset concluído com sucesso. Todos os outros utilizadores "
-                    "e aplicações de questionários foram eliminados. A versão normativa "
-                    "ativa foi reposta para v1. O histórico de auditoria foi preservado.",
+                    "Master Reset concluído com sucesso. Os profissionais aprovados foram "
+                    "preservados; os pacientes, profissionais pendentes, aplicações e dados "
+                    "clínicos foram eliminados. A versão normativa ativa foi reposta para v1.",
                 )
                 return redirect("administration:system")
 

@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, Permission, User
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -15,7 +15,6 @@ from polls.models import (
     NormativeParticipant,
     NormativeScaleScore,
     NormativeSpectrumScore,
-    NormativeAnswer,
     Question,
     QuestionCategory,
     QuestionnaireSubmission,
@@ -26,7 +25,7 @@ from polls.models import (
     UserAnswer,
 )
 from polls.normative_versions import create_normative_version
-from polls.normative_versions import NormativeVersionError
+from website.models import UserProfile
 
 from .master_reset import MasterResetError, perform_master_reset
 from .models import AdministrativeAuditLog, MASTER_RESET_ACTION
@@ -41,7 +40,16 @@ class MasterResetTests(TestCase):
         cls.actor = cls.make_user("actor", "admin", is_staff=True, is_superuser=True)
         cls.second_admin = cls.make_user("second-admin", "admin")
         cls.professional = cls.make_user("professional", "professional")
+        cls.professional.userprofile.is_verified = True
+        cls.professional.userprofile.save(update_fields=["is_verified"])
+        cls.professional_group = Group.objects.create(name="approved-professionals")
+        cls.professional.groups.add(cls.professional_group)
+        cls.professional_permission = Permission.objects.order_by("pk").first()
+        cls.professional.user_permissions.add(cls.professional_permission)
+        cls.pending_professional = cls.make_user("pending-professional", "professional")
         cls.patient = cls.make_user("patient", "patient")
+        cls.patient.userprofile.professional = cls.professional
+        cls.patient.userprofile.save(update_fields=["professional"])
         cls.staff_only = cls.make_user("staff-only", "professional", is_staff=True)
         cls.other_superuser = cls.make_user(
             "other-superuser", "professional", is_staff=True, is_superuser=True
@@ -150,6 +158,9 @@ class MasterResetTests(TestCase):
         cls.completed_submission = QuestionnaireSubmission.objects.create(
             user=cls.patient, completed=True, report_normative_version=cls.v3
         )
+        cls.exported_participant = participants[255]
+        cls.exported_participant.source_submission = cls.completed_submission
+        cls.exported_participant.save(update_fields=["source_submission"])
         cls.test_submission = QuestionnaireSubmission.objects.create(
             user=cls.test_user, is_test_data=True, simulation_mode="simulated",
             report_normative_version=cls.test_version,
@@ -278,23 +289,54 @@ class MasterResetTests(TestCase):
 
     def test_success_removes_operational_data_and_preserves_actor(self):
         actor_pk = self.actor.pk
+        professional_pk = self.professional.pk
+        professional_profile_pk = self.professional.userprofile.pk
+        professional_password = self.professional.password
         profile_pk = self.actor.userprofile.pk
         password_hash = self.actor.password
         response = self.post_reset()
         self.assertRedirects(response, reverse("administration:system"))
 
         actor = User.objects.get(pk=actor_pk)
-        self.assertEqual(list(User.objects.values_list("pk", flat=True)), [actor_pk])
+        self.assertEqual(
+            set(User.objects.values_list("pk", flat=True)),
+            {actor_pk, professional_pk},
+        )
         self.assertEqual(actor.userprofile.pk, profile_pk)
         self.assertEqual(actor.userprofile.user_type, "admin")
         self.assertTrue(actor.is_staff)
         self.assertTrue(actor.is_superuser)
         self.assertEqual(actor.password, password_hash)
         self.assertTrue(actor.check_password(PASSWORD))
+
+        professional = User.objects.get(pk=professional_pk)
+        self.assertEqual(professional.userprofile.pk, professional_profile_pk)
+        self.assertEqual(professional.userprofile.user_type, "professional")
+        self.assertTrue(professional.userprofile.is_verified)
+        self.assertEqual(professional.password, professional_password)
+        self.assertTrue(professional.is_active)
+        self.assertTrue(professional.check_password(PASSWORD))
+        self.assertEqual(
+            set(professional.groups.values_list("pk", flat=True)),
+            {self.professional_group.pk},
+        )
+        self.assertEqual(
+            set(professional.user_permissions.values_list("pk", flat=True)),
+            {self.professional_permission.pk},
+        )
+        self.assertFalse(User.objects.filter(pk=self.pending_professional.pk).exists())
+        self.assertFalse(User.objects.filter(pk=self.patient.pk).exists())
+        self.assertFalse(UserProfile.objects.filter(user_type="patient").exists())
         self.assertFalse(QuestionnaireSubmission.objects.exists())
         self.assertFalse(UserAnswer.objects.exists())
         self.assertFalse(DynamicAnswer.objects.exists())
         self.assertFalse(SociodemographicAnswer.objects.exists())
+
+        self.client.force_login(professional)
+        dashboard = self.client.get(reverse("website:dashboard"))
+        self.assertEqual(dashboard.status_code, 200)
+        self.assertEqual(dashboard.context["total_patients"], 0)
+        self.assertEqual(dashboard.context["total_submissions"], 0)
 
     def test_normative_history_and_audit_are_preserved(self):
         version_ids = set(NormativeDatasetVersion.objects.filter(
@@ -364,6 +406,9 @@ class MasterResetTests(TestCase):
         self.assertEqual(reset_log.actor_id, self.actor.pk)
         self.assertEqual(reset_log.object_type, "system")
         self.assertEqual(reset_log.metadata["users_deleted"], 6)
+        self.assertEqual(reset_log.metadata["approved_professionals_preserved"], 1)
+        self.assertEqual(reset_log.metadata["unapproved_professionals_deleted"], 3)
+        self.assertEqual(reset_log.metadata["patients_deleted"], 2)
         self.assertEqual(reset_log.metadata["submissions_deleted"], 3)
         self.assertEqual(reset_log.metadata["test_submissions_deleted"], 1)
         self.assertEqual(reset_log.metadata["test_versions_deleted"], 1)
@@ -371,6 +416,21 @@ class MasterResetTests(TestCase):
         self.assertEqual(reset_log.metadata["previous_active_normative_version"], "v3")
         self.assertEqual(reset_log.metadata["restored_normative_version"], "v1")
         self.assertNotIn("password", str(reset_log.metadata).lower())
+
+        derived_participant = NormativeParticipant.objects.get(pk=self.exported_participant.pk)
+        self.assertIsNone(derived_participant.source_submission_id)
+
+    def test_preview_explains_preserved_professionals_and_deleted_clinical_data(self):
+        self.client.force_login(self.actor)
+        response = self.client.get(reverse("administration:master_reset"))
+        self.assertContains(response, "Profissionais aprovados")
+        self.assertContains(response, "Profissionais não aprovados")
+        self.assertContains(response, "Pacientes e associações")
+        self.assertContains(response, "Total de contas eliminadas")
+        self.assertContains(response, "Bases normativas de produção")
+        self.assertEqual(response.context["preview"].approved_professionals_preserved, 1)
+        self.assertEqual(response.context["preview"].unapproved_professionals_deleted, 3)
+        self.assertEqual(response.context["preview"].patients_deleted, 2)
 
     def test_invalid_v1_aborts_before_deletion(self):
         NormativeDatasetMembership.objects.filter(version=self.v4).delete()
@@ -433,6 +493,10 @@ class MasterResetTests(TestCase):
             perform_master_reset(self.actor)
         self.assertEqual(QuestionnaireSubmission.objects.count(), before)
         self.assertTrue(User.objects.filter(pk=self.patient.pk).exists())
+        self.professional.refresh_from_db()
+        self.patient.userprofile.refresh_from_db()
+        self.assertTrue(self.professional.userprofile.is_verified)
+        self.assertEqual(self.patient.userprofile.professional_id, self.professional.pk)
         self.assertTrue(NormativeDatasetVersion.objects.filter(pk=child.pk).exists())
 
     def test_failure_during_audit_rolls_back_everything(self):
@@ -464,6 +528,10 @@ class MasterResetTests(TestCase):
         ), before)
         self.test_submission.refresh_from_db()
         self.assertEqual(self.test_submission.report_normative_version, self.test_version)
+        self.professional.refresh_from_db()
+        self.patient.userprofile.refresh_from_db()
+        self.assertTrue(self.professional.userprofile.is_verified)
+        self.assertEqual(self.patient.userprofile.professional_id, self.professional.pk)
         self.v1.refresh_from_db()
         self.v3.refresh_from_db()
         self.assertEqual(self.v1.status, NormativeDatasetVersion.Status.RETIRED)

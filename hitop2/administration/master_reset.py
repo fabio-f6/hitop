@@ -35,7 +35,10 @@ class MasterResetError(Exception):
 
 @dataclass(frozen=True)
 class MasterResetPreview:
-    users: int
+    users_deleted: int
+    approved_professionals_preserved: int
+    unapproved_professionals_deleted: int
+    patients_deleted: int
     submissions: int
     test_submissions: int
     actor_username: str
@@ -46,8 +49,23 @@ class MasterResetPreview:
 def get_master_reset_preview(actor):
     User = get_user_model()
     v1 = NormativeDatasetVersion.objects.filter(name=ORIGINAL_VERSION_NAME).first()
+    approved_professionals = UserProfile.objects.filter(
+        user_type="professional",
+        is_verified=True,
+    )
+    preserved_user_ids = approved_professionals.values_list("user_id", flat=True)
     return MasterResetPreview(
-        users=User.objects.exclude(pk=actor.pk).count(),
+        users_deleted=(
+            User.objects.exclude(pk=actor.pk)
+            .exclude(pk__in=preserved_user_ids)
+            .count()
+        ),
+        approved_professionals_preserved=approved_professionals.count(),
+        unapproved_professionals_deleted=UserProfile.objects.filter(
+            user_type="professional",
+            is_verified=False,
+        ).exclude(user_id=actor.pk).count(),
+        patients_deleted=UserProfile.objects.filter(user_type="patient").count(),
         submissions=QuestionnaireSubmission.objects.count(),
         test_submissions=QuestionnaireSubmission.objects.filter(is_test_data=True).count(),
         actor_username=actor.get_username(),
@@ -150,13 +168,54 @@ def perform_master_reset(actor):
         "groups": tuple(locked_actor.groups.order_by("pk").values_list("pk", flat=True)),
     }
 
+    approved_profiles = list(
+        UserProfile.objects.select_for_update()
+        .select_related("user")
+        .filter(user_type="professional", is_verified=True)
+        .order_by("pk")
+    )
+    approved_professional_state = {
+        profile.user_id: {
+            "profile_pk": profile.pk,
+            "user_type": profile.user_type,
+            "is_verified": profile.is_verified,
+            "username": profile.user.username,
+            "email": profile.user.email,
+            "first_name": profile.user.first_name,
+            "last_name": profile.user.last_name,
+            "is_active": profile.user.is_active,
+            "is_staff": profile.user.is_staff,
+            "is_superuser": profile.user.is_superuser,
+            "password": profile.user.password,
+            "user_permissions": tuple(
+                profile.user.user_permissions.order_by("pk").values_list("pk", flat=True)
+            ),
+            "groups": tuple(
+                profile.user.groups.order_by("pk").values_list("pk", flat=True)
+            ),
+        }
+        for profile in approved_profiles
+    }
+    preserved_user_ids = {actor_pk, *approved_professional_state}
+
     previous_active = next(
         (item.name for item in locked_versions
          if item.status == item.Status.ACTIVE
          and item.environment == item.Environment.PRODUCTION),
         None,
     )
-    users_deleted = User.objects.exclude(pk=actor_pk).count()
+    doomed_users = User.objects.exclude(pk__in=preserved_user_ids)
+    users_deleted = doomed_users.count()
+    approved_professionals_preserved = len(approved_professional_state)
+    unapproved_professionals_deleted = UserProfile.objects.filter(
+        user_type="professional",
+        is_verified=False,
+        user_id__in=doomed_users.values_list("pk", flat=True),
+    ).count()
+    patients_deleted = UserProfile.objects.filter(
+        user_type="patient",
+        user_id__in=doomed_users.values_list("pk", flat=True),
+    ).count()
     submissions_deleted = QuestionnaireSubmission.objects.count()
     test_submissions_deleted = QuestionnaireSubmission.objects.filter(
         is_test_data=True,
@@ -185,10 +244,9 @@ def perform_master_reset(actor):
     SociodemographicAnswer.objects.all().delete()
     test_cleanup = clear_normative_test_environment()
 
-    doomed_users = User.objects.exclude(pk=actor_pk)
     doomed_user_ids = list(doomed_users.values_list("pk", flat=True))
-    if actor_pk in doomed_user_ids:
-        raise MasterResetError("O actor entrou no conjunto destrutivo.")
+    if preserved_user_ids.intersection(doomed_user_ids):
+        raise MasterResetError("Uma conta preservada entrou no conjunto destrutivo.")
     # Remove doomed profiles first to resolve their PROTECT references to test
     # environment owners. The actor's own profile is never in this queryset.
     UserProfile.objects.filter(user_id__in=doomed_user_ids).delete()
@@ -198,8 +256,8 @@ def perform_master_reset(actor):
 
     if not User.objects.filter(pk=actor_pk).exists():
         raise MasterResetError("O actor foi removido.")
-    if User.objects.exclude(pk=actor_pk).exists():
-        raise MasterResetError("Ainda existem outros utilizadores.")
+    if set(User.objects.values_list("pk", flat=True)) != preserved_user_ids:
+        raise MasterResetError("O conjunto final de utilizadores é inconsistente.")
     if QuestionnaireSubmission.objects.exists():
         raise MasterResetError("Ainda existem aplicações de questionário.")
     if QuestionnaireSubmission.objects.filter(is_test_data=True).exists():
@@ -219,6 +277,40 @@ def perform_master_reset(actor):
         != actor_state["groups"]
     ):
         raise MasterResetError("A identidade do actor foi alterada.")
+
+    for user_id, expected in approved_professional_state.items():
+        try:
+            profile = UserProfile.objects.select_related("user").get(
+                user_id=user_id,
+                user_type="professional",
+                is_verified=True,
+            )
+        except UserProfile.DoesNotExist as exception:
+            raise MasterResetError("Um profissional aprovado foi removido ou alterado.") from exception
+        actual = {
+            "profile_pk": profile.pk,
+            "user_type": profile.user_type,
+            "is_verified": profile.is_verified,
+            "username": profile.user.username,
+            "email": profile.user.email,
+            "first_name": profile.user.first_name,
+            "last_name": profile.user.last_name,
+            "is_active": profile.user.is_active,
+            "is_staff": profile.user.is_staff,
+            "is_superuser": profile.user.is_superuser,
+            "password": profile.user.password,
+            "user_permissions": tuple(
+                profile.user.user_permissions.order_by("pk").values_list("pk", flat=True)
+            ),
+            "groups": tuple(
+                profile.user.groups.order_by("pk").values_list("pk", flat=True)
+            ),
+        }
+        if actual != expected:
+            raise MasterResetError("Uma conta profissional aprovada foi alterada.")
+
+    if UserProfile.objects.filter(user_type="patient").exists():
+        raise MasterResetError("Ainda existem pacientes ou associações clínicas.")
 
     v1.refresh_from_db()
     if v1.status != v1.Status.ACTIVE or v1.memberships.count() != 255:
@@ -249,6 +341,9 @@ def perform_master_reset(actor):
             object_label="Master Reset",
             metadata={
                 "users_deleted": users_deleted,
+                "approved_professionals_preserved": approved_professionals_preserved,
+                "unapproved_professionals_deleted": unapproved_professionals_deleted,
+                "patients_deleted": patients_deleted,
                 "submissions_deleted": submissions_deleted,
                 "test_submissions_deleted": test_submissions_deleted,
                 "previous_active_normative_version": previous_active,

@@ -527,10 +527,513 @@
     ]
   },
   {
+    "id": "subs_use_lastyear_alc",
+    "label": "Álcool (etanol)",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Ocasionalmente (1 - 10 vezes em todo o ano)"
+      ],
+      [
+        "2",
+        "Uso mensal (pelo menos 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "4",
+        "Uso diário ou quase diário"
+      ],
+      [
+        "5",
+        "Uso diário ou quase diário, várias vezes por dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ],
+    "group_intro": "No último ano, selecione a frequência com que consumiu as seguintes substâncias. Por favor, considere apenas substâncias que NÃO lhe foram prescritas por um profissional de saúde OU que utilizou de uma forma DIFERENTE da prescrita."
+  },
+  {
+    "id": "subs_use_lastyear_can",
+    "label": "Cannabis (erva, marijuana, haxixe, ganza, óleo, etc)",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Ocasionalmente (1 - 10 vezes em todo o ano)"
+      ],
+      [
+        "2",
+        "Uso mensal (pelo menos 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "4",
+        "Uso diário ou quase diário"
+      ],
+      [
+        "5",
+        "Uso diário ou quase diário, várias vezes por dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_lastyear_nic",
+    "label": "Nicotina/Tabaco (cigarros, vaporizadores/cigarros eletrónicos, adesivos ou pastilhas de nicotina, medicação para deixar de fumar)",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Ocasionalmente (1 - 10 vezes em todo o ano)"
+      ],
+      [
+        "2",
+        "Uso mensal (pelo menos 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "4",
+        "Uso diário ou quase diário"
+      ],
+      [
+        "5",
+        "Uso diário ou quase diário, várias vezes por dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_lastyear_stimulant",
+    "label": "Estimulantes (cocaína, crack, catinonas/khat, metanfetaminas ou anfetaminas, como: speed, cristal, crystal meth, ice).",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Ocasionalmente (1 - 10 vezes em todo o ano)"
+      ],
+      [
+        "2",
+        "Uso mensal (pelo menos 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "4",
+        "Uso diário ou quase diário"
+      ],
+      [
+        "5",
+        "Uso diário ou quase diário, várias vezes por dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_lastyear_inal",
+    "label": "Inalantes (óxido nitroso, cola, combustível, diluentes, etc)",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Ocasionalmente (1 - 10 vezes em todo o ano)"
+      ],
+      [
+        "2",
+        "Uso mensal (pelo menos 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "4",
+        "Uso diário ou quase diário"
+      ],
+      [
+        "5",
+        "Uso diário ou quase diário, várias vezes por dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_lastyear_aluc",
+    "label": "Alucinogénios (LSD, ácido, cogumelos mágios, psilocibina, PCP/pó de anjo, Cetamina/Keta, ecstasy, etc)",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Ocasionalmente (1 - 10 vezes em todo o ano)"
+      ],
+      [
+        "2",
+        "Uso mensal (pelo menos 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "4",
+        "Uso diário ou quase diário"
+      ],
+      [
+        "5",
+        "Uso diário ou quase diário, várias vezes por dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_lastyear_opiod",
+    "label": "Opióides (heroína, ópio, fentanil, etc)",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Ocasionalmente (1 - 10 vezes em todo o ano)"
+      ],
+      [
+        "2",
+        "Uso mensal (pelo menos 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "4",
+        "Uso diário ou quase diário"
+      ],
+      [
+        "5",
+        "Uso diário ou quase diário, várias vezes por dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_lastyear_medicines",
+    "label": "Medicamentos não prescritos por médicos ou utilizados em quantidade fora do prescrito (ex: sedativos/ansiolíticos/benzodiazepinas/sonoríparos como Valium, Diazepam, etc; Estimulantes como Ritalina ou Concerta, etc; Opióides como Oxicodona, Metadona, Buprenorfina, etc)",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Ocasionalmente (1 - 10 vezes em todo o ano)"
+      ],
+      [
+        "2",
+        "Uso mensal (pelo menos 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "4",
+        "Uso diário ou quase diário"
+      ],
+      [
+        "5",
+        "Uso diário ou quase diário, várias vezes por dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_life_4",
+    "label": "Álcool",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Só para experimentar (1-3 vezes na vida)"
+      ],
+      [
+        "2",
+        "Ocasionalmente (menos de 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso mensal (em média 1 vez por mês)"
+      ],
+      [
+        "4",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "5",
+        "Uso quase diário ou diário"
+      ],
+      [
+        "6",
+        "Uso diário ou quase diário e várias vezes ao dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ],
+    "group_intro": "Ao longo de toda a sua vida, que frequência descreve melhor o seu consumo das seguintes substâncias?"
+  },
+  {
+    "id": "subs_use_life_24",
+    "label": "Cannabis",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Só para experimentar (1-3 vezes na vida)"
+      ],
+      [
+        "2",
+        "Ocasionalmente (menos de 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso mensal (em média 1 vez por mês)"
+      ],
+      [
+        "4",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "5",
+        "Uso quase diário ou diário"
+      ],
+      [
+        "6",
+        "Uso diário ou quase diário e várias vezes ao dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_life_25",
+    "label": "Nicotina/Tabaco",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Só para experimentar (1-3 vezes na vida)"
+      ],
+      [
+        "2",
+        "Ocasionalmente (menos de 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso mensal (em média 1 vez por mês)"
+      ],
+      [
+        "4",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "5",
+        "Uso quase diário ou diário"
+      ],
+      [
+        "6",
+        "Uso diário ou quase diário e várias vezes ao dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_life_26",
+    "label": "Estimulantes, inalantes, alucinogénicos ou opióides",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Só para experimentar (1-3 vezes na vida)"
+      ],
+      [
+        "2",
+        "Ocasionalmente (menos de 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso mensal (em média 1 vez por mês)"
+      ],
+      [
+        "4",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "5",
+        "Uso quase diário ou diário"
+      ],
+      [
+        "6",
+        "Uso diário ou quase diário e várias vezes ao dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "subs_use_life_27",
+    "label": "Medicamentos não prescritos por médicos ou utilizados em quantidades fora do prescrito",
+    "type": "radio",
+    "section": "Consumo de substâncias",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nunca"
+      ],
+      [
+        "1",
+        "Só para experimentar (1-3 vezes na vida)"
+      ],
+      [
+        "2",
+        "Ocasionalmente (menos de 1 vez por mês)"
+      ],
+      [
+        "3",
+        "Uso mensal (em média 1 vez por mês)"
+      ],
+      [
+        "4",
+        "Uso semanal (pelo menos 1 vez por semana)"
+      ],
+      [
+        "5",
+        "Uso quase diário ou diário"
+      ],
+      [
+        "6",
+        "Uso diário ou quase diário e várias vezes ao dia"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
     "id": "mental_diagnosis",
     "label": "Teve ou tem algum problema de saúde mental diagnosticado por um profissional de saúde como psiquiatra, psicólogo ou neurologista?",
     "type": "radio",
-    "section": "Dados Sociodemográficos",
+    "section": "Saúde Mental",
     "required": true,
     "choices": [
       [
@@ -544,6 +1047,490 @@
       [
         "3",
         "Sim, há mais de um ano"
+      ]
+    ]
+  },
+  {
+    "id": "mental_treatment",
+    "label": "À data de hoje, encontra-se em tratamento ou a ser seguido por algum profissional de saúde mental? Selecione todas as opções que se apliquem.",
+    "type": "checkbox",
+    "section": "Saúde Mental",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Não"
+      ],
+      [
+        "2",
+        "Sim, por um psicólogo"
+      ],
+      [
+        "3",
+        "Sim, por um psiquiatra"
+      ],
+      [
+        "4",
+        "Sim, com recurso a medicação psiquiátrica"
+      ],
+      [
+        "5",
+        "Sim, sendo que por vezes existe necessidade de hospitalização/internamento por agravamento do estado de saúde mental"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "mental_med",
+    "label": "Por favor, especifique qual a medicação e dosagem.",
+    "type": "text",
+    "section": "Saúde Mental",
+    "required": true,
+    "show_if_question": "mental_treatment",
+    "show_if_values": [
+      "4"
+    ]
+  },
+  {
+    "id": "treatment_access",
+    "label": "De uma forma geral, conseguiu (ou conseguiria) aceder a cuidados de saúde mental (consulta no psicólogo ou psiquiatra, tratamentos, medicação)?",
+    "type": "radio",
+    "section": "Saúde Mental",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sim"
+      ],
+      [
+        "2",
+        "Sim, mas com algumas dificuldades"
+      ],
+      [
+        "3",
+        "Não, apesar de ter tentado"
+      ],
+      [
+        "44",
+        "Não procurei ajuda, apesar de ter precisado"
+      ],
+      [
+        "55",
+        "Não procurei ajuda porque não precisei"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "insurance",
+    "label": "Tem algum seguro de saúde (por exemplo, ADSE, Multicare, Medis, Tranquilidade, Allians, SAMS)?",
+    "type": "radio",
+    "section": "Saúde Mental",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Não tenho seguro de saúde"
+      ],
+      [
+        "2",
+        "Tenho seguro de saúde, mas não cobre despesas relacionadas com saúde mental"
+      ],
+      [
+        "3",
+        "Tenho seguro de saúde que cobre despesas relacionadas com saúde mental"
+      ],
+      [
+        "0",
+        "Não tenho a certeza"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "absenteeism",
+    "label": "No último ano, faltou ao trabalho ou escola/faculdade devido a problemas de saúde mental?",
+    "type": "radio",
+    "section": "Saúde Mental",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Não"
+      ],
+      [
+        "2",
+        "Sim, 1-5 dias"
+      ],
+      [
+        "3",
+        "Sim, 6-15 dias"
+      ],
+      [
+        "4",
+        "Sim, mais de 15 dias"
+      ],
+      [
+        "0",
+        "Não aplicável (não trabalho e não estudo)"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "presenteeism",
+    "label": "No último ano, trabalhou ou estudou apesar de se sentir psicologicamente mal, com impacto no seu desempenho?",
+    "type": "radio",
+    "section": "Saúde Mental",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Não, nunca ou raramente."
+      ],
+      [
+        "2",
+        "Por vezes"
+      ],
+      [
+        "3",
+        "Bastantes vezes"
+      ],
+      [
+        "4",
+        "Frequentemente ou Sempre"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "life_events",
+    "label": "No último ano, experienciou alguma destas situações? Assinale todas as que se aplicam.",
+    "type": "checkbox",
+    "section": "Saúde Mental",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Dificuldades económicas recorrentes para pagar despesas essenciais (contas de luz, água, aquecimento, alimentação, etc)"
+      ],
+      [
+        "2",
+        "Insegurança habitacional (atraso no pagamento de renda ou conta, risco de perda, sobrelotação, ou outros)"
+      ],
+      [
+        "3",
+        "Insegurança laboral (salários em atraso, contratos precários ou temporários, sem proteção social em caso de despedimento, ou outros)"
+      ],
+      [
+        "4",
+        "Insegurança física (nos trajetos do dia-a-dia e locais que costuma frequentar)"
+      ],
+      [
+        "5",
+        "Desemprego"
+      ],
+      [
+        "6",
+        "Sobrecarga de cuidados a crianças, idosos ou pessoas dependentes"
+      ],
+      [
+        "7",
+        "Conflitos familiares ou relacionais persistentes"
+      ],
+      [
+        "8",
+        "Deficiência física, doença crónica ou problema de saúde grave (do próprio ou de pessoa próxima) com impacto na vida diária"
+      ],
+      [
+        "10",
+        "Luto"
+      ],
+      [
+        "11",
+        "Separação/divórcio"
+      ],
+      [
+        "12",
+        "Migração ou mudança de residência forçada"
+      ],
+      [
+        "13",
+        "Estigmatização (raça, género, idade, orientação sexual, condição social ou outra característica pessoal)"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ],
+      [
+        "0",
+        "Não experienciei nenhuma destas situações"
+      ]
+    ]
+  },
+  {
+    "id": "social_support",
+    "label": "Quantas pessoas considera fazerem parte da sua rede de apoio próxima - e que o poderiam ajudar - se tivesse um problema em que precisasse de ajuda urgente?",
+    "type": "radio",
+    "section": "Saúde Mental",
+    "required": true,
+    "choices": [
+      [
+        "0",
+        "Nenhuma"
+      ],
+      [
+        "1",
+        "1 pessoa"
+      ],
+      [
+        "2",
+        "2-4 pessoas"
+      ],
+      [
+        "3",
+        "5 ou mais pessoas"
+      ],
+      [
+        "9",
+        "Prefiro não responder"
+      ]
+    ]
+  },
+  {
+    "id": "Health",
+    "label": "Ao nível físico, possui alguma condição de saúde diagnosticada (por exemplo, problemas cardíacos ou respiratórios; doenças musculoesqueléticas; doenças endócrinas e/ou metabólicas; doenças autoimunes; ou doença oncológica)?",
+    "type": "radio",
+    "section": "Estado de saúde física",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sim"
+      ],
+      [
+        "2",
+        "Sim, mais do que uma condição diagnosticada"
+      ],
+      [
+        "3",
+        "Não"
+      ]
+    ]
+  },
+  {
+    "id": "Diagnosis",
+    "label": "O seu diagnóstico (ao nível da saúde física) é de carácter:",
+    "type": "radio",
+    "section": "Estado de saúde física",
+    "required": true,
+    "show_if_question": "Health",
+    "show_if_values": [
+      "1",
+      "2"
+    ],
+    "choices": [
+      [
+        "1",
+        "Agudo (i.e., o quadro clínico finda aquando do término do tratamento)"
+      ],
+      [
+        "2",
+        "Crónico (i.e., realiza um tratamento contínuo para gerir o quadro clínico)"
+      ],
+      [
+        "3",
+        "Outro"
+      ]
+    ]
+  },
+  {
+    "id": "Diagnosis_descript",
+    "label": "Por favor, especifique o(s) seu(s) diagnóstico(s).",
+    "type": "text",
+    "section": "Estado de saúde física",
+    "required": true,
+    "show_if_question": "Health",
+    "show_if_values": [
+      "1",
+      "2"
+    ]
+  },
+  {
+    "id": "Diagnosis_onset",
+    "label": "Há quanto tempo foi diagnosticado/a com a sua condição de saúde?",
+    "type": "radio",
+    "section": "Estado de saúde física",
+    "required": true,
+    "show_if_question": "Health",
+    "show_if_values": [
+      "1",
+      "2"
+    ],
+    "choices": [
+      [
+        "1",
+        "Menos de 3 meses"
+      ],
+      [
+        "2",
+        "Há cerca de 6 meses"
+      ],
+      [
+        "3",
+        "Há cerca de 9 meses"
+      ],
+      [
+        "4",
+        "Há cerca de 1 ano"
+      ],
+      [
+        "5",
+        "Há cerca de 3 anos"
+      ],
+      [
+        "6",
+        "Há cerca de 5 anos"
+      ],
+      [
+        "7",
+        "Há mais de 5 anos"
+      ]
+    ]
+  },
+  {
+    "id": "Diagnosis_med",
+    "label": "Toma alguma medicação ou realiza tratamentos para a sua condição de saúde física?",
+    "type": "radio",
+    "section": "Estado de saúde física",
+    "required": true,
+    "show_if_question": "Health",
+    "show_if_values": [
+      "1",
+      "2"
+    ],
+    "choices": [
+      [
+        "1",
+        "Sim"
+      ],
+      [
+        "2",
+        "Não"
+      ]
+    ]
+  },
+  {
+    "id": "Diagnosis_med_name",
+    "label": "Por favor, especifique qual(quais) medicamento(s)/tratamento(s) prescritos para a sua condição de saúde física e, sempre que possível, especifique a dosagem.",
+    "type": "text",
+    "section": "Estado de saúde física",
+    "required": true,
+    "show_if_question": "Diagnosis_med",
+    "show_if_values": [
+      "1"
+    ]
+  },
+  {
+    "id": "Diagnosis_med_freq",
+    "label": "Com que frequência toma alguma medicação ou realiza um tratamento para a sua condição de saúde física?",
+    "type": "radio",
+    "section": "Estado de saúde física",
+    "required": true,
+    "show_if_question": "Diagnosis_med",
+    "show_if_values": [
+      "1"
+    ],
+    "choices": [
+      [
+        "1",
+        "Várias vezes ao dia"
+      ],
+      [
+        "2",
+        "Todos os dias"
+      ],
+      [
+        "3",
+        "Várias vezes por semana"
+      ],
+      [
+        "4",
+        "Uma vez por semana"
+      ],
+      [
+        "5",
+        "Várias vezes por mês"
+      ],
+      [
+        "6",
+        "Uma vez por mês"
+      ],
+      [
+        "7",
+        "De 3 em 3 meses"
+      ],
+      [
+        "8",
+        "De 6 em 6 meses"
+      ],
+      [
+        "9",
+        "Uma vez ao ano"
+      ],
+      [
+        "10",
+        "Outra"
+      ]
+    ]
+  },
+  {
+    "id": "Diagnosis_med_freq_other",
+    "label": "Indique a frequência do tratamento",
+    "type": "text",
+    "section": "Estado de saúde física",
+    "required": true,
+    "show_if_question": "Diagnosis_med_freq",
+    "show_if_values": [
+      "10"
+    ]
+  },
+  {
+    "id": "Medication_regular",
+    "label": "Além da medicação que descreveu previamente, toma regularmente outro tipo de medicação e/ou suplementação (melatonina, valdispert, teanina, etc)? Descreva brevemente os outros tipos de medicação e/ou suplementação que toma regularmente. Deverá referir qual a substância ou medicação que utiliza, a dosagem e com que frequência utiliza (exemplo: Terazosina 100 mg, 1x por dia).",
+    "type": "text",
+    "section": "Estado de saúde física",
+    "required": false
+  },
+  {
+    "id": "Answer_validation",
+    "label": "Por fim, é de extrema importância para a nossa investigação incluir apenas respostas de pessoas que dedicaram esforço e atenção ao preenchimento do questionário. Caso contrário, anos de esforço, dos investigadores e outros participantes, podem ser desperdiçados ou devolver dados incorretos na área de investigação da saúde mental. Na sua opinião, devemos incluir as suas respostas neste estudo porque as mesmas foram honestas? Não há qualquer consequência se considerar que não o devemos fazer. Agradecemos a sua honestidade.",
+    "type": "radio",
+    "section": "Validação respostas",
+    "required": true,
+    "choices": [
+      [
+        "1",
+        "Sim"
+      ],
+      [
+        "0",
+        "Não"
       ]
     ]
   }

@@ -100,23 +100,7 @@
 
     <br>
 
-    <!-- PROGRESS BAR -->
-    <div style="width: 100%; background-color: #e0e0e0; margin-bottom: 20px;">
-        <div style="
-            width: {{ progress }}%;
-            background-color: #9ec9ff;
-            height: 10px;
-            transition: width 0.3s ease;">
-        </div>
-    </div>
-
-    <p style="text-align: center;">
-        {% if page_number <= num_pages %}
-            Página {{ page_number }} de {{ num_pages }}
-        {% else %}
-            Página final
-        {% endif %}
-    </p>
+    {% include "polls/components/questionnaire_progress.html" with current_page=page_number total_pages=num_pages progress_percent=progress %}
 
 </form>
 

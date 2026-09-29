@@ -130,6 +130,10 @@
             {{ submit_label|default:"Enviar" }}
         </button>
 
+        <br><br>
+
+        {% include "polls/components/questionnaire_progress.html" with current_page=section_index|add:1 total_pages=section_total progress_percent=progress %}
+
     </form>
 
 </div>

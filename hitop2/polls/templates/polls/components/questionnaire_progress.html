@@ -1,0 +1,19 @@
+<div data-questionnaire-progress
+     role="progressbar"
+     aria-label="Progresso do questionário"
+     aria-valuemin="0"
+     aria-valuemax="100"
+     aria-valuenow="{{ progress_percent }}"
+     style="width: 100%; background-color: #e0e0e0; margin-bottom: 20px;">
+    <div data-progress-value="{{ progress_percent }}"
+         style="width: {{ progress_percent }}%; background-color: #9ec9ff; height: 10px; transition: width 0.3s ease;">
+    </div>
+</div>
+
+<p class="text-center mb-0">
+    {% if current_page <= total_pages %}
+        Página {{ current_page }} de {{ total_pages }}
+    {% else %}
+        Página final
+    {% endif %}
+</p>

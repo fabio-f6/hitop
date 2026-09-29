@@ -35,6 +35,36 @@ from .normative_export import (
 from .socio_config import SOCIO_QUESTIONS
 
 
+PDF_SOCIODEMOGRAPHIC_STRUCTURE = {
+    "Dados Sociodemográficos": (
+        "age", "country_born", "country_residence", "PT_residence_years",
+        "PT_residence_years_other", "PT_lang", "PT_residence_region",
+        "freguesia", "urbanicity", "race", "gender", "sex", "education",
+        "employment", "socioeconomic", "income", "marital_status",
+        "household_adults", "household_children", "spirituality",
+    ),
+    "Consumo de substâncias": (
+        "subs_use_lastyear_alc", "subs_use_lastyear_can",
+        "subs_use_lastyear_nic", "subs_use_lastyear_stimulant",
+        "subs_use_lastyear_inal", "subs_use_lastyear_aluc",
+        "subs_use_lastyear_opiod", "subs_use_lastyear_medicines",
+        "subs_use_life_4", "subs_use_life_24", "subs_use_life_25",
+        "subs_use_life_26", "subs_use_life_27",
+    ),
+    "Saúde Mental": (
+        "mental_diagnosis", "mental_treatment", "mental_med",
+        "treatment_access", "insurance", "absenteeism", "presenteeism",
+        "life_events", "social_support",
+    ),
+    "Estado de saúde física": (
+        "Health", "Diagnosis", "Diagnosis_descript", "Diagnosis_onset",
+        "Diagnosis_med", "Diagnosis_med_name", "Diagnosis_med_freq",
+        "Diagnosis_med_freq_other", "Medication_regular",
+    ),
+    "Validação respostas": ("Answer_validation",),
+}
+
+
 class QuestionnaireSubmissionNormativeStatusTests(TestCase):
     def setUp(self):
         self.patient = User.objects.create_user(username="normative-status-patient")
@@ -390,6 +420,30 @@ class PatientQuestionnaireFlowTests(TestCase):
             question_id="obsolete_question"
         ).is_active)
 
+    def test_pdf_questions_are_complete_and_in_the_expected_block_order(self):
+        configured_structure = {}
+        for question in SOCIO_QUESTIONS:
+            configured_structure.setdefault(question["section"], []).append(
+                question["id"]
+            )
+
+        self.assertEqual(
+            list(configured_structure),
+            list(PDF_SOCIODEMOGRAPHIC_STRUCTURE),
+        )
+        self.assertEqual(
+            configured_structure,
+            {
+                section: list(question_ids)
+                for section, question_ids in PDF_SOCIODEMOGRAPHIC_STRUCTURE.items()
+            },
+        )
+        self.assertEqual(len(SOCIO_QUESTIONS), 52)
+        self.assertEqual(
+            PDF_SOCIODEMOGRAPHIC_STRUCTURE["Validação respostas"],
+            ("Answer_validation",),
+        )
+
     def test_uuid_flow_resumes_and_new_submission_asks_again(self):
         first = self.make_submission()
         SociodemographicAnswer.objects.create(
@@ -404,17 +458,42 @@ class PatientQuestionnaireFlowTests(TestCase):
             is_active=True
         ).order_by("order"))
         section_names = list(dict.fromkeys(q.section for q in questions))
-        self.assertEqual(section_names, ["Dados Sociodemográficos"])
+        self.assertEqual(section_names, list(PDF_SOCIODEMOGRAPHIC_STRUCTURE))
 
+        first_section_questions = [
+            question for question in questions
+            if question.section == section_names[0]
+        ]
         response = self.client.post(
             reverse("polls:sociodemographic") + "?section=0",
-            self.section_data(questions),
+            self.section_data(first_section_questions),
         )
         self.assertRedirects(
             response,
-            reverse("polls:questionnaire"),
+            reverse("polls:sociodemographic") + "?section=1",
             fetch_redirect_response=False,
         )
+        response = self.open_link(first)
+        self.assertContains(response, "Consumo de substâncias")
+
+        response = self.client.get(
+            reverse("polls:sociodemographic") + "?section=0"
+        )
+        age = DynamicQuestion.objects.get(question_id="age")
+        self.assertEqual(response.context["answers"][age.id], "33")
+
+        for index, section_name in enumerate(section_names[1:], start=1):
+            section_questions = [
+                question for question in questions
+                if question.section == section_name
+            ]
+            response = self.client.post(
+                reverse("polls:sociodemographic") + f"?section={index}",
+                self.section_data(section_questions),
+            )
+            self.assertEqual(response.status_code, 302)
+
+        self.assertEqual(response.url, reverse("polls:questionnaire"))
 
         first.refresh_from_db()
         self.assertTrue(first.sociodemographic_completed)
@@ -440,19 +519,118 @@ class PatientQuestionnaireFlowTests(TestCase):
         submission = self.make_submission()
         self.open_link(submission)
 
-        response = self.client.post(
-            reverse("polls:sociodemographic") + "?section=0", {},
-        )
-        self.assertRedirects(
-            response,
-            reverse("polls:questionnaire"),
-            fetch_redirect_response=False,
-        )
+        for index in range(len(PDF_SOCIODEMOGRAPHIC_STRUCTURE)):
+            response = self.client.post(
+                reverse("polls:sociodemographic") + f"?section={index}", {},
+            )
+            self.assertEqual(response.status_code, 302)
 
         submission.refresh_from_db()
         self.assertTrue(submission.sociodemographic_completed)
-        self.assertEqual(submission.sociodemographic_step, 1)
+        self.assertEqual(
+            submission.sociodemographic_step,
+            len(PDF_SOCIODEMOGRAPHIC_STRUCTURE),
+        )
         self.assertFalse(DynamicAnswer.objects.filter(submission=submission).exists())
+
+    def test_progress_matches_the_current_block(self):
+        submission = self.make_submission()
+        response = self.open_link(submission)
+
+        self.assertEqual(response.context["progress"], 20)
+        self.assertContains(response, 'data-progress-value="20.0"')
+        self.assertContains(response, "Página 1 de 5")
+
+        questions = DynamicQuestion.objects.filter(
+            is_active=True,
+            section="Dados Sociodemográficos",
+        ).order_by("order")
+        self.client.post(
+            reverse("polls:sociodemographic") + "?section=0",
+            self.section_data(questions),
+        )
+        response = self.client.get(
+            reverse("polls:sociodemographic") + "?section=1"
+        )
+
+        self.assertEqual(response.context["progress"], 40)
+        self.assertContains(response, 'data-progress-value="40.0"')
+        self.assertContains(response, "Página 2 de 5")
+
+    def test_conditional_mental_medication_is_required_when_selected(self):
+        submission = self.make_submission()
+        self.open_link(submission)
+        sections = list(PDF_SOCIODEMOGRAPHIC_STRUCTURE)
+
+        for index in range(2):
+            questions = DynamicQuestion.objects.filter(
+                is_active=True,
+                section=sections[index],
+            ).order_by("order")
+            self.client.post(
+                reverse("polls:sociodemographic") + f"?section={index}",
+                self.section_data(questions),
+            )
+
+        questions = list(DynamicQuestion.objects.filter(
+            is_active=True,
+            section="Saúde Mental",
+        ).order_by("order"))
+        data = self.section_data(questions)
+        treatment = DynamicQuestion.objects.get(question_id="mental_treatment")
+        medication = DynamicQuestion.objects.get(question_id="mental_med")
+        data[f"question_{treatment.id}"] = ["4"]
+        data.pop(f"question_{medication.id}")
+
+        response = self.client.post(
+            reverse("polls:sociodemographic") + "?section=2",
+            data,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Revise as respostas obrigatórias")
+        self.assertFalse(DynamicAnswer.objects.filter(
+            submission=submission,
+            question=medication,
+        ).exists())
+
+    def test_hidden_physical_health_questions_are_not_required(self):
+        submission = self.make_submission()
+        self.open_link(submission)
+        sections = list(PDF_SOCIODEMOGRAPHIC_STRUCTURE)
+
+        for index in range(3):
+            questions = DynamicQuestion.objects.filter(
+                is_active=True,
+                section=sections[index],
+            ).order_by("order")
+            self.client.post(
+                reverse("polls:sociodemographic") + f"?section={index}",
+                self.section_data(questions),
+            )
+
+        questions = list(DynamicQuestion.objects.filter(
+            is_active=True,
+            section="Estado de saúde física",
+        ).order_by("order"))
+        data = self.section_data(questions)
+        health = DynamicQuestion.objects.get(question_id="Health")
+        data[f"question_{health.id}"] = "3"
+
+        response = self.client.post(
+            reverse("polls:sociodemographic") + "?section=3",
+            data,
+        )
+
+        self.assertRedirects(
+            response,
+            reverse("polls:sociodemographic") + "?section=4",
+            fetch_redirect_response=False,
+        )
+        self.assertFalse(DynamicAnswer.objects.filter(
+            submission=submission,
+            question__question_id="Diagnosis",
+        ).exists())
 
     @override_settings(SOCIODEMOGRAPHIC_REQUIRE_ANSWERS=True)
     def test_required_mode_blocks_blank_section(self):

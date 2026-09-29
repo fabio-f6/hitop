@@ -13,25 +13,29 @@
         <p class="text-uppercase fw-bold text-danger mb-2">Zona de perigo</p>
         <h1 class="h2 fw-bold mb-3">Confirmar Master Reset</h1>
         <p>
-            Esta ação elimina definitivamente todos os outros utilizadores, todas as aplicações de
-            questionários e todas as respostas clínicas e sociodemográficas. Não existe undo.
+            Esta ação elimina definitivamente toda a atividade clínica acumulada e os ambientes de
+            teste. As contas dos profissionais aprovados permanecem, mas regressam a um ambiente
+            clínico vazio. Não existe undo.
         </p>
 
         <div class="row g-4 my-2">
             <div class="col-md-6">
                 <h2 class="h5 fw-bold">Serão eliminados</h2>
                 <dl>
-                    <div class="d-flex justify-content-between border-bottom py-2"><dt>Utilizadores</dt><dd class="mb-0">{{ preview.users }}</dd></div>
-                    <div class="d-flex justify-content-between border-bottom py-2"><dt>Aplicações</dt><dd class="mb-0">{{ preview.submissions }}</dd></div>
-                    <div class="d-flex justify-content-between py-2"><dt>Aplicações de teste</dt><dd class="mb-0">{{ preview.test_submissions }}</dd></div>
+                    <div class="d-flex justify-content-between border-bottom py-2"><dt>Pacientes e associações</dt><dd class="mb-0">{{ preview.patients_deleted }}</dd></div>
+                    <div class="d-flex justify-content-between border-bottom py-2"><dt>Profissionais não aprovados</dt><dd class="mb-0">{{ preview.unapproved_professionals_deleted }}</dd></div>
+                    <div class="d-flex justify-content-between border-bottom py-2"><dt>Total de contas eliminadas</dt><dd class="mb-0">{{ preview.users_deleted }}</dd></div>
+                    <div class="d-flex justify-content-between border-bottom py-2"><dt>Submissões e respostas</dt><dd class="mb-0">{{ preview.submissions }}</dd></div>
+                    <div class="d-flex justify-content-between py-2"><dt>Submissões de teste</dt><dd class="mb-0">{{ preview.test_submissions }}</dd></div>
                 </dl>
             </div>
             <div class="col-md-6">
                 <h2 class="h5 fw-bold">Serão preservados</h2>
                 <dl>
                     <div class="d-flex justify-content-between border-bottom py-2"><dt>A sua conta</dt><dd class="mb-0">{{ preview.actor_username }}</dd></div>
+                    <div class="d-flex justify-content-between border-bottom py-2"><dt>Profissionais aprovados</dt><dd class="mb-0">{{ preview.approved_professionals_preserved }}</dd></div>
                     <div class="d-flex justify-content-between border-bottom py-2"><dt>Auditoria</dt><dd class="mb-0">Preservada</dd></div>
-                    <div class="d-flex justify-content-between py-2"><dt>Dados normativos</dt><dd class="mb-0">Preservados</dd></div>
+                    <div class="d-flex justify-content-between py-2"><dt>Bases normativas de produção</dt><dd class="mb-0">Preservadas</dd></div>
                 </dl>
                 <p class="mb-0"><strong>Versão após reset:</strong> {{ preview.normative_version }} — {{ preview.normative_participants }} participantes</p>
             </div>
