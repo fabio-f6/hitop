@@ -56,6 +56,17 @@
 
         </div>
 
+        <div class="form-check mb-3">
+            {{ form.no_identifying_data_confirmed }}
+            <label
+                class="form-check-label"
+                for="{{ form.no_identifying_data_confirmed.id_for_label }}"
+            >
+                {{ form.no_identifying_data_confirmed.label }}
+            </label>
+            {{ form.no_identifying_data_confirmed.errors }}
+        </div>
+
         <button
             type="submit"
             class="btn rounded-0"

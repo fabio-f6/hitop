@@ -205,6 +205,9 @@ def _create_submission(form, patient_profile, environment):
         submission = QuestionnaireSubmission.objects.create(
             user=patient_profile.user, questionnaire_type="hitop", title=title,
             completed=False, is_open=True,
+            no_identifying_data_confirmed=form.cleaned_data[
+                "no_identifying_data_confirmed"
+            ],
             is_test_data=environment.is_test_environment, **configuration,
         )
         if get_or_assign_report_normative_version(submission) is None:

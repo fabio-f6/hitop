@@ -237,6 +237,11 @@ class QuestionnaireSubmission(models.Model):
         db_index=True,
     )
 
+    no_identifying_data_confirmed = models.BooleanField(
+        default=False,
+        verbose_name="ausência de dados identificativos confirmada",
+    )
+
     spectra = models.ManyToManyField(
         Spectra,
         blank=True

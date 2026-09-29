@@ -87,6 +87,7 @@ class SimulationInterfaceTests(TestCase):
         data = {
             "title": "Simulação configurada",
             "spectra": [self.spectrum.id],
+            "no_identifying_data_confirmed": "on",
             "simulation_mode": "simulated",
             "sociodemographic_simulation_mode": "ineligible_mental_health",
             "simulation_response_profile": "high",
@@ -231,6 +232,7 @@ class SimulationInterfaceTests(TestCase):
             data={
                 "title": "Legacy nulls",
                 "spectra": [self.spectrum.id],
+                "no_identifying_data_confirmed": True,
                 "simulation_mode": "simulated_nulls",
                 "sociodemographic_simulation_mode": "normal",
                 "simulation_response_profile": "random",
@@ -248,6 +250,7 @@ class SimulationInterfaceTests(TestCase):
             data={
                 "title": "Legacy simulated",
                 "spectra": [self.spectrum.id],
+                "no_identifying_data_confirmed": True,
                 "simulation_mode": "simulated",
             },
             allow_simulation=True,

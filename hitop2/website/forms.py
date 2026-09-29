@@ -207,6 +207,15 @@ class SignUpForm(UserCreationForm):
 
 class CreatePatientForm(SimulationConfigurationMixin, UserCreationForm):
 
+    no_identifying_data_confirmed = forms.BooleanField(
+        label=(
+            "Confirmo que não incluí em nenhum campo dados que permitam "
+            "identificar o paciente."
+        ),
+        required=True,
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+    )
+
     username = forms.CharField(
         label="ID de Utilizador",
         required=False,
@@ -315,6 +324,15 @@ class CreatePatientForm(SimulationConfigurationMixin, UserCreationForm):
 
 
 class NewQuestionnaireForm(SimulationConfigurationMixin, forms.Form):
+    no_identifying_data_confirmed = forms.BooleanField(
+        label=(
+            "Confirmo que não incluí em nenhum campo dados que permitam "
+            "identificar o paciente."
+        ),
+        required=True,
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+    )
+
     title = forms.CharField(
         label="Descrição da aplicação",
         max_length=255,
@@ -340,6 +358,7 @@ class NewQuestionnaireForm(SimulationConfigurationMixin, forms.Form):
                 "title",
                 *self.simulation_field_names,
                 "spectra",
+                "no_identifying_data_confirmed",
             ))
 
 class EditPatientForm(forms.ModelForm):

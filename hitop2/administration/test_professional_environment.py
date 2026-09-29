@@ -325,6 +325,7 @@ class ProfessionalSimulationBoundaryTests(
             {
                 "title": "Attempted manual simulation",
                 "spectra": [self.spectrum.id],
+                "no_identifying_data_confirmed": "on",
                 "simulation_mode": "simulated",
                 "sociodemographic_simulation_mode": "eligible",
                 "simulation_response_profile": "high",
@@ -405,6 +406,7 @@ class ProfessionalTestEnvironmentWorkflowTests(
         response = self.client.post(url, {
             "title": "Configured administrator simulation",
             "spectra": [self.spectrum.id],
+            "no_identifying_data_confirmed": "on",
             "simulation_mode": "simulated",
             "sociodemographic_simulation_mode": "normal",
             "simulation_response_profile": "high",
