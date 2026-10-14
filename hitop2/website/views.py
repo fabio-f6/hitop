@@ -2,6 +2,7 @@ from collections import defaultdict
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import IntegrityError, transaction
 from django.db.models import Count, Max, Q
@@ -60,6 +61,8 @@ from .decorators import (
 )
 from administration.audit import record_admin_action
 from administration.models import AdministrativeAuditLog
+from email_notifications.forms import EmailNotificationPreferencesForm
+from email_notifications.services import notify_professional_registration, preferences_for
 
 
 @researcher_required
@@ -352,18 +355,19 @@ def register_user(request):
                 return username_unavailable(request)
 
             try:
-                user.save()
+                with transaction.atomic():
+                    user.save()
+                    # atualiza o perfil que já foi criado automaticamente
+                    profile = user.userprofile
+                    profile.user_type = 'professional'  # apenas profissionais podem registrar
+                    profile.is_verified = False
+                    profile.area_formacao = form.cleaned_data['area_formacao']
+                    profile.objetivo_uso = form.cleaned_data['objetivo_uso']
+                    profile.cedula_profissional = form.cleaned_data['cedula_profissional']
+                    profile.save()
+                    notify_professional_registration(profile)
             except IntegrityError:
                 return username_unavailable(request)
-
-            # atualiza o perfil que já foi criado automaticamente
-            profile = user.userprofile
-            profile.user_type = 'professional'  # apenas profissionais podem registrar
-            profile.is_verified = False
-            profile.area_formacao = form.cleaned_data['area_formacao']
-            profile.objetivo_uso = form.cleaned_data['objetivo_uso']
-            profile.cedula_profissional = form.cleaned_data['cedula_profissional']
-            profile.save()
 
             messages.success(
                 request,
@@ -377,6 +381,35 @@ def register_user(request):
         form = SignUpForm()
 
     return render(request, 'website/register.html', {'form': form})
+
+
+@login_required(login_url="website:home")
+def notification_preferences(request):
+    preferences = preferences_for(request.user)
+    profile = request.user.userprofile
+    form = EmailNotificationPreferencesForm(request.POST or None, instance=preferences)
+
+    visible_fields = set()
+    if profile.user_type == "admin":
+        visible_fields.add("professional_registration")
+    elif profile.user_type == "professional":
+        visible_fields.add("questionnaire_completed")
+        if profile.is_researcher:
+            visible_fields.add("collection_daily_summary")
+
+    for field_name in list(form.fields):
+        if field_name != "email_notifications_enabled" and field_name not in visible_fields:
+            form.fields.pop(field_name)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Preferências de notificações guardadas com sucesso.")
+        return redirect("website:notification_preferences")
+
+    return render(request, "website/notification_preferences.html", {
+        "form": form,
+        "profile": profile,
+    })
 
 @verified_professional_required
 def create_patient(request):

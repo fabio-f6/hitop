@@ -1,0 +1,13 @@
+HiTOP Platform
+
+Resumo diário das suas Coletas Gerais
+
+As suas Coletas Gerais receberam novas participações concluídas em {{ digest_date }}.
+{% for collection in collections %}
+{{ collection.name }}
+Novas submissões concluídas: {{ collection.new_count }}
+Total de submissões concluídas: {{ collection.total_count }}
+{% endfor %}
+Consultar Coletas Gerais: {{ action_url }}
+
+Gerir preferências de notificações: {{ preferences_url }}

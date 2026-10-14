@@ -1,0 +1,9 @@
+HiTOP Platform
+
+Questionário clínico concluído
+
+Uma aplicação clínica associada a um dos seus pacientes foi concluída. Os resultados podem ser consultados, após autenticação, na plataforma.
+
+Consultar aplicações: {{ action_url }}
+
+Gerir preferências de notificações: {{ preferences_url }}

@@ -30,6 +30,7 @@ from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from website.decorators import collection_owner_is_authorized
+from email_notifications.services import notify_questionnaire_completed
 
 
 answer_choices = [
@@ -204,12 +205,17 @@ def questionnaire(request):
             request.session.pop('submission_id', None)
             request.session.pop('submission_access_token', None)
 
-            submission.completed = True
-            submission.completed_at = timezone.now()
-            submission.is_open = False
-            submission.save()
-
-            process_normative_eligibility(submission)
+            with transaction.atomic():
+                submission = QuestionnaireSubmission.objects.select_for_update().get(
+                    pk=submission.pk
+                )
+                if not submission.completed:
+                    submission.completed = True
+                    submission.completed_at = timezone.now()
+                    submission.is_open = False
+                    submission.save(update_fields=["completed", "completed_at", "is_open"])
+                    process_normative_eligibility(submission)
+                    notify_questionnaire_completed(submission)
 
             return redirect("polls:thank_you")
 

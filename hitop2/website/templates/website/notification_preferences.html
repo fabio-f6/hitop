@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-3" style="max-width:760px; margin:0 auto;">
+    <div class="mb-4">
+        <h1 class="h2 fw-bold mb-2">Preferências de Notificações</h1>
+        <p class="text-secondary mb-0">Escolha as comunicações opcionais que pretende receber por e-mail.</p>
+    </div>
+
+    <form method="post" class="border bg-white p-4">
+        {% csrf_token %}
+        <h2 class="h5 fw-bold mb-3">Notificações por e-mail</h2>
+        <div class="form-check mb-4">
+            {{ form.email_notifications_enabled }}
+            <label class="form-check-label" for="{{ form.email_notifications_enabled.id_for_label }}">
+                <strong>Receber notificações por e-mail</strong>
+                <span class="d-block text-secondary">Ativar as notificações opcionais selecionadas abaixo.</span>
+            </label>
+        </div>
+
+        {% if form.professional_registration or form.questionnaire_completed or form.collection_daily_summary %}
+            <hr>
+            <h2 class="h5 fw-bold my-3">Notificações disponíveis</h2>
+        {% endif %}
+
+        {% if form.professional_registration %}
+            <div class="form-check mb-3">
+                {{ form.professional_registration }}
+                <label class="form-check-label" for="{{ form.professional_registration.id_for_label }}">
+                    <strong>Novos registos profissionais</strong>
+                    <span class="d-block text-secondary">Receber um e-mail quando um novo profissional solicitar acesso à plataforma.</span>
+                </label>
+            </div>
+        {% endif %}
+        {% if form.questionnaire_completed %}
+            <div class="form-check mb-3">
+                {{ form.questionnaire_completed }}
+                <label class="form-check-label" for="{{ form.questionnaire_completed.id_for_label }}">
+                    <strong>Questionários concluídos</strong>
+                    <span class="d-block text-secondary">Receber um e-mail quando um paciente concluir uma aplicação clínica.</span>
+                </label>
+            </div>
+        {% endif %}
+        {% if form.collection_daily_summary %}
+            <div class="form-check mb-3">
+                {{ form.collection_daily_summary }}
+                <label class="form-check-label" for="{{ form.collection_daily_summary.id_for_label }}">
+                    <strong>Resumos diários das Coletas Gerais</strong>
+                    <span class="d-block text-secondary">Receber um resumo diário das novas participações concluídas nas suas Coletas Gerais.</span>
+                </label>
+            </div>
+        {% endif %}
+
+        <hr>
+        <div class="mb-4">
+            <h2 class="h5 fw-bold">Comunicações essenciais</h2>
+            <p class="text-secondary mb-0">
+                Pode desativar as notificações opcionais. As comunicações essenciais relacionadas com a aprovação ou rejeição da sua conta continuarão a ser enviadas.
+            </p>
+        </div>
+
+        {% if form.errors %}
+            <div class="alert alert-danger rounded-0">Não foi possível guardar as preferências. Reveja os campos apresentados.</div>
+        {% endif %}
+        <button type="submit" class="btn rounded-0" style="background:#e2f0ff; border:1px solid #9ec9ff; color:black; padding:8px 18px;">
+            Guardar alterações
+        </button>
+    </form>
+</section>
+{% endblock %}

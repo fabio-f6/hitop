@@ -1,0 +1,9 @@
+HiTOP Platform
+
+Conta aprovada
+
+O seu pedido de registo foi aprovado. Já pode iniciar sessão e utilizar a plataforma.
+
+Iniciar sessão: {{ login_url }}
+
+Esta é uma comunicação essencial relativa ao estado da sua conta.

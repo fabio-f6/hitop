@@ -101,6 +101,11 @@ urlpatterns = [
         name="approve_professional",
     ),
     path(
+        "professionals/<int:professional_id>/reject/",
+        views.reject_professional,
+        name="reject_professional",
+    ),
+    path(
         "professionals/<int:professional_id>/researcher/",
         views.update_professional_researcher,
         name="update_professional_researcher",

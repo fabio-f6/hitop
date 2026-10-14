@@ -111,6 +111,12 @@
                     Aprovar profissional
                 </button>
             </form>
+            <form method="post" action="{% url 'administration:reject_professional' professional.id %}" class="mt-2">
+                {% csrf_token %}
+                <button type="submit" class="btn rounded-0" style="background:#ffffff; border:1px solid red; color:red;">
+                    Rejeitar pedido
+                </button>
+            </form>
         </article>
     {% elif professional.user.is_active and professional.is_verified %}
         <article class="border p-4">
@@ -126,9 +132,13 @@
                 Retirar acesso
             </a>
         </article>
-    {% else %}
+    {% elif professional.is_verified %}
         <div class="mb-0 p-3" style="background:#fafafa; border:1px solid #bbb; color:#555;">
             Este profissional foi anteriormente aprovado, mas já não pode autenticar-se na plataforma.
+        </div>
+    {% else %}
+        <div class="mb-0 p-3" style="background:#fafafa; border:1px solid #bbb; color:#555;">
+            Este pedido de registo não foi aprovado e a conta encontra-se inativa.
         </div>
     {% endif %}
 </section>

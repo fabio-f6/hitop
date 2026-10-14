@@ -13,6 +13,10 @@ class AdministrativeAuditLog(models.Model):
             "professional.approved",
             "Profissional aprovado",
         )
+        PROFESSIONAL_REJECTED = (
+            "professional.rejected",
+            "Pedido profissional rejeitado",
+        )
         PROFESSIONAL_ACCESS_REVOKED = (
             "professional.access_revoked",
             "Acesso de profissional retirado",

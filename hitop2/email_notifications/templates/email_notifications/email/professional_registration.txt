@@ -1,0 +1,9 @@
+HiTOP Platform
+
+Novo registo profissional
+
+{{ professional_name }} submeteu um pedido de acesso profissional, que aguarda verificação.
+
+Consultar pedido: {{ action_url }}
+
+Gerir preferências de notificações: {{ preferences_url }}

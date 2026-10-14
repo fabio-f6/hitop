@@ -34,6 +34,21 @@ def approve_professional(professional_id):
 
 
 @transaction.atomic
+def reject_professional(professional_id):
+    """Deactivate a genuinely pending professional registration."""
+    professional = _get_locked_professional(professional_id)
+    if professional.is_verified:
+        raise ProfessionalStateError(
+            "Um profissional já aprovado não pode ser rejeitado como pedido pendente."
+        )
+    if not professional.user.is_active:
+        return professional, False
+    professional.user.is_active = False
+    professional.user.save(update_fields=["is_active"])
+    return professional, True
+
+
+@transaction.atomic
 def withdraw_professional_access(professional_id):
     """Disable login for a previously verified professional without deleting it."""
     professional = _get_locked_professional(professional_id)

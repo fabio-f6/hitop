@@ -8,6 +8,10 @@ _ALLOWED_METADATA_KEYS = {
         "previous_is_verified",
         "new_is_verified",
     },
+    AdministrativeAuditLog.Action.PROFESSIONAL_REJECTED: {
+        "previous_is_active",
+        "new_is_active",
+    },
     AdministrativeAuditLog.Action.PROFESSIONAL_ACCESS_REVOKED: {
         "previous_is_active",
         "new_is_active",

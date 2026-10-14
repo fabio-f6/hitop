@@ -79,7 +79,9 @@ from .services import (
     approve_professional as approve_professional_service,
     set_professional_researcher,
     withdraw_professional_access,
+    reject_professional as reject_professional_service,
 )
+from email_notifications.services import notify_professional_approved, notify_professional_rejected
 
 
 logger = logging.getLogger(__name__)
@@ -655,6 +657,37 @@ def update_professional_researcher(request, professional_id):
         "administration:professional_detail",
         professional_id=professional.pk,
     )
+
+
+@administrator_required
+@require_POST
+def reject_professional(request, professional_id):
+    try:
+        with transaction.atomic():
+            professional, changed = reject_professional_service(professional_id)
+            if changed:
+                record_admin_action(
+                    actor=request.user,
+                    action=AdministrativeAuditLog.Action.PROFESSIONAL_REJECTED,
+                    object_type=AdministrativeAuditLog.ObjectType.PROFESSIONAL,
+                    object_id=professional.pk,
+                    object_label=_professional_audit_label(professional),
+                    metadata={"previous_is_active": True, "new_is_active": False},
+                )
+                notify_professional_rejected(professional)
+    except UserProfile.DoesNotExist as exception:
+        raise Http404 from exception
+    except ProfessionalStateError as exception:
+        messages.error(request, str(exception))
+        return redirect("administration:professional_detail", professional_id=professional_id)
+
+    if changed:
+        messages.success(request, "Pedido de registo rejeitado.")
+    else:
+        messages.info(request, "Este pedido já se encontrava rejeitado.")
+    return redirect("administration:professional_detail", professional_id=professional.pk)
+
+
 @administrator_required
 @require_POST
 def approve_professional(request, professional_id):
@@ -673,6 +706,7 @@ def approve_professional(request, professional_id):
                         "new_is_verified": True,
                     },
                 )
+                notify_professional_approved(professional)
     except UserProfile.DoesNotExist as exception:
         raise Http404 from exception
     except ProfessionalStateError as exception:

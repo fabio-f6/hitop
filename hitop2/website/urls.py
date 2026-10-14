@@ -30,6 +30,11 @@ urlpatterns = [
         views.dashboard,
         name="dashboard",
     ),
+    path(
+        "account/notification-preferences/",
+        views.notification_preferences,
+        name="notification_preferences",
+    ),
 
     # Coletas Gerais
     path("collections/", views.collection_list, name="collection_list"),
