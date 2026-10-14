@@ -32,7 +32,7 @@
             color:black;
             padding:10px 18px;
         "
-        href="{% url patient_submissions_url_name submission.user.id %}"
+        href="{% if is_collection_submission %}{{ collection_detail_url }}{% else %}{% url patient_submissions_url_name submission.user.id %}{% endif %}"
     >
         ← Submissões
     </a>
@@ -45,7 +45,7 @@
             color:black;
             padding:10px 18px;
         "
-        href="{% url export_report_url_name submission.id %}"
+        href="{% if is_collection_submission %}{{ collection_export_url }}{% else %}{% url export_report_url_name submission.id %}{% endif %}"
     >
         Exportar relatório
     </a>

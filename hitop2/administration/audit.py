@@ -12,6 +12,12 @@ _ALLOWED_METADATA_KEYS = {
         "previous_is_active",
         "new_is_active",
     },
+    AdministrativeAuditLog.Action.PROFESSIONAL_RESEARCHER_GRANTED: {
+        "previous_is_researcher", "new_is_researcher",
+    },
+    AdministrativeAuditLog.Action.PROFESSIONAL_RESEARCHER_REVOKED: {
+        "previous_is_researcher", "new_is_researcher",
+    },
     AdministrativeAuditLog.Action.NORMATIVE_VERSION_CREATED: {
         "new_status",
         "participant_count",
@@ -47,10 +53,14 @@ _ALLOWED_METADATA_KEYS = {
     },
     AdministrativeAuditLog.Action.PROFESSIONAL_TEST_ENVIRONMENT_CLEARED: {
         "patients_deleted",
+        "collections_deleted",
         "submissions_deleted",
         "test_versions_deleted",
         "synthetic_participants_deleted",
     },
+    AdministrativeAuditLog.Action.COLLECTION_CREATED: set(),
+    AdministrativeAuditLog.Action.COLLECTION_ACTIVATED: set(),
+    AdministrativeAuditLog.Action.COLLECTION_DEACTIVATED: set(),
     MASTER_RESET_ACTION: {
         "users_deleted",
         "approved_professionals_preserved",

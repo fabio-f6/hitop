@@ -3,15 +3,18 @@ from collections import defaultdict
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
+from django.db.models import Count, Max, Q
 from django.http import HttpResponse
 from django.views.decorators.http import require_http_methods, require_POST
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from polls.attention_checks import evaluate_attention_checks
 from polls.models import (
     DynamicAnswer,
     NormativeDatasetVersion,
+    QuestionnaireCollection,
     QuestionnaireSubmission,
     SociodemographicAnswer,
     UserAnswer,
@@ -22,13 +25,14 @@ from polls.percentiles import (
 )
 from polls.questions import get_questions_for_submission
 from polls.normative_export import evaluate_normative_eligibility
+from polls.normative_versions import get_or_assign_report_normative_version
 from polls.report_constants import SPECTRUM_KEYS
 from polls.report_interpretation import build_report_analysis
 from polls.scoring import calculate_scale_scores_from_answers
 from polls.spectrum_scores import calculate_spectrum_scores
 from polls.translations import translate_scale, translate_spectrum
 
-from .forms import EditPatientForm, SignUpForm
+from .forms import EditPatientForm, QuestionnaireCollectionForm, SignUpForm
 from .models import UserProfile
 from .patient_deletion import (
     ActivePatientDeletionBlocked,
@@ -48,9 +52,203 @@ from .professional_environment import (
 )
 from .decorators import (
     PENDING_VERIFICATION_MESSAGE,
+    can_use_general_collections,
+    collection_owner_is_authorized,
     is_unverified_professional,
+    researcher_required,
     verified_professional_required,
 )
+from administration.audit import record_admin_action
+from administration.models import AdministrativeAuditLog
+
+
+@researcher_required
+def collection_list(request):
+    collections = (
+        QuestionnaireCollection.objects.filter(owner=request.user, is_test_data=False)
+        .annotate(
+            submission_count=Count("submissions"),
+            completed_count=Count("submissions", filter=Q(submissions__completed=True)),
+        )
+    )
+    return render(request, "website/collection_list.html", {
+        "collections": collections,
+        "collection_create_url_name": "website:collection_create",
+        "collection_detail_url_name": "website:collection_detail",
+        "collection_heading": "Coletas Gerais",
+    })
+
+
+@researcher_required
+def collection_create(request):
+    form = QuestionnaireCollectionForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        collection = form.save(commit=False)
+        collection.owner = request.user
+        collection.is_test_data = False
+        collection.save()
+        form.save_m2m()
+        record_admin_action(
+            actor=request.user,
+            action=AdministrativeAuditLog.Action.COLLECTION_CREATED,
+            object_type=AdministrativeAuditLog.ObjectType.QUESTIONNAIRE_COLLECTION,
+            object_id=collection.pk,
+            object_label=collection.name,
+        )
+        messages.success(request, "Coleta Geral criada com sucesso.")
+        return redirect("website:collection_detail", collection_id=collection.pk)
+    return render(request, "website/collection_form.html", {
+        "form": form,
+        "collection_list_url_name": "website:collection_list",
+        "collection_form_heading": "Nova Coleta Geral",
+    })
+
+
+@researcher_required
+def collection_detail(request, collection_id):
+    collection = get_object_or_404(
+        QuestionnaireCollection.objects.prefetch_related("spectra"),
+        pk=collection_id,
+        owner=request.user,
+    )
+    submissions = collection.submissions.order_by("-participant_number")
+    counts = submissions.aggregate(
+        total=Count("id"),
+        completed_total=Count("id", filter=Q(completed=True)),
+        incomplete_total=Count("id", filter=Q(completed=False)),
+    )
+    public_url = request.build_absolute_uri(
+        reverse("website:collection_public", args=[collection.public_token])
+    )
+    return render(request, "website/collection_detail.html", {
+        "collection": collection,
+        "submissions": submissions,
+        "counts": counts,
+        "public_url": public_url,
+        "collection_list_url_name": "website:collection_list",
+        "collection_toggle_url_name": "website:collection_toggle",
+        "collection_report_preview_url_name": "website:collection_report_preview",
+        "collection_report_export_url_name": "website:collection_report_export",
+    })
+
+
+@require_POST
+@researcher_required
+def collection_toggle(request, collection_id):
+    collection = get_object_or_404(
+        QuestionnaireCollection, pk=collection_id, owner=request.user,
+    )
+    collection.is_active = not collection.is_active
+    collection.save(update_fields=["is_active", "updated_at"])
+    action = (
+        AdministrativeAuditLog.Action.COLLECTION_ACTIVATED
+        if collection.is_active
+        else AdministrativeAuditLog.Action.COLLECTION_DEACTIVATED
+    )
+    record_admin_action(
+        actor=request.user,
+        action=action,
+        object_type=AdministrativeAuditLog.ObjectType.QUESTIONNAIRE_COLLECTION,
+        object_id=collection.pk,
+        object_label=collection.name,
+    )
+    return redirect("website:collection_detail", collection_id=collection.pk)
+
+
+def collection_public(request, token):
+    collection = get_object_or_404(QuestionnaireCollection, public_token=token)
+    return render(request, "website/collection_public.html", {
+        "collection": collection,
+        "collection_available": (
+            collection.is_active
+            and collection_owner_is_authorized(collection)
+        ),
+    })
+
+
+@require_POST
+def collection_start(request, token):
+    with transaction.atomic():
+        collection = get_object_or_404(
+            QuestionnaireCollection.objects.select_for_update(), public_token=token,
+        )
+        if (
+            not collection.is_active
+            or not collection_owner_is_authorized(collection)
+        ):
+            messages.error(request, "Esta coleta não está disponível neste momento.")
+            return redirect("website:collection_public", token=token)
+
+        current_id = request.session.get("submission_id")
+        current_token = request.session.get("submission_access_token")
+        submission = QuestionnaireSubmission.objects.filter(
+            pk=current_id,
+            collection=collection,
+            is_open=True,
+            completed=False,
+            access_token=current_token,
+        ).first() if current_id and current_token else None
+        if submission is None:
+            last_number = collection.submissions.aggregate(value=Max("participant_number"))["value"] or 0
+            submission = QuestionnaireSubmission.objects.create(
+                collection=collection,
+                participant_number=last_number + 1,
+                title=collection.name,
+                questionnaire_type="hitop",
+                no_identifying_data_confirmed=True,
+                is_test_data=collection.is_test_data,
+            )
+            submission.spectra.set(collection.spectra.all())
+            get_or_assign_report_normative_version(submission)
+
+    request.session.cycle_key()
+    request.session["submission_id"] = submission.pk
+    request.session["submission_access_token"] = str(submission.access_token)
+    request.session["anonymous_questionnaire"] = True
+    return redirect("polls:sociodemographic")
+
+
+def _owned_collection_submission_or_404(user, submission_id):
+    return get_object_or_404(
+        QuestionnaireSubmission.objects.select_related("collection"),
+        pk=submission_id,
+        collection__owner=user,
+    )
+
+
+@researcher_required
+def collection_report_preview(request, submission_id):
+    submission = _owned_collection_submission_or_404(request.user, submission_id)
+    if not submission.completed:
+        return HttpResponse("O relatório ainda não está disponível.", status=409)
+    context = _build_report_context(submission)
+    context.update({
+        "is_collection_submission": True,
+        "collection_detail_url": reverse(
+            "website:collection_detail", args=[submission.collection_id]
+        ),
+        "collection_export_url": reverse(
+            "website:collection_report_export", args=[submission.pk]
+        ),
+    })
+    return render(request, "website/report_preview.html", context)
+
+
+@researcher_required
+def collection_report_export(request, submission_id):
+    submission = _owned_collection_submission_or_404(request.user, submission_id)
+    if not submission.completed:
+        return HttpResponse("O relatório ainda não está disponível.", status=409)
+    from .docx_report import build_report_docx
+    document = build_report_docx(_build_report_context(submission))
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
+    response["Content-Disposition"] = (
+        f'attachment; filename="relatorio-coleta-{submission.participant_number:03d}.docx"'
+    )
+    response.write(document.getvalue())
+    return response
 
 
 def home(request):
@@ -644,12 +842,23 @@ def _build_report_context(submission):
         "height": chart_height,
     }
 
-    patient_profile = patient.userprofile
-    if submission.is_test_data:
+    if submission.collection_id:
+        professional = submission.collection.owner
+        professional_profile = professional.userprofile
+        professional_area = professional_profile.area_formacao
+        professional_license = professional_profile.cedula_profissional
+        subject_label = (
+            f"Coleta Geral: {submission.collection.name} — "
+            f"Participação: {submission.participant_label}"
+        )
+    else:
+        patient_profile = patient.userprofile
+        subject_label = patient.username
+    if not submission.collection_id and submission.is_test_data:
         professional = patient_profile.test_environment_owner
         professional_area = "Ambiente administrativo de teste"
         professional_license = "Não aplicável"
-    else:
+    elif not submission.collection_id:
         professional = patient_profile.professional
         professional_area = professional.userprofile.area_formacao
         professional_license = professional.userprofile.cedula_profissional
@@ -659,7 +868,7 @@ def _build_report_context(submission):
     report_data = {
 
         "patient_name":
-            patient.username,
+            subject_label,
 
         "age":
             socio.get("age", "-"),

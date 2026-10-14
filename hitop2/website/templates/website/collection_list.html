@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "website/components/collection_ui_styles.html" %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div><h1 class="h3 mb-1">{{ collection_heading }}</h1><p class="text-muted mb-0">Aplicações anónimas através de um link permanente.</p></div>
+  <a class="btn collection-action" href="{% url collection_create_url_name %}">Nova coleta</a>
+</div>
+<div class="collection-panel p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+  <thead class="table-light"><tr><th>Nome</th><th>Submissões</th><th>Concluídas</th><th>Estado</th><th></th></tr></thead>
+  <tbody>{% for collection in collections %}<tr>
+    <td>{{ collection.name }}</td><td>{{ collection.submission_count }}</td><td>{{ collection.completed_count }}</td>
+    <td>{% if collection.is_active %}<span class="collection-status collection-status--active">Ativa</span>{% else %}<span class="collection-status collection-status--inactive">Inativa</span>{% endif %}</td>
+    <td class="text-end"><a class="btn collection-action collection-action--compact" href="{% url collection_detail_url_name collection.id %}">Abrir</a></td>
+  </tr>{% empty %}<tr><td colspan="5" class="text-center text-muted py-4">Ainda não existem Coletas Gerais.</td></tr>{% endfor %}</tbody>
+</table></div></div>
+{% endblock %}

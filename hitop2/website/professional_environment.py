@@ -109,10 +109,14 @@ class ProfessionalEnvironment:
         return profile.user
 
     def submission_queryset(self):
-        submissions = QuestionnaireSubmission.objects.filter(
-            user__userprofile__in=self.patient_profiles(),
-        )
         if self.is_test_environment:
+            submissions = QuestionnaireSubmission.objects.filter(
+                Q(user__userprofile__in=self.patient_profiles())
+                | Q(
+                    collection__owner=self.owner,
+                    collection__is_test_data=True,
+                )
+            )
             # Include legacy test submissions created before the submission-level
             # marker was consistently set, while remaining scoped to this owner's
             # test patient profiles.
@@ -122,6 +126,9 @@ class ProfessionalEnvironment:
                 | ~Q(simulation_mode="normal")
             )
         else:
+            submissions = QuestionnaireSubmission.objects.filter(
+                user__userprofile__in=self.patient_profiles(),
+            )
             # Legacy simulated records are structurally identifiable through
             # simulation_mode even though they predate the is_test_data field.
             submissions = submissions.filter(

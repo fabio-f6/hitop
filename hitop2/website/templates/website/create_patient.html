@@ -6,6 +6,21 @@
 
     {% include "website/components/test_environment_banner.html" %}
 
+    <div class="mb-3">
+        <a
+            href="{% url dashboard_url_name %}"
+            class="btn rounded-0"
+            style="
+                background:#e2f0ff;
+                border:1px solid #9ec9ff;
+                color:black;
+                padding:10px 18px;
+            "
+        >
+            ← Dashboard
+        </a>
+    </div>
+
     <h2>{% if is_test_environment %}Novo paciente de teste e aplicação HiTOP{% else %}Novo paciente e aplicação HiTOP{% endif %}</h2>
 
     <form method="POST">

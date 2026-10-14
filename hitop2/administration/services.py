@@ -49,3 +49,15 @@ def withdraw_professional_access(professional_id):
     professional.user.is_active = False
     professional.user.save(update_fields=["is_active"])
     return professional, True
+
+
+@transaction.atomic
+def set_professional_researcher(professional_id, *, enabled):
+    """Set the independent researcher grant while holding the profile lock."""
+    professional = _get_locked_professional(professional_id)
+    enabled = bool(enabled)
+    if professional.is_researcher == enabled:
+        return professional, False
+    professional.is_researcher = enabled
+    professional.save(update_fields=["is_researcher"])
+    return professional, True

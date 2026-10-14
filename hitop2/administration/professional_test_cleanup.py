@@ -8,6 +8,7 @@ from polls.models import (
     DynamicAnswer,
     NormativeDatasetVersion,
     NormativeParticipant,
+    QuestionnaireCollection,
     QuestionnaireSubmission,
     SociodemographicAnswer,
     UserAnswer,
@@ -21,6 +22,7 @@ from .permissions import can_master_reset
 @dataclass(frozen=True)
 class ProfessionalTestCleanupPreview:
     patients: int
+    collections: int
     submissions: int
     normative_test_versions: int
     synthetic_participants: int
@@ -29,6 +31,7 @@ class ProfessionalTestCleanupPreview:
 @dataclass(frozen=True)
 class ProfessionalTestCleanupResult:
     patients: int
+    collections: int
     submissions: int
     normative_test_versions: int
     synthetic_participants: int
@@ -54,6 +57,7 @@ def get_professional_test_cleanup_preview():
     patient_user_ids = _test_patient_profiles().values_list("user_id", flat=True)
     return ProfessionalTestCleanupPreview(
         patients=_test_patient_profiles().count(),
+        collections=QuestionnaireCollection.objects.filter(is_test_data=True).count(),
         submissions=_test_submission_scope(patient_user_ids).count(),
         normative_test_versions=NormativeDatasetVersion.objects.filter(
             environment=NormativeDatasetVersion.Environment.TEST
@@ -80,10 +84,15 @@ def clear_professional_test_environment(actor):
     )
     submission_count = len(submission_ids)
     patient_count = len(patient_user_ids)
+    test_collections = QuestionnaireCollection.objects.select_for_update().filter(
+        is_test_data=True,
+    )
+    collection_count = test_collections.count()
 
     # Remove submission-owned PROTECT references before deleting the shared
     # TEST normative versions. Raw answers for PTE patients are removed too.
     QuestionnaireSubmission.objects.filter(pk__in=submission_ids).delete()
+    test_collections.delete()
     UserAnswer.objects.filter(user_id__in=patient_user_ids).delete()
     DynamicAnswer.objects.filter(user_id__in=patient_user_ids).delete()
     SociodemographicAnswer.objects.filter(user_id__in=patient_user_ids).delete()
@@ -95,6 +104,8 @@ def clear_professional_test_environment(actor):
 
     if _test_patient_profiles().exists():
         raise RuntimeError("Permanecem pacientes no Ambiente Profissional de Teste.")
+    if QuestionnaireCollection.objects.filter(is_test_data=True).exists():
+        raise RuntimeError("Permanecem Coletas Gerais de Teste.")
     if QuestionnaireSubmission.objects.filter(
         Q(is_test_data=True) | ~Q(simulation_mode="normal")
     ).exists():
@@ -106,6 +117,7 @@ def clear_professional_test_environment(actor):
 
     return ProfessionalTestCleanupResult(
         patients=patient_count,
+        collections=collection_count,
         submissions=submission_count,
         normative_test_versions=normative_result.versions,
         synthetic_participants=normative_result.participants,

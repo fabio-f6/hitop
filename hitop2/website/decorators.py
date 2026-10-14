@@ -51,6 +51,46 @@ def verified_professional_required(view_func):
 
     return wrapper
 
+
+def can_use_general_collections(user):
+    """Return the single effective authorization rule for Coletas Gerais."""
+    if not getattr(user, "is_authenticated", False) or not user.is_active:
+        return False
+    try:
+        profile = user.userprofile
+    except UserProfile.DoesNotExist:
+        return False
+    return (
+        profile.user_type == "professional"
+        and profile.is_verified
+        and profile.is_researcher
+    )
+
+
+def collection_owner_is_authorized(collection):
+    """Apply the correct owner authorization for a collection environment."""
+    owner = collection.owner
+    if not owner.is_active:
+        return False
+    if collection.is_test_data:
+        try:
+            return owner.userprofile.user_type == "admin"
+        except UserProfile.DoesNotExist:
+            return False
+    return can_use_general_collections(owner)
+
+
+def researcher_required(view_func):
+    """Require an approved professional with the additional researcher grant."""
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("website:home")
+        if not can_use_general_collections(request.user):
+            raise PermissionDenied
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
 def user_is_patient(view_func):
     def wrapper(request, *args, **kwargs):
         if hasattr(request.user, 'userprofile') and request.user.userprofile.user_type == 'patient':

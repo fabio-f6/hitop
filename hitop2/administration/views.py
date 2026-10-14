@@ -8,13 +8,16 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db import IntegrityError, transaction
-from django.db.models import Q
-from django.http import Http404
+from django.db.models import Count, Max, Q
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST, require_http_methods
 
-from polls.models import NormativeDatasetVersion, NormativeParticipant, QuestionnaireSubmission
+from polls.models import (NormativeDatasetVersion, NormativeParticipant,
+                          QuestionnaireCollection, QuestionnaireSubmission)
+from polls.simulation import SimulationConfigurationError, simulate_submission_batch
 from polls.normative_test import clear_normative_test_environment
 from polls.normative_export import (
     NormativeExportError,
@@ -31,6 +34,7 @@ from polls.normative_versions import (
     get_normative_versions,
     get_total_normative_participant_count,
     get_unversioned_normative_participant_count,
+    get_or_assign_report_normative_version,
     prepare_normative_version as prepare_normative_version_service,
 )
 from website.models import UserProfile
@@ -46,9 +50,11 @@ from website.professional_environment import (
     restore_patient_response,
 )
 from website.views import (
+    _build_report_context,
     export_report_docx_response,
     report_preview_response,
 )
+from website.forms import CollectionSimulationForm, QuestionnaireCollectionForm
 
 from .audit import record_admin_action
 from .forms import (MasterResetConfirmationForm, NormativeVersionCreateForm,
@@ -71,6 +77,7 @@ from .questionnaire_map import build_questionnaire_structure
 from .services import (
     ProfessionalStateError,
     approve_professional as approve_professional_service,
+    set_professional_researcher,
     withdraw_professional_access,
 )
 
@@ -349,6 +356,182 @@ def test_export_report_docx(request, submission_id):
     return export_report_docx_response(submission, environment)
 
 
+def _test_collection_or_404(actor, collection_id):
+    return get_object_or_404(
+        QuestionnaireCollection,
+        pk=collection_id,
+        owner=actor,
+        is_test_data=True,
+    )
+
+
+@administrator_required
+def test_collection_list(request):
+    collections = (
+        QuestionnaireCollection.objects.filter(owner=request.user, is_test_data=True)
+        .annotate(
+            submission_count=Count("submissions"),
+            completed_count=Count("submissions", filter=Q(submissions__completed=True)),
+        )
+    )
+    return render(request, "website/collection_list.html", {
+        "collections": collections,
+        "collection_create_url_name": "administration:test_collection_create",
+        "collection_detail_url_name": "administration:test_collection_detail",
+        "collection_heading": "Coletas Gerais de Teste",
+        "is_test_environment": True,
+        "test_environment_notice": "Ambiente de Teste Profissional — os dados criados nesta área destinam-se exclusivamente a simulação.",
+    })
+
+
+@administrator_required
+def test_collection_create(request):
+    form = QuestionnaireCollectionForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        collection = form.save(commit=False)
+        collection.owner = request.user
+        collection.is_test_data = True
+        collection.save()
+        form.save_m2m()
+        messages.success(request, "Coleta Geral de Teste criada com sucesso.")
+        return redirect("administration:test_collection_detail", collection_id=collection.pk)
+    return render(request, "website/collection_form.html", {
+        "form": form,
+        "collection_list_url_name": "administration:test_collection_list",
+        "collection_form_heading": "Nova Coleta Geral de Teste",
+        "is_test_environment": True,
+    })
+
+
+@administrator_required
+def test_collection_detail(request, collection_id):
+    collection = _test_collection_or_404(request.user, collection_id)
+    submissions = collection.submissions.order_by("-participant_number")
+    counts = submissions.aggregate(
+        total=Count("id"),
+        completed_total=Count("id", filter=Q(completed=True)),
+        incomplete_total=Count("id", filter=Q(completed=False)),
+    )
+    return render(request, "website/collection_detail.html", {
+        "collection": collection,
+        "submissions": submissions,
+        "counts": counts,
+        "public_url": request.build_absolute_uri(
+            reverse("website:collection_public", args=[collection.public_token])
+        ),
+        "simulation_form": CollectionSimulationForm(),
+        "collection_list_url_name": "administration:test_collection_list",
+        "collection_toggle_url_name": "administration:test_collection_toggle",
+        "collection_simulate_url_name": "administration:test_collection_simulate",
+        "collection_report_preview_url_name": "administration:test_collection_report_preview",
+        "collection_report_export_url_name": "administration:test_collection_report_export",
+        "is_test_environment": True,
+    })
+
+
+@administrator_required
+@require_POST
+def test_collection_toggle(request, collection_id):
+    collection = _test_collection_or_404(request.user, collection_id)
+    collection.is_active = not collection.is_active
+    collection.save(update_fields=["is_active", "updated_at"])
+    return redirect("administration:test_collection_detail", collection_id=collection.pk)
+
+
+@administrator_required
+@require_POST
+def test_collection_simulate(request, collection_id):
+    form = CollectionSimulationForm(request.POST)
+    collection = _test_collection_or_404(request.user, collection_id)
+    if not form.is_valid():
+        messages.error(request, "Revise a configuração da simulação.")
+        return redirect("administration:test_collection_detail", collection_id=collection.pk)
+
+    config = form.simulation_configuration()
+    quantity = config.pop("simulation_quantity")
+    export_to_test = config.pop("include_in_normative_test")
+    base_seed = config["simulation_seed"]
+    try:
+        with transaction.atomic():
+            locked = QuestionnaireCollection.objects.select_for_update().get(pk=collection.pk)
+            last_number = locked.submissions.aggregate(value=Max("participant_number"))["value"] or 0
+            submissions = []
+            for index in range(quantity):
+                submission = QuestionnaireSubmission.objects.create(
+                    collection=locked,
+                    participant_number=last_number + index + 1,
+                    title=locked.name,
+                    questionnaire_type="hitop",
+                    is_test_data=True,
+                    no_identifying_data_confirmed=True,
+                    **config,
+                )
+                submission.spectra.set(locked.spectra.all())
+                get_or_assign_report_normative_version(submission)
+                submissions.append(submission)
+            summary = simulate_submission_batch(
+                submissions,
+                base_seed=base_seed,
+                export_to_normative_test=export_to_test,
+            )
+    except SimulationConfigurationError as error:
+        messages.error(request, str(error))
+    else:
+        messages.success(
+            request,
+            "Simulações criadas: {created}; elegíveis: {eligible}; exportadas para "
+            "normativa de teste: {exported}; ineligíveis: {ineligible}; pendentes: "
+            "{pending}.".format(**summary),
+        )
+    return redirect("administration:test_collection_detail", collection_id=collection.pk)
+
+
+def _test_collection_submission_or_404(actor, submission_id):
+    return get_object_or_404(
+        QuestionnaireSubmission.objects.select_related("collection"),
+        pk=submission_id,
+        is_test_data=True,
+        collection__owner=actor,
+        collection__is_test_data=True,
+    )
+
+
+@administrator_required
+def test_collection_report_preview(request, submission_id):
+    submission = _test_collection_submission_or_404(request.user, submission_id)
+    if not submission.completed:
+        return HttpResponse("O relatório ainda não está disponível.", status=409)
+    context = _build_report_context(submission)
+    context.update({
+        "is_collection_submission": True,
+        "is_test_environment": True,
+        "collection_detail_url": reverse(
+            "administration:test_collection_detail", args=[submission.collection_id]
+        ),
+        "collection_export_url": reverse(
+            "administration:test_collection_report_export", args=[submission.pk]
+        ),
+    })
+    return render(request, "website/report_preview.html", context)
+
+
+@administrator_required
+def test_collection_report_export(request, submission_id):
+    submission = _test_collection_submission_or_404(request.user, submission_id)
+    if not submission.completed:
+        return HttpResponse("O relatório ainda não está disponível.", status=409)
+    from website.docx_report import build_report_docx
+    context = _build_report_context(submission)
+    context["is_test_environment"] = True
+    document = build_report_docx(context)
+    response = HttpResponse(
+        document.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    )
+    response["Content-Disposition"] = f'attachment; filename="relatorio-coleta-teste-{submission.participant_number:03d}.docx"'
+    return response
+
+
 @administrator_required
 def professionals(request):
     professional_queryset = _professional_queryset()
@@ -433,6 +616,45 @@ def professional_detail(request, professional_id):
     )
 
 
+@administrator_required
+@require_POST
+def update_professional_researcher(request, professional_id):
+    enabled = request.POST.get("is_researcher") == "on"
+    try:
+        with transaction.atomic():
+            professional, changed = set_professional_researcher(
+                professional_id, enabled=enabled,
+            )
+            if changed:
+                record_admin_action(
+                    actor=request.user,
+                    action=(
+                        AdministrativeAuditLog.Action.PROFESSIONAL_RESEARCHER_GRANTED
+                        if enabled else
+                        AdministrativeAuditLog.Action.PROFESSIONAL_RESEARCHER_REVOKED
+                    ),
+                    object_type=AdministrativeAuditLog.ObjectType.PROFESSIONAL,
+                    object_id=professional.pk,
+                    object_label=_professional_audit_label(professional),
+                    metadata={
+                        "previous_is_researcher": not enabled,
+                        "new_is_researcher": enabled,
+                    },
+                )
+    except UserProfile.DoesNotExist as exception:
+        raise Http404 from exception
+
+    if changed:
+        messages.success(
+            request,
+            "Autorização de Investigador atualizada com sucesso.",
+        )
+    else:
+        messages.info(request, "A autorização de Investigador não foi alterada.")
+    return redirect(
+        "administration:professional_detail",
+        professional_id=professional.pk,
+    )
 @administrator_required
 @require_POST
 def approve_professional(request, professional_id):
@@ -668,6 +890,7 @@ def clear_professional_test_environment_view(request):
                         object_label="Ambiente Profissional de Teste",
                         metadata={
                             "patients_deleted": result.patients,
+                            "collections_deleted": result.collections,
                             "submissions_deleted": result.submissions,
                             "test_versions_deleted": result.normative_test_versions,
                             "synthetic_participants_deleted": result.synthetic_participants,

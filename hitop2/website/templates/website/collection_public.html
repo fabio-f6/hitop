@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "website/components/collection_ui_styles.html" %}
+<div class="row justify-content-center"><div class="col-lg-7"><div class="collection-panel p-4 p-md-5">
+  <h1 class="h2 mb-3">Questionário HiTOP</h1>
+  {% if collection.is_test_data %}<div class="collection-test-notice mb-3">Ambiente de Teste — esta participação não contém dados reais.</div>{% endif %}
+  <p>Esta participação é anónima. Não é necessário criar uma conta nem fornecer nome, email ou telefone.</p>
+  <p class="text-muted">As respostas são guardadas como uma participação independente e utilizadas exclusivamente para as finalidades definidas para esta aplicação.</p>
+  {% if collection_available %}<form method="post" action="{% url 'website:collection_start' collection.public_token %}">{% csrf_token %}<button class="btn collection-action" type="submit">Iniciar questionário</button></form>{% else %}<div class="collection-panel" style="background:#f5f5f5; color:#555;">Esta coleta não está disponível neste momento.</div>{% endif %}
+</div></div></div>
+{% endblock %}

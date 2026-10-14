@@ -319,11 +319,23 @@ def simulate_submission(submission):
     except AttributeError:
         patient_profile = None
         owner_is_administrator = False
-    if (
-        not submission.is_test_data
-        or patient_profile is None
-        or not patient_profile.is_test_data
-        or not owner_is_administrator
+    collection_is_administrative_test = False
+    if submission.collection_id:
+        try:
+            collection_is_administrative_test = (
+                submission.collection.is_test_data
+                and submission.collection.owner.userprofile.user_type == "admin"
+            )
+        except AttributeError:
+            collection_is_administrative_test = False
+
+    patient_is_administrative_test = (
+        patient_profile is not None
+        and patient_profile.is_test_data
+        and owner_is_administrator
+    )
+    if not submission.is_test_data or not (
+        patient_is_administrative_test or collection_is_administrative_test
     ):
         raise SimulationPermissionError(
             "A simulação está reservada ao Ambiente de Teste Profissional."

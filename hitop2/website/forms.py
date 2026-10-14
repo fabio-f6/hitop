@@ -2,10 +2,27 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
 from .models import UserProfile
-from polls.models import Spectra, QuestionnaireSubmission
+from polls.models import QuestionnaireCollection, Spectra, QuestionnaireSubmission
 from polls.questions import get_scientific_spectra
 import random
 import string
+
+
+class QuestionnaireCollectionForm(forms.ModelForm):
+    spectra = forms.ModelMultipleChoiceField(
+        label="Módulos a incluir:",
+        queryset=get_scientific_spectra(),
+        widget=forms.CheckboxSelectMultiple(attrs={"class": "form-check-input"}),
+        required=True,
+    )
+
+    class Meta:
+        model = QuestionnaireCollection
+        fields = ("name", "spectra")
+        labels = {"name": "Nome da coleta"}
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "form-control", "maxlength": 255}),
+        }
 
 
 class SimulationConfigurationMixin:
@@ -135,6 +152,21 @@ class SimulationConfigurationMixin:
         if not self.allow_simulation:
             return self.simulation_defaults.copy()
         return {name: self.cleaned_data[name] for name in self.simulation_field_names}
+
+class CollectionSimulationForm(SimulationConfigurationMixin, forms.Form):
+    """Existing simulation controls adapted to a collection-owned batch."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.configure_simulation_fields(allow_simulation=True)
+        self.fields["simulation_mode"].widget = forms.HiddenInput()
+        self.fields["simulation_mode"].initial = "simulated"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        cleaned_data["simulation_mode"] = "simulated"
+        return cleaned_data
+
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(

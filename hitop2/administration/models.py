@@ -17,6 +17,14 @@ class AdministrativeAuditLog(models.Model):
             "professional.access_revoked",
             "Acesso de profissional retirado",
         )
+        PROFESSIONAL_RESEARCHER_GRANTED = (
+            "professional.researcher_granted",
+            "Autorização de Investigador atribuída",
+        )
+        PROFESSIONAL_RESEARCHER_REVOKED = (
+            "professional.researcher_revoked",
+            "Autorização de Investigador revogada",
+        )
         NORMATIVE_VERSION_CREATED = (
             "normative_version.created",
             "Versão normativa criada",
@@ -47,11 +55,15 @@ class AdministrativeAuditLog(models.Model):
             "professional_test.cleared",
             "Ambiente Profissional de Teste limpo",
         )
+        COLLECTION_CREATED = "collection.created", "Coleta Geral criada"
+        COLLECTION_ACTIVATED = "collection.activated", "Coleta Geral ativada"
+        COLLECTION_DEACTIVATED = "collection.deactivated", "Coleta Geral desativada"
 
     class ObjectType(models.TextChoices):
         PROFESSIONAL = "professional", "Profissional"
         NORMATIVE_VERSION = "normative_version", "Versão normativa"
         NORMATIVE_TEST = "normative_test", "Ambiente normativo de teste"
+        QUESTIONNAIRE_COLLECTION = "questionnaire_collection", "Coleta Geral"
 
     class Result(models.TextChoices):
         SUCCESS = "success", "Concluída"

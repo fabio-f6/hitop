@@ -11,6 +11,7 @@ from polls.models import (
     NormativeParticipant,
     NormativeScaleScore,
     NormativeSpectrumScore,
+    QuestionnaireCollection,
     QuestionnaireSubmission,
     Scale,
     SociodemographicAnswer,
@@ -179,6 +180,7 @@ def perform_master_reset(actor):
             "profile_pk": profile.pk,
             "user_type": profile.user_type,
             "is_verified": profile.is_verified,
+            "is_researcher": profile.is_researcher,
             "username": profile.user.username,
             "email": profile.user.email,
             "first_name": profile.user.first_name,
@@ -239,6 +241,7 @@ def perform_master_reset(actor):
     # Submission-owned answers cascade; the explicit deletes also remove all
     # legacy/unattached clinical and sociodemographic application data.
     QuestionnaireSubmission.objects.all().delete()
+    QuestionnaireCollection.objects.all().delete()
     UserAnswer.objects.all().delete()
     DynamicAnswer.objects.all().delete()
     SociodemographicAnswer.objects.all().delete()
@@ -260,6 +263,8 @@ def perform_master_reset(actor):
         raise MasterResetError("O conjunto final de utilizadores é inconsistente.")
     if QuestionnaireSubmission.objects.exists():
         raise MasterResetError("Ainda existem aplicações de questionário.")
+    if QuestionnaireCollection.objects.exists():
+        raise MasterResetError("Ainda existem Coletas Gerais.")
     if QuestionnaireSubmission.objects.filter(is_test_data=True).exists():
         raise MasterResetError("Ainda existem aplicações de teste.")
 
@@ -291,6 +296,7 @@ def perform_master_reset(actor):
             "profile_pk": profile.pk,
             "user_type": profile.user_type,
             "is_verified": profile.is_verified,
+            "is_researcher": profile.is_researcher,
             "username": profile.user.username,
             "email": profile.user.email,
             "first_name": profile.user.first_name,

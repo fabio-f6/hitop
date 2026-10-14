@@ -74,6 +74,29 @@ class Question(models.Model):
     def spectra(self):
         return self.scale.subfactor.spectra
 
+
+class QuestionnaireCollection(models.Model):
+    """A permanent public entry point for independent anonymous submissions."""
+
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="questionnaire_collections",
+    )
+    name = models.CharField(max_length=255)
+    public_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    is_active = models.BooleanField(default=True, db_index=True)
+    is_test_data = models.BooleanField(default=False, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    spectra = models.ManyToManyField(Spectra, blank=True)
+
+    class Meta:
+        ordering = ("-created_at", "-id")
+
+    def __str__(self):
+        return self.name
+
 class QuestionnaireSubmission(models.Model):
 
     class NormativeStatus(models.TextChoices):
@@ -124,8 +147,20 @@ class QuestionnaireSubmission(models.Model):
 
     user = models.ForeignKey(
         User,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
+
+    collection = models.ForeignKey(
+        QuestionnaireCollection,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="submissions",
+    )
+
+    participant_number = models.PositiveIntegerField(null=True, blank=True)
 
     access_token = models.UUIDField(
         default=uuid.uuid4,
@@ -247,6 +282,44 @@ class QuestionnaireSubmission(models.Model):
         blank=True
     )
 
+    class Meta:
+        constraints = (
+            models.CheckConstraint(
+                condition=(
+                    Q(user__isnull=False, collection__isnull=True,
+                      participant_number__isnull=True)
+                    | Q(user__isnull=True, collection__isnull=False,
+                        participant_number__isnull=False)
+                ),
+                name="polls_submission_has_one_origin",
+            ),
+            models.UniqueConstraint(
+                fields=("collection", "participant_number"),
+                condition=Q(collection__isnull=False),
+                name="polls_unique_collection_participant",
+            ),
+        )
+
+    @property
+    def is_collection_submission(self):
+        return self.collection_id is not None
+
+    @property
+    def participant_label(self):
+        if self.participant_number is None:
+            return ""
+        return f"#{self.participant_number:03d}"
+
+    def clean(self):
+        super().clean()
+        if (
+            self.collection_id
+            and self.is_test_data != self.collection.is_test_data
+        ):
+            raise ValidationError(
+                "O ambiente da submissão deve coincidir com o ambiente da coleta."
+            )
+
     def save(self, *args, **kwargs):
         update_fields = kwargs.get("update_fields")
         if update_fields is not None and "report_normative_version" in update_fields:
@@ -267,7 +340,9 @@ class QuestionnaireSubmission(models.Model):
         return self.simulation_missing_percentage
 
 class UserAnswer(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='answers')
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='answers', null=True, blank=True,
+    )
     
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='user_answers')
     answer = models.CharField(max_length=1, choices=Question.ANSWER_CHOICES)
@@ -282,7 +357,8 @@ class UserAnswer(models.Model):
     )
 
     def __str__(self):
-        return f"{self.user.username} - {self.question.question_text}: {self.get_answer_display()}"
+        subject = self.user.username if self.user_id else self.submission.participant_label
+        return f"{subject} - {self.question.question_text}: {self.get_answer_display()}"
 
 class SociodemographicAnswer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -373,7 +449,9 @@ class DynamicAnswer(models.Model):
 
     user = models.ForeignKey(
         User,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
 
     submission = models.ForeignKey(
@@ -393,7 +471,8 @@ class DynamicAnswer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.question.question_id}"
+        subject = self.user.username if self.user_id else self.submission.participant_label
+        return f"{subject} - {self.question.question_id}"
 
 
 class NormativeDatasetVersion(models.Model):

@@ -17,6 +17,11 @@ class UserProfile(models.Model):
         verbose_name="Verificado",
     )
 
+    is_researcher = models.BooleanField(
+        default=False,
+        verbose_name="Investigador",
+    )
+
     professional = models.ForeignKey(
         User, null=True, blank=True,
         on_delete=models.SET_NULL,

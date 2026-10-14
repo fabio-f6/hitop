@@ -14,15 +14,17 @@
         <p class="text-uppercase fw-bold text-danger mb-2">Ação irreversível</p>
         <h1 class="h2 fw-bold mb-3">Apagar todo o Ambiente Profissional de Teste</h1>
         <p>
-            Esta ação elimina os pacientes de teste, todas as suas submissions e
-            respostas, as versões e scores normativos de teste e os participantes
-            sintéticos. Os utilizadores clínicos, os dados de produção e o histórico
-            de auditoria serão preservados.
+            Esta ação elimina os pacientes e Coletas Gerais de Teste, todas as suas
+            submissões e respostas, as versões e scores normativos de teste e os
+            participantes sintéticos. Os utilizadores clínicos, os dados de produção
+            e o histórico de auditoria serão preservados.
         </p>
 
         <dl class="row border-top border-bottom py-3">
             <dt class="col-sm-8">Pacientes de teste</dt>
             <dd class="col-sm-4">{{ preview.patients }}</dd>
+            <dt class="col-sm-8">Coletas Gerais de Teste</dt>
+            <dd class="col-sm-4">{{ preview.collections }}</dd>
             <dt class="col-sm-8">Submissões de teste/simulação</dt>
             <dd class="col-sm-4">{{ preview.submissions }}</dd>
             <dt class="col-sm-8">Versões normativas TEST</dt>
@@ -48,7 +50,7 @@
                 {% for error in form.password.errors %}<div class="text-danger mt-1">{{ error }}</div>{% endfor %}
             </div>
             <button type="submit" class="btn btn-danger rounded-0">
-                Apagar pacientes e dados de teste
+                Apagar dados do Ambiente Profissional de Teste
             </button>
         </form>
     </div>

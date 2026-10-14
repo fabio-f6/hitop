@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "website/components/collection_ui_styles.html" %}
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+        <a class="btn collection-action mb-3" href="{% url collection_list_url_name %}">← {% if collection.is_test_data %}Coletas Gerais de Teste{% else %}Coletas Gerais{% endif %}</a>
+        <h1 class="h3 mb-1">{{ collection.name }}</h1>
+        <p class="text-muted mb-0">Criada em {{ collection.created_at|date:"d/m/Y" }}</p>
+    </div>
+    <form method="post" action="{% url collection_toggle_url_name collection.id %}">
+        {% csrf_token %}
+        <button class="btn collection-action{% if collection.is_active %} collection-action--secondary{% endif %}" type="submit">{% if collection.is_active %}Desativar{% else %}Ativar{% endif %}</button>
+    </form>
+</div>
+
+<div class="collection-panel mb-4">
+    <label class="form-label fw-semibold" for="collection-link">Link permanente</label>
+    <div class="input-group">
+        <input id="collection-link" class="form-control rounded-0" readonly value="{{ public_url }}">
+        <button class="btn collection-action" type="button" onclick="navigator.clipboard.writeText(document.getElementById('collection-link').value)">Copiar link</button>
+    </div>
+    <div class="mt-3">
+        <strong>Estado:</strong>
+        {% if collection.is_active %}<span class="collection-status collection-status--active">Ativa</span>{% else %}<span class="collection-status collection-status--inactive">Inativa</span>{% endif %}
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="collection-panel h-100"><div class="text-muted">Total</div><div class="h3 mb-0">{{ counts.total }}</div></div></div>
+    <div class="col-md-4"><div class="collection-panel h-100"><div class="text-muted">Concluídas</div><div class="h3 mb-0">{{ counts.completed_total }}</div></div></div>
+    <div class="col-md-4"><div class="collection-panel h-100"><div class="text-muted">Incompletas</div><div class="h3 mb-0">{{ counts.incomplete_total }}</div></div></div>
+</div>
+
+{% if simulation_form %}{% include "website/_collection_simulation.html" %}{% endif %}
+
+<div class="collection-panel p-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light"><tr><th>Participante</th><th>Data</th><th>Estado</th><th class="text-end">Relatório</th></tr></thead>
+            <tbody>
+                {% for submission in submissions %}
+                    <tr>
+                        <td>{{ submission.participant_label }}</td>
+                        <td>{{ submission.started_at|date:"d/m/Y H:i" }}</td>
+                        <td>{% if submission.completed %}<span class="collection-status collection-status--completed">Concluída</span>{% else %}<span class="collection-status collection-status--progress">Incompleta</span>{% endif %}</td>
+                        <td class="text-end">
+                            {% if submission.completed %}
+                                <div class="d-inline-flex flex-wrap justify-content-end gap-2">
+                                    <a class="btn collection-action collection-action--compact" href="{% url collection_report_preview_url_name submission.id %}">Visualizar</a>
+                                    <a class="btn collection-action collection-action--compact collection-action--secondary" href="{% url collection_report_export_url_name submission.id %}">DOCX</a>
+                                </div>
+                            {% else %}—{% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="4" class="text-center text-muted py-4">Ainda não existem participações.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

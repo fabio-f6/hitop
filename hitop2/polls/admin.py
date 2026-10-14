@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import (
     NormativeDatasetVersion,
     Question,
+    QuestionnaireCollection,
     QuestionnaireSubmission,
     UserAnswer,
 )
@@ -24,6 +25,7 @@ class QuestionnaireSubmissionAdmin(admin.ModelAdmin):
 
 admin.site.register(Question)
 admin.site.register(UserAnswer)
+admin.site.register(QuestionnaireCollection)
 
 
 @admin.register(NormativeDatasetVersion)

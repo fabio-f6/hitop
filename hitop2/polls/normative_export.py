@@ -152,7 +152,6 @@ def export_submission_to_test_normative(submission):
     """Export an eligible simulated submission into the isolated test pool."""
     locked_submission = (
         QuestionnaireSubmission.objects.select_for_update()
-        .select_related("user")
         .get(pk=submission.pk)
     )
     if not is_test_or_simulated_submission(locked_submission):
@@ -199,7 +198,6 @@ def export_eligible_submissions_to_test_normative(submissions):
     skipped = 0
     locked_submissions = (
         submissions.select_for_update()
-        .select_related("user")
         .order_by("pk")
     )
     for submission in locked_submissions:
@@ -250,7 +248,6 @@ def export_submission_to_normative(submission):
     """Copy one clinical submission into the anonymous normative data set."""
     locked_submission = (
         QuestionnaireSubmission.objects.select_for_update()
-        .select_related("user")
         .get(pk=submission.pk)
     )
     if is_test_or_simulated_submission(locked_submission):

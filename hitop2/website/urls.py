@@ -31,6 +31,16 @@ urlpatterns = [
         name="dashboard",
     ),
 
+    # Coletas Gerais
+    path("collections/", views.collection_list, name="collection_list"),
+    path("collections/create/", views.collection_create, name="collection_create"),
+    path("collections/<int:collection_id>/", views.collection_detail, name="collection_detail"),
+    path("collections/<int:collection_id>/toggle/", views.collection_toggle, name="collection_toggle"),
+    path("collections/reports/<int:submission_id>/preview/", views.collection_report_preview, name="collection_report_preview"),
+    path("collections/reports/<int:submission_id>/export/", views.collection_report_export, name="collection_report_export"),
+    path("c/<uuid:token>/", views.collection_public, name="collection_public"),
+    path("c/<uuid:token>/start/", views.collection_start, name="collection_start"),
+
     # Pacientes
     path(
         "patients/create/",

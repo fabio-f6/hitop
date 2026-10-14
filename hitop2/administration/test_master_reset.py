@@ -41,7 +41,8 @@ class MasterResetTests(TestCase):
         cls.second_admin = cls.make_user("second-admin", "admin")
         cls.professional = cls.make_user("professional", "professional")
         cls.professional.userprofile.is_verified = True
-        cls.professional.userprofile.save(update_fields=["is_verified"])
+        cls.professional.userprofile.is_researcher = True
+        cls.professional.userprofile.save(update_fields=["is_verified", "is_researcher"])
         cls.professional_group = Group.objects.create(name="approved-professionals")
         cls.professional.groups.add(cls.professional_group)
         cls.professional_permission = Permission.objects.order_by("pk").first()
@@ -313,6 +314,7 @@ class MasterResetTests(TestCase):
         self.assertEqual(professional.userprofile.pk, professional_profile_pk)
         self.assertEqual(professional.userprofile.user_type, "professional")
         self.assertTrue(professional.userprofile.is_verified)
+        self.assertTrue(professional.userprofile.is_researcher)
         self.assertEqual(professional.password, professional_password)
         self.assertTrue(professional.is_active)
         self.assertTrue(professional.check_password(PASSWORD))

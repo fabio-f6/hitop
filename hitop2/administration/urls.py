@@ -74,6 +74,13 @@ urlpatterns = [
         views.test_export_report_docx,
         name="test_export_report_docx",
     ),
+    path("test-environment/collections/", views.test_collection_list, name="test_collection_list"),
+    path("test-environment/collections/create/", views.test_collection_create, name="test_collection_create"),
+    path("test-environment/collections/<int:collection_id>/", views.test_collection_detail, name="test_collection_detail"),
+    path("test-environment/collections/<int:collection_id>/toggle/", views.test_collection_toggle, name="test_collection_toggle"),
+    path("test-environment/collections/<int:collection_id>/simulate/", views.test_collection_simulate, name="test_collection_simulate"),
+    path("test-environment/collections/reports/<int:submission_id>/preview/", views.test_collection_report_preview, name="test_collection_report_preview"),
+    path("test-environment/collections/reports/<int:submission_id>/export/", views.test_collection_report_export, name="test_collection_report_export"),
     path("audit/", views.audit, name="audit"),
     path(
         "questionnaires/",
@@ -92,6 +99,11 @@ urlpatterns = [
         "professionals/<int:professional_id>/approve/",
         views.approve_professional,
         name="approve_professional",
+    ),
+    path(
+        "professionals/<int:professional_id>/researcher/",
+        views.update_professional_researcher,
+        name="update_professional_researcher",
     ),
     path(
         "professionals/<int:professional_id>/deactivate/",

@@ -89,6 +89,12 @@
                             </a>
                         </li>
 
+                        {% if request.user.userprofile.is_researcher %}<li class="nav-item">
+                            <a class="nav-link" href="{% url 'website:collection_list' %}">
+                                Coletas Gerais
+                            </a>
+                        </li>{% endif %}
+
                     {% endif %}
 
                     {% if request.user.userprofile.user_type == "patient" %}

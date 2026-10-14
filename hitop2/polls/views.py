@@ -29,6 +29,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from website.decorators import collection_owner_is_authorized
 
 
 answer_choices = [
@@ -39,6 +40,17 @@ answer_choices = [
 ]
 
 last_page_extra_choice = ('5', 'Não sei / Prefiro não responder')
+
+
+def _collection_access_is_available(submission):
+    return (
+        not submission.collection_id
+        or collection_owner_is_authorized(submission.collection)
+    )
+
+
+def _collection_unavailable_response(request):
+    return render(request, "polls/collection_unavailable.html", status=403)
 
 def questionnaire(request):
 
@@ -58,13 +70,18 @@ def questionnaire(request):
             questionnaire_type="hitop"
         ).first()
 
-    if submission:
+        if submission and submission.collection_id:
+            session_token = request.session.get("submission_access_token")
+            if not session_token or str(submission.access_token) != session_token:
+                submission = None
+
+    if submission and submission.user_id:
         user_profile = submission.user.userprofile
 
     # ----------------------------
     # FALLBACK PARA SISTEMA ANTIGO
     # ----------------------------
-    if not submission:
+    if not submission and request.user.is_authenticated:
 
         submission = QuestionnaireSubmission.objects.filter(
             user=request.user,
@@ -80,6 +97,9 @@ def questionnaire(request):
     # ----------------------------
     if not submission:
         return redirect("polls:thank_you")
+
+    if not _collection_access_is_available(submission):
+        return _collection_unavailable_response(request)
 
     # ----------------------------
     # BLOQUEIO POR PROFISSIONAL
@@ -182,6 +202,7 @@ def questionnaire(request):
             request.session.pop('partial_answers', None)
             request.session.pop('question_order', None)
             request.session.pop('submission_id', None)
+            request.session.pop('submission_access_token', None)
 
             submission.completed = True
             submission.completed_at = timezone.now()
@@ -234,6 +255,7 @@ def thank_you(request):
         "anonymous_questionnaire",
         None
     )
+    request.session.pop("submission_access_token", None)
 
     return render(
         request,
@@ -305,6 +327,12 @@ def sociodemographic_form(request):
         questionnaire_type="hitop",
         is_open=True,
     )
+    if submission.collection_id and str(submission.access_token) != request.session.get(
+        "submission_access_token"
+    ):
+        return invalid_questionnaire_link(request, "invalid")
+    if not _collection_access_is_available(submission):
+        return _collection_unavailable_response(request)
     category = get_sociodemographic_category()
     if not category or not category.questions.filter(is_active=True).exists():
         messages.error(request, "As perguntas ainda não foram configuradas.")
@@ -401,7 +429,14 @@ def _dynamic_questionnaire_response(
                 continue
 
             value = submitted[question.question_id]
-            if require_answers and question.required and not value:
+            # Optional sociodemographic mode permits a whole item to be skipped,
+            # but once a participant selects an answer that opens a required
+            # follow-up, that dependent answer remains required.
+            if (
+                question.required
+                and not value
+                and (require_answers or bool(question.show_if_question))
+            ):
                 error = True
             if value and question.question_type in ("radio", "checkbox"):
                 selected = value if isinstance(value, list) else [value]
@@ -468,11 +503,15 @@ def questionnaire_by_token(request, token):
     if not submission:
         return invalid_questionnaire_link(request, token)
 
+    if not _collection_access_is_available(submission):
+        return _collection_unavailable_response(request)
+
     if request.session.get("submission_id") != submission.id:
         request.session.pop("question_order", None)
         request.session.pop("partial_answers", None)
 
     request.session["submission_id"] = submission.id
+    request.session["submission_access_token"] = str(submission.access_token)
     request.session["anonymous_questionnaire"] = True
 
     return redirect("polls:questionnaire")
@@ -480,6 +519,7 @@ def questionnaire_by_token(request, token):
 
 def invalid_questionnaire_link(request, token):
     request.session.pop("submission_id", None)
+    request.session.pop("submission_access_token", None)
     request.session.pop("anonymous_questionnaire", None)
 
     return render(

@@ -1,0 +1,16 @@
+<div class="collection-panel mb-4">
+    <h2 class="h5 mb-3">Simular participações</h2>
+    <form method="post" action="{% url collection_simulate_url_name collection.id %}">
+      {% csrf_token %}{{ simulation_form.simulation_mode }}{{ simulation_form.non_field_errors }}
+      <div class="row g-3">
+        <div class="col-md-4">{{ simulation_form.simulation_quantity.label_tag }}{{ simulation_form.simulation_quantity }}{{ simulation_form.simulation_quantity.errors }}</div>
+        <div class="col-md-4">{{ simulation_form.simulation_response_profile.label_tag }}{{ simulation_form.simulation_response_profile }}</div>
+        <div class="col-md-4">{{ simulation_form.simulation_missing_percentage.label_tag }}{{ simulation_form.simulation_missing_percentage }}</div>
+        <div class="col-md-4">{{ simulation_form.simulation_attention_mode.label_tag }}{{ simulation_form.simulation_attention_mode }}</div>
+        <div class="col-md-4">{{ simulation_form.sociodemographic_simulation_mode.label_tag }}{{ simulation_form.sociodemographic_simulation_mode }}</div>
+        <div class="col-md-4">{{ simulation_form.simulation_seed.label_tag }}{{ simulation_form.simulation_seed }}</div>
+        <div class="col-12 form-check ms-2">{{ simulation_form.include_in_normative_test }} {{ simulation_form.include_in_normative_test.label_tag }}</div>
+      </div>
+      <button type="submit" class="btn collection-action mt-3">Gerar submissões simuladas</button>
+    </form>
+</div>

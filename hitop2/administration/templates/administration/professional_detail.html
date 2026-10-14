@@ -42,6 +42,9 @@
                     A aguardar verificação
                 </span>
             {% endif %}
+            {% if professional.is_researcher %}
+                <span style="display:inline-block; background:#eef4fb; border:1px solid #9ec9ff; color:#222; padding:6px 11px; margin-left:6px;">Investigador</span>
+            {% endif %}
         </div>
     </div>
 
@@ -72,6 +75,21 @@
                 {{ professional.get_objetivo_uso_display|default:"—" }}
             </dd>
         </dl>
+    </article>
+
+    <article class="border bg-white p-4 mb-4">
+        <h2 class="h5 fw-bold mb-3">Permissões adicionais</h2>
+        <form method="post" action="{% url 'administration:update_professional_researcher' professional.id %}">
+            {% csrf_token %}
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" name="is_researcher" id="is-researcher" {% if professional.is_researcher %}checked{% endif %}>
+                <label class="form-check-label" for="is-researcher">
+                    <strong>Investigador</strong>
+                    <span class="d-block text-secondary">Permitir criação e gestão de Coletas Gerais.</span>
+                </label>
+            </div>
+            <button type="submit" class="btn rounded-0" style="background:#e2f0ff; border:1px solid #9ec9ff; color:black;">Guardar permissão</button>
+        </form>
     </article>
 
     {% if professional.user.is_active and not professional.is_verified %}
