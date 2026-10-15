@@ -125,13 +125,15 @@
     function selectNode(id, options = {}) {
         const node = nodes.get(id);
         if (!node) return;
-        const expansionChanged = radialMap.syncExpansionForSelection(node, options.toggleScale === true);
+        radialMap.syncExpansionForSelection(node, options.toggleScale === true);
+        radialMap.expandOutward(node);
         selectedId = id;
         expandTreeAncestors(node);
-        const structureChanged = options.structureChanged || expansionChanged;
         renderTree();
         renderDetails(node);
-        structureChanged ? radialMap.update() : radialMap.refreshSelection();
+        // Selection changes the radial geometry: the following branch is
+        // pushed outwards to make room for the selected node's full label.
+        radialMap.update();
         if (options.focusTree !== false) {
             requestAnimationFrame(() => {
                 const target = treeElement.querySelector(`[data-select-node="${CSS.escape(id)}"]`);
@@ -156,11 +158,12 @@
     }
 
     function clearSelection({ collapseExpansions = false } = {}) {
-        const structureChanged = collapseExpansions && radialMap.collapseAll();
+        if (collapseExpansions) radialMap.collapseAll();
+        radialMap.clearOutwardExpansions();
         selectedId = null;
         highlightTreeSelection();
         renderDefaultDetails();
-        structureChanged ? radialMap.update() : radialMap.refreshSelection();
+        radialMap.update();
     }
 
     function highlightTreeSelection() {
@@ -276,6 +279,7 @@
         const nodesLayer = viewport.select("[data-visual-nodes]");
         const tooltip = d3.select(root).select("[data-visual-tooltip]");
         const openScales = new Set();
+        const outwardExpandedNodes = new Set();
         const positions = new Map();
         let width = 900;
         let height = 650;
@@ -331,8 +335,49 @@
 
         function visibleLabel(datum) {
             const label = datum.data.label || datum.data.name;
-            if (datum.data.type !== "scale") return label;
+            if (datum.data.type !== "scale" || outwardExpandedNodes.has(datum.data.id)) return label;
             return label.length > 30 ? `${label.slice(0, 29)}…` : label;
+        }
+
+        function measuredLabelWidth(label) {
+            const measurement = nodesLayer.append("text")
+                .attr("class", "radial-node-label")
+                .attr("visibility", "hidden")
+                .text(label);
+            const width = measurement.node().getComputedTextLength();
+            measurement.remove();
+            return width;
+        }
+
+        function labelOffset(datum) {
+            const typeOffset = { spectrum: 11, subfactor: 9, scale: 8, question: 6 }[datum.data.type] || 7;
+            return radiusFor(datum) + typeOffset + (datum.labelLane || 0) * 15;
+        }
+
+        function fitLabelToPerimeter(textNode, datum, outerRadius) {
+            if (datum.data.type === "root") return;
+            const fullLabel = visibleLabel(datum);
+            const followsExpandedBranch = datum.parent && outwardExpandedNodes.has(datum.parent.data.id);
+            if (
+                (outwardExpandedNodes.has(datum.data.id) && datum.children?.length)
+                || followsExpandedBranch
+            ) {
+                textNode.textContent = datum.data.label || datum.data.name;
+                return;
+            }
+            const availableWidth = Math.max(0, outerRadius - datum.y - labelOffset(datum) - 8);
+            textNode.textContent = fullLabel;
+            if (textNode.getComputedTextLength() <= availableWidth) return;
+
+            let low = 0;
+            let high = fullLabel.length;
+            while (low < high) {
+                const middle = Math.ceil((low + high) / 2);
+                textNode.textContent = `${fullLabel.slice(0, middle).trimEnd()}…`;
+                if (textNode.getComputedTextLength() <= availableWidth) low = middle;
+                else high = middle - 1;
+            }
+            textNode.textContent = low ? `${fullLabel.slice(0, low).trimEnd()}…` : "";
         }
 
         function polarPoint(angle, radius) {
@@ -373,9 +418,7 @@
         function labelTransform(datum) {
             if (datum.data.type === "root") return "translate(0,-21)";
             const degrees = datum.x * 180 / Math.PI - 90;
-            const typeOffset = { spectrum: 11, subfactor: 9, scale: 8, question: 6 }[datum.data.type] || 7;
-            const collisionOffset = (datum.labelLane || 0) * 15;
-            return `rotate(${degrees}) translate(${radiusFor(datum) + typeOffset + collisionOffset},0)${datum.x >= Math.PI ? " rotate(180)" : ""}`;
+            return `rotate(${degrees}) translate(${labelOffset(datum)},0)${datum.x >= Math.PI ? " rotate(180)" : ""}`;
         }
 
         function assignLabelLanes(hierarchy, radius) {
@@ -481,6 +524,32 @@
                     return Math.max(relationshipSpacing, densitySpacing * priority);
                 })(hierarchy);
             assignLabelLanes(hierarchy, radius);
+            const expandedLabelPerimeters = new Map();
+            descendants
+                .filter(item => {
+                    const followsExpandedBranch = item.parent && outwardExpandedNodes.has(item.parent.data.id);
+                    return item.children?.length && (
+                        outwardExpandedNodes.has(item.data.id)
+                        || followsExpandedBranch
+                    );
+                })
+                .sort((a, b) => a.depth - b.depth)
+                .forEach(expandedNode => {
+                    const expandedLabel = expandedNode.data.label || expandedNode.data.name;
+                    const childPerimeter = d3.min(expandedNode.children, item => item.y);
+                    const availableWidth = childPerimeter - expandedNode.y - labelOffset(expandedNode) - 8;
+                    const expandedLabelWidth = Math.max(
+                        measuredLabelWidth(expandedLabel),
+                        expandedLabel.length * 7.5,
+                    );
+                    const outwardShift = Math.max(0, expandedLabelWidth - availableWidth + 24);
+                    if (outwardShift) {
+                        expandedNode.descendants().slice(1).forEach(item => {
+                            item.y += outwardShift;
+                        });
+                    }
+                    expandedLabelPerimeters.set(expandedNode.data.id, childPerimeter + outwardShift);
+                });
             positions.clear();
             descendants.forEach(item => positions.set(item.data.id, item));
             const duration = animate && !window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 280 : 0;
@@ -518,10 +587,20 @@
                     updateSelection => updateSelection,
                     exit => exit.transition(transition).style("opacity", 0).remove(),
                 );
-            nodeJoin.attr("class", datum => `radial-node radial-${datum.data.type}${datum.data.issues.length ? " has-warning" : ""}${datum.labelCollision ? " label-collision" : ""}`).call(selection => selection.transition(transition).attr("transform", transformFor));
+            nodeJoin.attr("class", datum => {
+                const followsExpandedBranch = datum.parent && outwardExpandedNodes.has(datum.parent.data.id);
+                return `radial-node radial-${datum.data.type}${datum.data.issues.length ? " has-warning" : ""}${datum.labelCollision ? " label-collision" : ""}${followsExpandedBranch ? " expanded-branch-child" : ""}`;
+            }).call(selection => selection.transition(transition).attr("transform", transformFor));
             nodeJoin.select("circle.radial-node-halo").attr("r", datum => radiusFor(datum) + 5);
             nodeJoin.select("circle.radial-node-mark").attr("r", radiusFor).attr("fill", fillFor).attr("stroke", colorFor);
-            nodeJoin.select("text.radial-node-label").text(visibleLabel).attr("text-anchor", datum => datum.data.type === "root" ? "middle" : datum.x < Math.PI ? "start" : "end").attr("transform", labelTransform);
+            nodeJoin.select("text.radial-node-label")
+                .text(visibleLabel)
+                .attr("text-anchor", datum => datum.data.type === "root" ? "middle" : datum.x < Math.PI ? "start" : "end")
+                .attr("transform", labelTransform)
+                .each(function (datum) {
+                    const labelPerimeter = expandedLabelPerimeters.get(datum.data.id) || radius;
+                    fitLabelToPerimeter(this, datum, labelPerimeter);
+                });
             nodeJoin.select("text.radial-warning-mark").attr("x", datum => radiusFor(datum) + 5).attr("y", datum => -(radiusFor(datum) + 3));
             updateClasses();
             if (firstVisibleRender) {
@@ -570,6 +649,16 @@
             isVisible,
             refreshSelection: updateClasses,
             collapseAll: () => setExpandedScale(null),
+            expandOutward(node) {
+                const activePathIds = new Set(node.path.map(part => part.id));
+                outwardExpandedNodes.forEach(id => {
+                    if (!activePathIds.has(id)) outwardExpandedNodes.delete(id);
+                });
+                if (node.children.length) outwardExpandedNodes.add(node.id);
+            },
+            clearOutwardExpansions() {
+                outwardExpandedNodes.clear();
+            },
             syncExpansionForSelection: (node, toggleScale) => {
                 if (node.type === "question") return setExpandedScale(node.parentId);
                 if (node.type === "scale" && toggleScale) {

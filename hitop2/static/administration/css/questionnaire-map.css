@@ -73,6 +73,8 @@
 .radial-scale.label-collision.is-selected .radial-node-label,
 .radial-scale.label-collision:focus .radial-node-label,
 .radial-scale.label-collision:hover .radial-node-label { display:block; }
+.radial-node.expanded-branch-child .radial-node-label,
+.visual-map.show-scale-labels .radial-scale.label-collision.expanded-branch-child .radial-node-label { display:block; }
 .radial-warning-mark { fill:#5c4307; stroke:#fff; stroke-width:2px; paint-order:stroke; font-size:12px; font-weight:700; text-anchor:middle; dominant-baseline:middle; }
 .radial-node.has-warning .radial-node-halo { fill:#fff0b8; stroke:#9a6b08; stroke-width:3; }
 .radial-tooltip { position:absolute; z-index:40; max-width:18rem; padding:.55rem .7rem; background:#243744; color:#fff; box-shadow:0 .35rem .8rem rgba(0,0,0,.18); pointer-events:none; opacity:0; transform:translateY(4px); transition:opacity .12s ease, transform .12s ease; }
