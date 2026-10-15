@@ -62,12 +62,21 @@ class AdministrativeAuditLog(models.Model):
         COLLECTION_CREATED = "collection.created", "Coleta Geral criada"
         COLLECTION_ACTIVATED = "collection.activated", "Coleta Geral ativada"
         COLLECTION_DEACTIVATED = "collection.deactivated", "Coleta Geral desativada"
+        SCIENTIFIC_DATA_EXPORTED = (
+            "scientific_data.exported",
+            "Dados científicos exportados",
+        )
+        NORMATIVE_DATASET_EXPORTED = (
+            "normative_dataset.exported",
+            "Dataset normativo exportado",
+        )
 
     class ObjectType(models.TextChoices):
         PROFESSIONAL = "professional", "Profissional"
         NORMATIVE_VERSION = "normative_version", "Versão normativa"
         NORMATIVE_TEST = "normative_test", "Ambiente normativo de teste"
         QUESTIONNAIRE_COLLECTION = "questionnaire_collection", "Coleta Geral"
+        SCIENTIFIC_EXPORT = "scientific_export", "Exportação científica"
 
     class Result(models.TextChoices):
         SUCCESS = "success", "Concluída"

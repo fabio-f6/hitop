@@ -22,6 +22,11 @@ def can_master_reset(user):
     return is_administrator(user) and user.is_staff
 
 
+def can_export_sensitive_data(user):
+    """Require the operational administrator role and Django staff status."""
+    return is_administrator(user) and user.is_staff
+
+
 def administrator_required(view_func):
     """Require login and the operational Administrator role for a view."""
     @wraps(view_func)
@@ -45,6 +50,21 @@ def master_reset_required(view_func):
             return redirect("website:home")
 
         if not can_master_reset(request.user):
+            raise PermissionDenied
+
+        return view_func(request, *args, **kwargs)
+
+    return wrapper
+
+
+def sensitive_export_required(view_func):
+    """Protect bulk scientific downloads at the backend boundary."""
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("website:home")
+
+        if not can_export_sensitive_data(request.user):
             raise PermissionDenied
 
         return view_func(request, *args, **kwargs)

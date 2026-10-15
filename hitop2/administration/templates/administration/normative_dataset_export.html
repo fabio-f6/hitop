@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-3">
+    <a href="{% url 'administration:normative_version_detail' version.id %}" class="btn rounded-0" style="background:#e2f0ff; border:1px solid #9ec9ff; color:black; padding:8px 16px;">← Versão {{ version.name }}</a>
+    <h1 class="h2 fw-bold mt-4 mb-2">Exportar Dataset</h1>
+    <p class="text-secondary">A exportação preserva o snapshot selecionado e não prepara, recalcula, ativa ou modifica a versão.</p>
+
+    <div class="alert alert-warning rounded-0" role="alert">
+        <strong>Dados psicológicos sensíveis.</strong> O ZIP é pseudonimizado, não cifrado e não deve ser partilhado fora dos canais institucionais autorizados.
+    </div>
+
+    <article class="border bg-white p-4 mb-4">
+        <h2 class="h5 fw-bold mb-3">Conteúdo a exportar</h2>
+        <dl class="row mb-0">
+            <dt class="col-sm-5">Versão</dt><dd class="col-sm-7">{{ version.name }}</dd>
+            <dt class="col-sm-5">Ambiente</dt><dd class="col-sm-7">{{ version.get_environment_display }}</dd>
+            <dt class="col-sm-5">Estado</dt><dd class="col-sm-7">{{ version.get_status_display }}</dd>
+            <dt class="col-sm-5">Participantes</dt><dd class="col-sm-7">{{ preview.participants }}</dd>
+            <dt class="col-sm-5">Respostas</dt><dd class="col-sm-7">{{ preview.answers }}</dd>
+            <dt class="col-sm-5">Scores de escalas persistidos</dt><dd class="col-sm-7">{{ preview.scale_scores }}</dd>
+            <dt class="col-sm-5">Scores de espectros persistidos</dt><dd class="col-sm-7">{{ preview.spectrum_scores }}</dd>
+        </dl>
+    </article>
+
+    <form method="post" class="border bg-white p-4">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger rounded-0">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="mb-3"><label class="form-label" for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>{{ form.password }}{{ form.password.errors }}</div>
+        <button type="submit" class="btn btn-primary rounded-0">Confirmar e descarregar ZIP</button>
+    </form>
+</section>
+{% endblock %}

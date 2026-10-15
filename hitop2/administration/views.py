@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db import IntegrityError, transaction
 from django.db.models import Count, Max, Q
-from django.http import Http404, HttpResponse
+from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -59,7 +59,8 @@ from website.forms import CollectionSimulationForm, QuestionnaireCollectionForm
 from .audit import record_admin_action
 from .forms import (MasterResetConfirmationForm, NormativeVersionCreateForm,
                     NormativeTestVersionCreateForm, NormativeTestCleanupForm,
-                    ProfessionalTestEnvironmentCleanupForm)
+                    ProfessionalTestEnvironmentCleanupForm,
+                    ScientificDataExportForm, NormativeDatasetExportForm)
 from .health_checks import get_system_health_report
 from .models import AdministrativeAuditLog, MASTER_RESET_ACTION
 from .monitoring import get_questionnaire_monitoring_report
@@ -72,7 +73,20 @@ from .professional_test_cleanup import (
     clear_professional_test_environment,
     get_professional_test_cleanup_preview,
 )
-from .permissions import administrator_required, can_master_reset, master_reset_required
+from .permissions import (
+    administrator_required,
+    can_export_sensitive_data,
+    can_master_reset,
+    master_reset_required,
+    sensitive_export_required,
+)
+from .data_exports import (
+    ScientificExportOptions,
+    build_normative_export,
+    build_scientific_export,
+    preview_normative_export,
+    preview_scientific_export,
+)
 from .questionnaire_map import build_questionnaire_structure
 from .services import (
     ProfessionalStateError,
@@ -1284,10 +1298,134 @@ def audit(request):
 @administrator_required
 @require_http_methods(["GET"])
 def questionnaire_monitoring(request):
+    context = get_questionnaire_monitoring_report()
+    context["can_export_sensitive_data"] = can_export_sensitive_data(request.user)
     return render(
         request,
         "administration/questionnaire_monitoring.html",
-        get_questionnaire_monitoring_report(),
+        context,
+    )
+
+
+def _scientific_options(cleaned_data):
+    return ScientificExportOptions(
+        origin=cleaned_data["origin"],
+        environment=cleaned_data["environment"],
+        date_from=cleaned_data.get("date_from"),
+        date_to=cleaned_data.get("date_to"),
+        completed_only=cleaned_data["state"] == "completed",
+        include_answers=cleaned_data.get("include_answers", False),
+        include_sociodemographics=cleaned_data.get(
+            "include_sociodemographics", False
+        ),
+        include_results=cleaned_data.get("include_results", False),
+    )
+
+
+def _private_download_response(package):
+    response = FileResponse(
+        package.file,
+        as_attachment=True,
+        filename=package.filename,
+        content_type="application/zip",
+    )
+    response["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
+    response["Pragma"] = "no-cache"
+    response["Expires"] = "0"
+    response["X-Content-Type-Options"] = "nosniff"
+    return response
+
+
+@sensitive_export_required
+@require_http_methods(["GET", "POST"])
+def scientific_data_export(request):
+    form = ScientificDataExportForm(request.POST if request.method == "POST" else (request.GET or None))
+    preview = None
+    options = None
+    if form.is_valid():
+        options = _scientific_options(form.cleaned_data)
+        preview = preview_scientific_export(options)
+        if request.method == "POST":
+            password = form.cleaned_data.get("password", "")
+            if not password or not request.user.check_password(password):
+                form.add_error("password", "A password atual está incorreta.")
+            else:
+                try:
+                    package = build_scientific_export(options)
+                except ValueError as exception:
+                    form.add_error(None, str(exception))
+                else:
+                    filters = package.metadata["filters"]
+                    record_admin_action(
+                        actor=request.user,
+                        action=AdministrativeAuditLog.Action.SCIENTIFIC_DATA_EXPORTED,
+                        object_type=AdministrativeAuditLog.ObjectType.SCIENTIFIC_EXPORT,
+                        object_id=f"scientific-{timezone.now().strftime('%Y%m%d%H%M%S')}",
+                        object_label="Exportação de dados científicos",
+                        metadata={
+                            "environment": options.environment,
+                            "origin": options.origin,
+                            "completed_only": options.completed_only,
+                            "date_from": str(filters.get("date_from") or ""),
+                            "date_to": str(filters.get("date_to") or ""),
+                            "include_answers": options.include_answers,
+                            "include_sociodemographics": options.include_sociodemographics,
+                            "include_results": options.include_results,
+                            "participant_count": package.metadata["participant_count"],
+                            "submission_count": package.metadata["submission_count"],
+                        },
+                    )
+                    return _private_download_response(package)
+    return render(
+        request,
+        "administration/scientific_data_export.html",
+        {"form": form, "preview": preview, "options": options},
+    )
+
+
+@sensitive_export_required
+@require_http_methods(["GET", "POST"])
+def normative_dataset_export(request, version_id):
+    version = _normative_version_or_404(version_id)
+    preview = preview_normative_export(version)
+    form = NormativeDatasetExportForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        if not request.user.check_password(form.cleaned_data["password"]):
+            form.add_error("password", "A password atual está incorreta.")
+        else:
+            try:
+                package = build_normative_export(version)
+            except ValueError as exception:
+                form.add_error(None, str(exception))
+                return render(
+                    request,
+                    "administration/normative_dataset_export.html",
+                    {"form": form, "preview": preview, "version": version},
+                )
+            record_admin_action(
+                actor=request.user,
+                action=AdministrativeAuditLog.Action.NORMATIVE_DATASET_EXPORTED,
+                object_type=AdministrativeAuditLog.ObjectType.NORMATIVE_VERSION,
+                object_id=version.pk,
+                object_label=version.name,
+                metadata={
+                    "environment": version.environment,
+                    "status": version.status,
+                    "participant_count": package.metadata["participant_count"],
+                    "answer_count": package.row_counts["normative_answers.csv"],
+                    "scale_score_count": package.row_counts[
+                        "normative_scale_scores.csv"
+                    ],
+                    "spectrum_score_count": package.row_counts[
+                        "normative_spectrum_scores.csv"
+                    ],
+                },
+            )
+            return _private_download_response(package)
+    return render(
+        request,
+        "administration/normative_dataset_export.html",
+        {"form": form, "preview": preview, "version": version},
     )
 
 

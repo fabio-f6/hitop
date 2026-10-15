@@ -67,6 +67,10 @@
         </dl>
     </article>
 
+    {% if request.user.is_staff %}<div class="mb-4">
+        <a href="{% url 'administration:normative_dataset_export' version.id %}" class="btn rounded-0" style="background:#e2f0ff; border:1px solid #9ec9ff; color:black;">Exportar Dataset</a>
+    </div>{% endif %}
+
     {% if version.status == "draft" %}
         <article class="p-4" style="background:#eef4fb; border:1px solid #9ec9ff;">
             <h2 class="h5 fw-bold">Ações da versão</h2>

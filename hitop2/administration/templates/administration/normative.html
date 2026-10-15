@@ -113,7 +113,7 @@
         </div>
         <h3 class="h5">Histórico de teste</h3>
         <ul class="mb-0">
-            {% for version in test_versions %}<li><a href="{% url 'administration:normative_version_detail' version.id %}">{{ version.name }}</a> — {{ version.get_status_display }} — {{ version.participant_count }} participantes</li>{% empty %}<li>Nenhuma versão de teste.</li>{% endfor %}
+            {% for version in test_versions %}<li><a href="{% url 'administration:normative_version_detail' version.id %}">{{ version.name }}</a> — {{ version.get_status_display }} — {{ version.participant_count }} participantes{% if request.user.is_staff %} — <a href="{% url 'administration:normative_dataset_export' version.id %}">Exportar Dataset</a>{% endif %}</li>{% empty %}<li>Nenhuma versão de teste.</li>{% endfor %}
         </ul>
     </section>
 </section>

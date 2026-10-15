@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-3">
+    <a href="{% url 'administration:questionnaire_monitoring' %}" class="btn rounded-0" style="background:#e2f0ff; border:1px solid #9ec9ff; color:black; padding:8px 16px;">← Monitorização de questionários</a>
+    <h1 class="h2 fw-bold mt-4 mb-2">Exportar Dados Científicos</h1>
+    <p class="text-secondary mb-4">Configure uma exportação pseudonimizada. Produção e teste nunca são misturados.</p>
+
+    <div class="alert alert-warning rounded-0" role="alert">
+        <strong>Dados psicológicos sensíveis.</strong> A pseudonimização reduz o risco, mas não torna estes dados anónimos. Guarde o ZIP apenas em local institucional autorizado.
+    </div>
+
+    <form method="get" class="border bg-white p-4 mb-4">
+        <h2 class="h5 fw-bold mb-4">Filtros e conteúdo</h2>
+        {% if form.non_field_errors %}<div class="alert alert-danger rounded-0">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="row g-3">
+            <div class="col-md-6"><label class="form-label" for="{{ form.origin.id_for_label }}">{{ form.origin.label }}</label>{{ form.origin }}{{ form.origin.errors }}</div>
+            <div class="col-md-6"><fieldset><legend class="form-label fs-6">{{ form.environment.label }}</legend>{{ form.environment }}{{ form.environment.errors }}</fieldset></div>
+            <div class="col-md-4"><label class="form-label" for="{{ form.date_from.id_for_label }}">{{ form.date_from.label }}</label>{{ form.date_from }}{{ form.date_from.errors }}</div>
+            <div class="col-md-4"><label class="form-label" for="{{ form.date_to.id_for_label }}">{{ form.date_to.label }}</label>{{ form.date_to }}{{ form.date_to.errors }}</div>
+            <div class="col-md-4"><label class="form-label" for="{{ form.state.id_for_label }}">{{ form.state.label }}</label>{{ form.state }}{{ form.state.errors }}</div>
+            <div class="col-12">
+                <div class="form-check">{{ form.include_answers }} <label class="form-check-label" for="{{ form.include_answers.id_for_label }}">{{ form.include_answers.label }}</label></div>
+                <div class="form-check">{{ form.include_sociodemographics }} <label class="form-check-label" for="{{ form.include_sociodemographics.id_for_label }}">{{ form.include_sociodemographics.label }}</label></div>
+                <div class="form-check">{{ form.include_results }} <label class="form-check-label" for="{{ form.include_results.id_for_label }}">{{ form.include_results.label }}</label></div>
+            </div>
+        </div>
+        <button type="submit" class="btn rounded-0 mt-4" style="background:#e2f0ff; border:1px solid #9ec9ff; color:black;">Atualizar pré-visualização</button>
+    </form>
+
+    {% if preview %}
+        <article class="border bg-white p-4 mb-4">
+            <h2 class="h5 fw-bold mb-3">Confirmação</h2>
+            <dl class="row">
+                <dt class="col-sm-5">Ambiente</dt><dd class="col-sm-7">{% if options.environment == 'test' %}Teste{% else %}Produção{% endif %}</dd>
+                <dt class="col-sm-5">Origem</dt><dd class="col-sm-7">{% if options.origin == 'clinical' %}Aplicações clínicas{% elif options.origin == 'collection' %}Coletas Gerais{% else %}Todas as origens permitidas{% endif %}</dd>
+                <dt class="col-sm-5">Submissões estimadas</dt><dd class="col-sm-7">{{ preview.submissions }}</dd>
+                <dt class="col-sm-5">Aplicações clínicas</dt><dd class="col-sm-7">{{ preview.clinical_submissions }}</dd>
+                <dt class="col-sm-5">Coletas Gerais</dt><dd class="col-sm-7">{{ preview.collection_submissions }}</dd>
+                <dt class="col-sm-5">Respostas armazenadas</dt><dd class="col-sm-7">{{ preview.answers }}</dd>
+            </dl>
+            <p class="small text-secondary">A quantidade é uma estimativa no momento da pré-visualização. O manifesto do ZIP descreve o conteúdo efetivamente gerado.</p>
+
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="origin" value="{{ options.origin }}">
+                <input type="hidden" name="environment" value="{{ options.environment }}">
+                <input type="hidden" name="date_from" value="{{ options.date_from|date:'Y-m-d' }}">
+                <input type="hidden" name="date_to" value="{{ options.date_to|date:'Y-m-d' }}">
+                <input type="hidden" name="state" value="{% if options.completed_only %}completed{% else %}all{% endif %}">
+                {% if options.include_answers %}<input type="hidden" name="include_answers" value="on">{% endif %}
+                {% if options.include_sociodemographics %}<input type="hidden" name="include_sociodemographics" value="on">{% endif %}
+                {% if options.include_results %}<input type="hidden" name="include_results" value="on">{% endif %}
+                <div class="mb-3"><label class="form-label" for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>{{ form.password }}{{ form.password.errors }}</div>
+                <button type="submit" class="btn btn-primary rounded-0">Confirmar e descarregar ZIP</button>
+            </form>
+        </article>
+    {% endif %}
+</section>
+{% endblock %}

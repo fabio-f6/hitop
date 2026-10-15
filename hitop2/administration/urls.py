@@ -87,6 +87,11 @@ urlpatterns = [
         views.questionnaire_monitoring,
         name="questionnaire_monitoring",
     ),
+    path(
+        "questionnaires/export-scientific-data/",
+        views.scientific_data_export,
+        name="scientific_data_export",
+    ),
     path("system-health/", views.system_health, name="system_health"),
     path("questionnaire-map/", views.questionnaire_map, name="questionnaire_map"),
     path("professionals/", views.professionals, name="professionals"),
@@ -132,6 +137,11 @@ urlpatterns = [
         "normative/versions/<int:version_id>/",
         views.normative_version_detail,
         name="normative_version_detail",
+    ),
+    path(
+        "normative/versions/<int:version_id>/export/",
+        views.normative_dataset_export,
+        name="normative_dataset_export",
     ),
     path(
         "normative/versions/<int:version_id>/prepare/",
